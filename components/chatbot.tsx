@@ -143,17 +143,34 @@ export default function Chatbot() {
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 >
-                  <MessageCircle className="h-7 w-7" />
+                  <Bot className="h-7 w-7" />
                 </motion.div>
                 <motion.span 
-                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-coop-yellow text-xs text-black shadow-lg"
+                  animate={{ 
+                    scale: [1, 1.15, 1],
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                 >
-                  <span className="relative flex h-3 w-3">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
-                  </span>
+                  <motion.span 
+                    className="relative flex h-3 w-3 items-center justify-center"
+                    animate={{ 
+                      scale: [1, 1.5, 1],
+                      opacity: [0.75, 0, 0.75]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeOut"
+                    }}
+                  >
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400"></span>
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-coop-yellow border border-yellow-600/30"></span>
+                  </motion.span>
                 </motion.span>
               </Button>
             </motion.div>
