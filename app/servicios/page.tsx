@@ -22,6 +22,7 @@ export default function ServiciosPage() {
       color: "text-yellow-600",
       bgColor: "bg-yellow-50",
       borderColor: "border-yellow-200",
+      bgGradient: "from-yellow-50 to-yellow-100/50",
     },
     {
       icon: Wifi,
@@ -37,6 +38,7 @@ export default function ServiciosPage() {
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
+      bgGradient: "from-blue-50 to-blue-100/50",
     },
     {
       icon: Tv,
@@ -47,6 +49,7 @@ export default function ServiciosPage() {
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
+      bgGradient: "from-purple-50 to-purple-100/50",
     },
     {
       icon: Heart,
@@ -62,6 +65,7 @@ export default function ServiciosPage() {
       color: "text-red-600",
       bgColor: "bg-red-50",
       borderColor: "border-red-200",
+      bgGradient: "from-red-50 to-red-100/50",
     },
   ]
 
@@ -92,56 +96,125 @@ export default function ServiciosPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-coop-green to-green-700 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Nuestros Servicios</h1>
-            <p className="text-xl text-green-100">
-              Ofrecemos servicios esenciales de calidad para mejorar la vida de nuestra comunidad
+      {/* Hero Section - Enhanced */}
+      <section className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-20 lg:py-28 relative z-10">
+          <div className="text-center max-w-4xl mx-auto space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+              <Zap className="w-4 h-4 text-coop-yellow" />
+              <span className="text-sm font-medium">Servicios de Calidad</span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight tracking-tight">
+              Nuestros Servicios
+            </h1>
+            <p className="text-lg sm:text-xl lg:text-2xl text-green-50 leading-relaxed">
+              Ofrecemos servicios esenciales de calidad para mejorar la vida de nuestra comunidad con excelencia y compromiso
             </p>
+          </div>
+          
+          {/* Hero Image - Desktop */}
+          {/* TODO: Agregar imagen hero servicios desktop: /images/services-hero-desktop.jpg - Dimensiones: 1400x600px */}
+          <div className="hidden lg:block mt-12 relative">
+            <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+              <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                <Zap className="w-32 h-32 text-white/30" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Hero Image - Mobile */}
+          {/* TODO: Agregar imagen hero servicios mobile: /images/services-hero-mobile.jpg - Dimensiones: 800x400px */}
+          <div className="lg:hidden mt-8 relative">
+            <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+              <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                <Zap className="w-24 h-24 text-white/30" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Main Services */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Servicios Principales</h2>
-            <p className="text-xl text-gray-600">Servicios esenciales para tu hogar y familia</p>
+      {/* Main Services - Enhanced */}
+      <section className="py-20 lg:py-28 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-coop-green rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-green/10 rounded-full mb-6">
+              <Star className="w-4 h-4 text-coop-green" />
+              <span className="text-sm font-medium text-coop-green">Servicios Principales</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+              Servicios Principales
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Servicios esenciales para tu hogar y familia con la mejor calidad y atención
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
             {mainServices.map((service, index) => (
-              <Card key={index} className={`${service.borderColor} border-2 hover:shadow-lg transition-shadow`}>
-                <CardHeader className={service.bgColor}>
+              <Card 
+                key={index} 
+                className={`group ${service.borderColor} border-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden relative bg-white`}
+              >
+                {/* Service Image - Desktop */}
+                {/* TODO: Agregar imagen servicio {service.title} desktop: /images/service-${service.title.toLowerCase()}-detail-desktop.jpg - Dimensiones: 800x500px */}
+                <div className="hidden lg:block relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient || 'from-gray-100 to-gray-200'} opacity-60 group-hover:opacity-80 transition-opacity`}></div>
+                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                </div>
+                
+                {/* Service Image - Mobile */}
+                {/* TODO: Agregar imagen servicio {service.title} mobile: /images/service-${service.title.toLowerCase()}-detail-mobile.jpg - Dimensiones: 600x400px */}
+                <div className="lg:hidden relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient || 'from-gray-100 to-gray-200'} opacity-60 group-hover:opacity-80 transition-opacity`}></div>
+                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                </div>
+                
+                <CardHeader className={`${service.bgColor} pb-4`}>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <service.icon className={`w-8 h-8 ${service.color}`} />
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-3 rounded-xl bg-white/80 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300`}>
+                        <service.icon className={`w-8 h-8 ${service.color}`} />
+                      </div>
                       <div>
-                        <CardTitle className="text-2xl">{service.title}</CardTitle>
-                        <Badge className="mt-1">{service.price}</Badge>
+                        <CardTitle className="text-2xl lg:text-3xl font-bold">{service.title}</CardTitle>
+                        <Badge className="mt-2 bg-white/90 text-gray-900 font-semibold">{service.price}</Badge>
                       </div>
                     </div>
                   </div>
-                  <CardDescription className="text-base mt-3">{service.description}</CardDescription>
+                  <CardDescription className="text-base mt-4 font-medium">{service.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <ul className="space-y-3 mb-6">
                     {service.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center space-x-2">
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span>{feature}</span>
+                      <li key={featureIndex} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex-shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-coop-green/10 flex items-center justify-center">
+                            <CheckCircle className="w-4 h-4 text-coop-green" />
+                          </div>
+                        </div>
+                        <span className="text-gray-700 font-medium">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="bg-coop-green hover:bg-coop-green/90 flex-1">
+                    <Button className="bg-coop-green hover:bg-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn">
                       Contratar Servicio
-                      <ArrowRight className="ml-2 w-4 h-4" />
+                      <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1 border-2 hover:bg-gray-50 font-semibold">
                       Más Información
                     </Button>
                   </div>

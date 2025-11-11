@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { MessageCircle, X, Send, Bot, User, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
   id: string
@@ -114,121 +115,210 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* Botón flotante */}
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110",
-          "bg-coop-green hover:bg-coop-green/90 text-white",
-          isOpen && "hidden"
+      {/* Botón flotante - Enhanced with Framer Motion */}
+      <AnimatePresence mode="wait">
+        {!isOpen && (
+          <motion.div
+            key="chat-button"
+            initial={{ scale: 0, opacity: 0, rotate: -180 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ scale: 0, opacity: 0, rotate: 180 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="fixed bottom-6 right-6 z-50"
+          >
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                onClick={() => setIsOpen(true)}
+                className={cn(
+                  "h-16 w-16 rounded-full shadow-2xl",
+                  "bg-gradient-to-br from-coop-green to-green-700 hover:from-coop-green/90 hover:to-green-600 text-white",
+                  "border-4 border-white/20 backdrop-blur-sm"
+                )}
+                aria-label="Abrir chat"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <MessageCircle className="h-7 w-7" />
+                </motion.div>
+                <motion.span 
+                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-lg"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
+                  </span>
+                </motion.span>
+              </Button>
+            </motion.div>
+          </motion.div>
         )}
-        aria-label="Abrir chat"
-      >
-        <MessageCircle className="h-6 w-6" />
-        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-          <span className="relative flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
-          </span>
-        </span>
-      </Button>
+      </AnimatePresence>
 
-      {/* Ventana de chat */}
-      {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 flex h-[600px] w-[400px] flex-col shadow-2xl transition-all duration-300 md:h-[650px] md:w-[450px]">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b bg-coop-green p-4 text-white">
-            <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+      {/* Ventana de chat - Enhanced with Framer Motion */}
+      <AnimatePresence mode="wait">
+        {isOpen && (
+          <motion.div
+            key="chat-window"
+            initial={{ opacity: 0, scale: 0.8, y: 20, x: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20, x: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed bottom-6 right-6 z-50"
+          >
+            <Card className="flex h-[600px] w-[calc(100vw-3rem)] sm:w-[400px] flex-col shadow-2xl md:h-[650px] md:w-[450px] border-2 border-coop-green/20 overflow-hidden">
+          {/* Header - Enhanced */}
+          <div className="flex items-center justify-between bg-gradient-to-r from-coop-green to-green-700 p-4 text-white relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-coop-yellow rounded-full blur-2xl"></div>
+            </div>
+            
+            <div className="flex items-center space-x-3 relative z-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-lg">
                 <Bot className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold">Asistente Virtual</h3>
-                <div className="flex items-center space-x-1 text-xs text-green-100">
-                  <span className="relative flex h-2 w-2">
+                <h3 className="font-bold text-lg">Asistente Virtual</h3>
+                <div className="flex items-center space-x-1.5 text-xs text-green-50">
+                  <span className="relative flex h-2.5 w-2.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400"></span>
                   </span>
-                  <span>En línea 24/7</span>
+                  <span className="font-medium">En línea 24/7</span>
                 </div>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 text-white hover:bg-white/20"
-              aria-label="Cerrar chat"
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
             >
-              <X className="h-4 w-4" />
-            </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="h-9 w-9 text-white hover:bg-white/20 rounded-lg transition-all duration-300 relative z-10"
+                aria-label="Cerrar chat"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </motion.div>
           </div>
 
-          {/* Área de mensajes */}
-          <ScrollArea className="flex-1 p-4">
+          {/* Área de mensajes - Enhanced with Framer Motion */}
+          <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white">
             <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex items-start space-x-2",
-                    message.sender === "user" && "flex-row-reverse space-x-reverse"
-                  )}
-                >
+              <AnimatePresence mode="popLayout">
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    layout
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                    transition={{ 
+                      duration: 0.3,
+                      layout: { duration: 0.2 }
+                    }}
+                    className={cn(
+                      "flex items-start space-x-3",
+                      message.sender === "user" && "flex-row-reverse space-x-reverse"
+                    )}
+                  >
                   <div
                     className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-md transition-transform hover:scale-110",
                       message.sender === "user"
-                        ? "bg-coop-green text-white"
-                        : "bg-coop-yellow text-gray-800"
+                        ? "bg-gradient-to-br from-coop-green to-green-700 text-white"
+                        : "bg-gradient-to-br from-coop-yellow to-yellow-400 text-gray-800"
                     )}
                   >
                     {message.sender === "user" ? (
-                      <User className="h-4 w-4" />
+                      <User className="h-5 w-5" />
                     ) : (
-                      <Bot className="h-4 w-4" />
+                      <Bot className="h-5 w-5" />
                     )}
                   </div>
                   <div
                     className={cn(
-                      "max-w-[75%] rounded-lg px-4 py-2",
+                      "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm",
                       message.sender === "user"
-                        ? "bg-coop-green text-white"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-gradient-to-br from-coop-green to-green-700 text-white"
+                        : "bg-white text-gray-800 border border-gray-200"
                     )}
                   >
-                    <p className="text-sm">{message.text}</p>
-                    <p className="mt-1 text-xs opacity-70">
+                    <p className="text-sm leading-relaxed">{message.text}</p>
+                    <p className={cn(
+                      "mt-2 text-xs",
+                      message.sender === "user" ? "text-green-100" : "text-gray-500"
+                    )}>
                       {message.timestamp.toLocaleTimeString("es-AR", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </p>
                   </div>
-                </div>
-              ))}
+                </motion.div>
+                ))}
+              </AnimatePresence>
 
-              {isTyping && (
-                <div className="flex items-start space-x-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-yellow text-gray-800">
-                    <Bot className="h-4 w-4" />
-                  </div>
-                  <div className="rounded-lg bg-gray-100 px-4 py-2">
-                    <div className="flex space-x-1">
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]"></span>
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"></span>
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></span>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {isTyping && (
+                  <motion.div
+                    key="typing-indicator"
+                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-start space-x-2"
+                  >
+                    <motion.div 
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-yellow text-gray-800"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
+                      <Bot className="h-4 w-4" />
+                    </motion.div>
+                    <motion.div 
+                      className="rounded-lg bg-gray-100 px-4 py-2"
+                      initial={{ width: 0 }}
+                      animate={{ width: "auto" }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex space-x-1">
+                        <motion.span 
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                        />
+                        <motion.span 
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                        />
+                        <motion.span 
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
 
-          {/* Input area */}
-          <div className="border-t p-4">
+          {/* Input area - Enhanced */}
+          <div className="border-t border-gray-200 bg-white p-4">
             <div className="flex space-x-2">
               <Input
                 ref={inputRef}
@@ -236,25 +326,37 @@ export default function Chatbot() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Escribe tu mensaje..."
-                className="flex-1"
+                className="flex-1 border-2 border-gray-200 focus:border-coop-green rounded-xl px-4 py-3 transition-all duration-300"
                 disabled={isTyping}
               />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isTyping}
-                className="bg-coop-green hover:bg-coop-green/90 text-white"
-                size="icon"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Send className="h-4 w-4" />
-              </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim() || isTyping}
+                  className="bg-gradient-to-br from-coop-green to-green-700 hover:from-coop-green/90 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl px-4"
+                  size="icon"
+                >
+                  <motion.div
+                    animate={inputValue.trim() && !isTyping ? { rotate: [0, 15, -15, 0] } : {}}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Send className="h-5 w-5" />
+                  </motion.div>
+                </Button>
+              </motion.div>
             </div>
-            <p className="mt-2 text-xs text-gray-500 text-center">
-              <Clock className="mr-1 inline h-3 w-3" />
-              Disponible 24/7 para ayudarte
+            <p className="mt-3 text-xs text-gray-500 text-center flex items-center justify-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>Disponible 24/7 para ayudarte</span>
             </p>
           </div>
         </Card>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

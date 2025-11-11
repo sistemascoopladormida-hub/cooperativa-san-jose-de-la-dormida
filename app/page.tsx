@@ -1,10 +1,13 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function HomePage() {
   const services = [
@@ -13,24 +16,28 @@ export default function HomePage() {
       title: "Electricidad",
       description: "Suministro eléctrico confiable las 24 horas",
       color: "text-yellow-600",
+      bgGradient: "from-yellow-50 to-yellow-100/50",
     },
     {
       icon: Wifi,
       title: "Internet",
       description: "Conexión de alta velocidad para tu hogar",
       color: "text-blue-600",
+      bgGradient: "from-blue-50 to-blue-100/50",
     },
     {
       icon: Tv,
       title: "Televisión",
       description: "Amplia variedad de canales y entretenimiento",
       color: "text-purple-600",
+      bgGradient: "from-purple-50 to-purple-100/50",
     },
     {
       icon: Heart,
       title: "Farmacia Social",
       description: "Medicamentos a precios accesibles para socios",
       color: "text-red-600",
+      bgGradient: "from-red-50 to-red-100/50",
     },
   ]
 
@@ -44,186 +51,891 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/30">
       <Header />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-coop-green to-green-700 text-white">
-        <div className="container mx-auto px-4 py-16 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                Bienvenido a la
-                <span className="text-coop-yellow block">Cooperativa</span> de San Jose De La Dormida
-              </h1>
-              <p className="text-xl lg:text-2xl text-green-100">
-                Servicios de calidad para nuestra comunidad. Electricidad, Internet, TV y más.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/login">
-                  <Button size="lg" className="bg-coop-yellow text-black hover:bg-coop-yellow/90 w-full sm:w-auto">
-                    Área Socios
-                    <ArrowRight className="ml-2 w-5 h-5" />
+      {/* Hero Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <motion.div 
+            className="absolute top-0 right-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, -50, 0],
+              y: [0, 30, 0],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div 
+              className="space-y-8"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-4 h-4 text-coop-yellow" />
+                </motion.div>
+                <span className="text-sm font-medium">Más de 50 años sirviendo a la comunidad</span>
+              </motion.div>
+              
+              <motion.div 
+                className="space-y-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              >
+                <motion.h1 
+                  className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
+                  Bienvenido a la
+                  <motion.span 
+                    className="text-coop-yellow block mt-2 bg-gradient-to-r from-coop-yellow to-yellow-300 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    Cooperativa
+                  </motion.span>
+                  <motion.span 
+                    className="block mt-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                  >
+                    de San Jose De La Dormida
+                  </motion.span>
+                </motion.h1>
+                <motion.p 
+                  className="text-lg sm:text-xl lg:text-2xl text-green-50 leading-relaxed max-w-xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1 }}
+                >
+                  Servicios de calidad para nuestra comunidad. Electricidad, Internet, TV y más, con el compromiso de siempre.
+                </motion.p>
+              </motion.div>
+              
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 pt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link href="/login" className="group">
+                    <Button 
+                      size="lg" 
+                      className="bg-coop-yellow text-black hover:bg-coop-yellow/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                    >
+                      Área Socios
+                      <motion.span
+                        className="inline-block ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <ArrowRight className="w-5 h-5" />
+                      </motion.span>
+                    </Button>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link href="/asociarse" className="group">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                    >
+                      Asociarse
+                      <motion.span
+                        className="inline-block ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <ArrowRight className="w-5 h-5" />
+                      </motion.span>
+                    </Button>
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              {/* Stats */}
+              <motion.div 
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.4 }}
+              >
+                {[
+                  { value: "5,000+", label: "Familias" },
+                  { value: "50+", label: "Años" },
+                  { value: "24/7", label: "Atención" },
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <motion.div 
+                      className="text-3xl lg:text-4xl font-bold text-coop-yellow"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                    <div className="text-sm text-green-100 mt-1">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+            
+            {/* Hero Image Section - Placeholder for images */}
+            <motion.div 
+              className="relative flex justify-center items-center"
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            >
+              <div className="relative w-full max-w-lg">
+                {/* Main hero image - Desktop */}
+                {/* TODO: Agregar imagen hero desktop: /images/hero-desktop.jpg - Dimensiones recomendadas: 1200x800px */}
+                <motion.div 
+                  className="hidden lg:block relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
+                    <Image
+                      src="/images/logo-coop.png"
+                      alt="Cooperativa La Dormida"
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-contain p-8"
+                    />
+                  </div>
+                </motion.div>
+                
+                {/* Main hero image - Mobile */}
+                {/* TODO: Agregar imagen hero mobile: /images/hero-mobile.jpg - Dimensiones recomendadas: 800x600px */}
+                <motion.div 
+                  className="lg:hidden relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
+                    <Image
+                      src="/images/logo-coop.png"
+                      alt="Cooperativa La Dormida"
+                      width={300}
+                      height={300}
+                      className="w-full h-full object-contain p-6"
+                    />
+                  </div>
+                </motion.div>
+                
+                {/* Decorative floating elements */}
+                <motion.div 
+                  className="absolute -top-4 -right-4 w-24 h-24 bg-coop-yellow/20 rounded-full blur-xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.5, 0.3],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+                <motion.div 
+                  className="absolute -bottom-4 -left-4 w-32 h-32 bg-white/10 rounded-full blur-xl"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.2, 0.4, 0.2],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5,
+                  }}
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Services Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="py-20 lg:py-28 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-5">
+          <motion.div 
+            className="absolute top-20 left-10 w-72 h-72 bg-coop-green rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 20, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-20 right-10 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, -20, 0],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-coop-green/10 rounded-full mb-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              >
+                <TrendingUp className="w-4 h-4 text-coop-green" />
+              </motion.div>
+              <span className="text-sm font-medium text-coop-green">Servicios de Calidad</span>
+            </motion.div>
+            <motion.h2 
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Nuestros Servicios
+            </motion.h2>
+            <motion.p 
+              className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              Ofrecemos una amplia gama de servicios esenciales para satisfacer las necesidades de nuestra comunidad con excelencia y compromiso
+            </motion.p>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.15,
+                },
+              },
+            }}
+          >
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                variants={{
+                  hidden: { opacity: 0, y: 50, scale: 0.9 },
+                  visible: { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15,
+                    },
+                  },
+                }}
+                whileHover={{ 
+                  y: -8, 
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
+                }}
+              >
+                <Card 
+                  className="group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-coop-green/20 overflow-hidden relative bg-white h-full"
+                >
+                {/* Service image placeholder */}
+                {/* TODO: Agregar imagen de servicio desktop: /images/service-{service.title.toLowerCase()}-desktop.jpg - Dimensiones: 600x400px */}
+                <div className="hidden lg:block relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
+                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                </div>
+                
+                {/* Service image placeholder - Mobile */}
+                {/* TODO: Agregar imagen de servicio mobile: /images/service-{service.title.toLowerCase()}-mobile.jpg - Dimensiones: 400x300px */}
+                <div className="lg:hidden relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
+                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+                </div>
+                
+                <CardHeader className="text-center pb-4">
+                  <div className="mb-4 flex justify-center">
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${service.bgGradient} group-hover:scale-110 transition-transform duration-300`}>
+                      <service.icon className={`w-8 h-8 ${service.color}`} />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-coop-green transition-colors">
+                    {service.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-center text-gray-600 leading-relaxed">
+                    {service.description}
+                  </CardDescription>
+                  <div className="mt-6 flex justify-center">
+                    <Link href={`/servicios#${service.title.toLowerCase()}`} className="group/link">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-coop-green hover:text-white hover:bg-coop-green group-hover/link:gap-2"
+                      >
+                        Más info
+                        <ArrowRight className="ml-1 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link href="/servicios" className="group inline-block">
+                <Button 
+                  size="lg" 
+                  className="bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
+                >
+                  Ver Todos los Servicios
+                  <motion.span
+                    className="inline-block ml-2"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.span>
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Benefits Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="py-20 lg:py-28 bg-white relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div 
+              className="space-y-8"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-yellow/10 rounded-full mb-6">
+                  <Award className="w-4 h-4 text-coop-green" />
+                  <span className="text-sm font-medium text-coop-green">Ventajas Exclusivas</span>
+                </div>
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+                  ¿Por qué elegir nuestra Cooperativa?
+                </h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  Somos más que un proveedor de servicios, somos una comunidad comprometida con tu bienestar.
+                </p>
+              </div>
+              
+              <motion.div 
+                className="space-y-5"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                    },
+                  },
+                }}
+              >
+                {benefits.map((benefit, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors group"
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { 
+                        opacity: 1, 
+                        x: 0,
+                        transition: {
+                          type: "spring",
+                          stiffness: 100,
+                        },
+                      },
+                    }}
+                    whileHover={{ x: 5, scale: 1.02 }}
+                  >
+                    <motion.div 
+                      className="flex-shrink-0 mt-0.5"
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-coop-green/10 flex items-center justify-center group-hover:bg-coop-green/20 transition-colors">
+                        <CheckCircle className="w-5 h-5 text-coop-green" />
+                      </div>
+                    </motion.div>
+                    <span className="text-lg text-gray-700 font-medium pt-0.5">{benefit}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+            
+            {/* Benefits Image Section */}
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+            >
+              {/* Community image - Desktop */}
+              {/* TODO: Agregar imagen comunidad desktop: /images/community-desktop.jpg - Dimensiones: 1000x800px */}
+              <motion.div 
+                className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-yellow/20"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 via-coop-yellow/10 to-green-700/20 flex items-center justify-center">
+                  <Users className="w-32 h-32 text-coop-green/30" />
+                </div>
+              </motion.div>
+              
+              {/* Community image - Mobile */}
+              {/* TODO: Agregar imagen comunidad mobile: /images/community-mobile.jpg - Dimensiones: 600x500px */}
+              <motion.div 
+                className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-yellow/20"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 via-coop-yellow/10 to-green-700/20 flex items-center justify-center">
+                  <Users className="w-24 h-24 text-coop-green/30" />
+                </div>
+              </motion.div>
+              
+              {/* CTA Card Overlay */}
+              <motion.div 
+                className="absolute -bottom-6 -right-2 lg:-bottom-8 lg:-right-8 bg-white rounded-2xl shadow-2xl p-6 lg:p-8 border-2 border-coop-yellow/30 max-w-xs"
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-coop-green to-green-700 rounded-full flex items-center justify-center">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Únete a nuestra familia</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Más de 5,000 familias confían en nosotros para sus servicios esenciales.
+                    </p>
+                    <Link href="/asociarse" className="block">
+                      <Button className="w-full bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                        Asociarse Ahora
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* PFC Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="py-20 lg:py-28 bg-gradient-to-br from-gray-50 via-coop-green/5 to-gray-50 relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decoration */}
+        <motion.div 
+          className="absolute top-0 right-0 w-96 h-96 bg-coop-green/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 30, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-0 left-0 w-96 h-96 bg-coop-yellow/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -30, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* PFC Image Section */}
+            <motion.div 
+              className="relative order-2 lg:order-1"
+              initial={{ opacity: 0, x: -50, scale: 0.9 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+            >
+              {/* PFC image - Desktop */}
+              {/* TODO: Agregar imagen PFC desktop: /images/pfc-desktop.jpg - Dimensiones: 1000x800px */}
+              <div className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    <ShieldCheck className="w-32 h-32 text-coop-green/40 mx-auto" />
+                    <div className="text-coop-green/60 font-semibold text-lg">Programa PFC</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* PFC image - Mobile */}
+              {/* TODO: Agregar imagen PFC mobile: /images/pfc-mobile.jpg - Dimensiones: 600x500px */}
+              <div className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <ShieldCheck className="w-24 h-24 text-coop-green/40 mx-auto" />
+                    <div className="text-coop-green/60 font-semibold">Programa PFC</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Badge */}
+              <motion.div 
+                className="absolute -top-4 -right-4 lg:-top-6 lg:-right-6 bg-coop-yellow rounded-full p-4 lg:p-6 shadow-xl"
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                whileHover={{ scale: 1.1, rotate: 360 }}
+              >
+                <ShieldCheck className="w-8 h-8 lg:w-10 lg:h-10 text-coop-green" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div 
+              className="space-y-8 order-1 lg:order-2"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-green/10 rounded-full mb-6">
+                  <ShieldCheck className="w-4 h-4 text-coop-green" />
+                  <span className="text-sm font-medium text-coop-green">Programa Especial</span>
+                </div>
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+                  Programa de Fortalecimiento Comunitario
+                  <span className="block text-coop-green mt-2">(PFC)</span>
+                </h2>
+                <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8">
+                  Descubre cómo el PFC apoya la salud y el bienestar integral de nuestros socios con programas especializados y atención personalizada.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-coop-green/10 hover:bg-white/80 transition-colors">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-full bg-coop-green/10 flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-coop-green" />
+                    </div>
+                  </div>
+                  <span className="text-lg text-gray-700 font-medium pt-0.5">Beneficios médicos y de salud</span>
+                </div>
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-coop-green/10 hover:bg-white/80 transition-colors">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-full bg-coop-green/10 flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-coop-green" />
+                    </div>
+                  </div>
+                  <span className="text-lg text-gray-700 font-medium pt-0.5">Acceso a especialistas y programas preventivos</span>
+                </div>
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-coop-green/10 hover:bg-white/80 transition-colors">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-full bg-coop-green/10 flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-coop-green" />
+                    </div>
+                  </div>
+                  <span className="text-lg text-gray-700 font-medium pt-0.5">Apoyo integral para una mejor calidad de vida</span>
+                </div>
+              </div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/pfc" className="inline-block group">
+                  <Button 
+                    size="lg" 
+                    className="bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
+                  >
+                    Más Información sobre PFC
+                    <motion.span
+                      className="inline-block ml-2"
+                      whileHover={{ x: 5 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
+                      <ArrowRight className="w-5 h-5" />
+                    </motion.span>
                   </Button>
                 </Link>
-                <Link href="/asociarse">
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* CTA Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white py-20 lg:py-28 overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-10">
+          <motion.div 
+            className="absolute top-0 left-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, -50, 0],
+              y: [0, 30, 0],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <motion.div 
+            className="max-w-3xl mx-auto space-y-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <motion.div 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6 border border-white/20"
+                initial={{ scale: 0.8, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Phone className="w-4 h-4 text-coop-yellow" />
+                </motion.div>
+                <span className="text-sm font-medium">Estamos aquí para ayudarte</span>
+              </motion.div>
+              <motion.h2 
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                ¿Necesitas ayuda o tienes consultas?
+              </motion.h2>
+              <motion.p 
+                className="text-lg sm:text-xl text-green-50 leading-relaxed max-w-2xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                Nuestro equipo está aquí para ayudarte. Contáctanos por cualquier medio y te responderemos a la brevedad.
+              </motion.p>
+            </motion.div>
+            
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/contacto" className="group inline-block">
+                  <Button 
+                    size="lg" 
+                    className="bg-coop-yellow text-black hover:bg-coop-yellow/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
+                  >
+                    <motion.div
+                      className="inline-flex items-center"
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      <Phone className="mr-2 w-5 h-5" />
+                    </motion.div>
+                    Contactar
+                  </Button>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/reclamos" className="group inline-block">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white hover:bg-white/40 text-coop-green w-full sm:w-auto"
+                    className="border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
                   >
-                    Asociarse
+                    <motion.div
+                      className="inline-flex items-center"
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      <Mail className="mr-2 w-5 h-5" />
+                    </motion.div>
+                    Hacer Reclamo
                   </Button>
                 </Link>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <Image
-                src="/images/logo-coop.png"
-                alt="Cooperativa La Dormida"
-                width={300}
-                height={300}
-                className="w-64 h-64 lg:w-80 lg:h-80 object-contain"
-              />
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Nuestros Servicios</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Ofrecemos una amplia gama de servicios para satisfacer las necesidades de nuestra comunidad
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="text-center">
-                  <service.icon className={`w-12 h-12 mx-auto mb-4 ${service.color}`} />
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center">{service.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/servicios">
-              <Button size="lg" className="bg-coop-green hover:bg-coop-green/90">
-                Ver Todos los Servicios
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-                ¿Por qué elegir nuestra Cooperativa?
-              </h2>
-              <div className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <CheckCircle className="w-6 h-6 text-coop-green flex-shrink-0" />
-                    <span className="text-lg text-gray-700">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-coop-yellow/10 p-8 rounded-2xl">
-              <div className="text-center space-y-6">
-                <Users className="w-16 h-16 text-coop-green mx-auto" />
-                <h3 className="text-2xl font-bold text-gray-900">Únete a nuestra familia cooperativa</h3>
-                <p className="text-gray-600">
-                  Más de 5,000 familias confían en nosotros para sus servicios esenciales.
-                </p>
-                <Link href="/asociarse">
-                  <Button className="bg-coop-green hover:bg-coop-green/90">Asociarse Ahora</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PFC Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                Programa de Fortalecimiento Comunitario (PFC)
-              </h2>
-              <p className="text-xl text-gray-600">
-                Descubre cómo el PFC apoya la salud y el bienestar de nuestros socios.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0" />
-                  <span>Beneficios médicos y de salud</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0" />
-                  <span>Acceso a especialistas y programas preventivos</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0" />
-                  <span>Apoyo integral para una mejor calidad de vida</span>
-                </li>
-              </ul>
-              <Link href="/pfc">
-                <Button size="lg" className="bg-coop-green hover:bg-coop-green/90">
-                  Más Información sobre PFC
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            </div>
-            <div className="flex justify-center">
-              <ShieldCheck className="w-64 h-64 text-coop-green" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-coop-green text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6">¿Necesitas ayuda o tienes consultas?</h2>
-          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-            Nuestro equipo está aquí para ayudarte. Contáctanos por cualquier medio.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contacto">
-              <Button size="lg" className="bg-coop-yellow text-black hover:bg-coop-yellow/90">
-                <Phone className="mr-2 w-5 h-5" />
-                Contactar
-              </Button>
-            </Link>
-            <Link href="/reclamos">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white hover:bg-white/40 text-coop-green"
-              >
-                <Mail className="mr-2 w-5 h-5" />
-                Hacer Reclamo
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      </motion.section>
 
       <Footer />
     </div>
