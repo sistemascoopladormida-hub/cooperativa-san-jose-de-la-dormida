@@ -56,11 +56,39 @@ export default function HomePage() {
 
       {/* Hero Section - Enhanced with Framer Motion */}
       <motion.section 
-        className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white overflow-hidden"
+        className="relative text-white overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
+        {/* Background Image - Desktop */}
+        <div className="hidden lg:block absolute inset-0">
+          <Image
+            src="/images/hero-desktop.png"
+            alt="Cooperativa Eléctrica La Dormida - Edificio principal"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          {/* Overlay para mejorar legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/70 via-coop-green/80 to-coop-orange/70"></div>
+        </div>
+        
+        {/* Background Image - Mobile */}
+        <div className="lg:hidden absolute inset-0">
+          <Image
+            src="/images/hero-mobile.png"
+            alt="Cooperativa Eléctrica La Dormida - Edificio principal"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          {/* Overlay para mejorar legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/70 via-coop-green/80 to-coop-orange/70"></div>
+        </div>
+        
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <motion.div 
@@ -236,78 +264,6 @@ export default function HomePage() {
               </motion.div>
             </motion.div>
             
-            {/* Hero Image Section - Placeholder for images */}
-            <motion.div 
-              className="relative flex justify-center items-center"
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-            >
-              <div className="relative w-full max-w-lg">
-                {/* Main hero image - Desktop */}
-                {/* TODO: Agregar imagen hero desktop: /images/hero-desktop.jpg - Dimensiones recomendadas: 1200x800px */}
-                <motion.div 
-                  className="hidden lg:block relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
-                    <Image
-                      src="/images/logocoopnuevo.jpg"
-                      alt="Cooperativa La Dormida"
-                      width={400}
-                      height={400}
-                      className="w-full h-full object-contain p-8"
-                    />
-                  </div>
-                </motion.div>
-                
-                {/* Main hero image - Mobile */}
-                {/* TODO: Agregar imagen hero mobile: /images/hero-mobile.jpg - Dimensiones recomendadas: 800x600px */}
-                <motion.div 
-                  className="lg:hidden relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
-                    <Image
-                      src="/images/logocoopnuevo.jpg"
-                      alt="Cooperativa La Dormida"
-                      width={300}
-                      height={300}
-                      className="w-full h-full object-contain p-6"
-                    />
-                  </div>
-                </motion.div>
-                
-                {/* Decorative floating elements */}
-                <motion.div 
-                  className="absolute -top-4 -right-4 w-24 h-24 bg-coop-orange/20 rounded-full blur-xl"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.3, 0.5, 0.3],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-                <motion.div 
-                  className="absolute -bottom-4 -left-4 w-32 h-32 bg-white/10 rounded-full blur-xl"
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.2, 0.4, 0.2],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.5,
-                  }}
-                />
-              </div>
-            </motion.div>
           </div>
         </div>
       </motion.section>
