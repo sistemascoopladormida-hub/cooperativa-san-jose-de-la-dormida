@@ -97,17 +97,17 @@ export default function ServiciosPage() {
       <Header />
 
       {/* Hero Section - Enhanced */}
-      <section className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
         
         <div className="container mx-auto px-4 py-20 lg:py-28 relative z-10">
           <div className="text-center max-w-4xl mx-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-              <Zap className="w-4 h-4 text-coop-yellow" />
+              <Zap className="w-4 h-4 text-coop-orange" />
               <span className="text-sm font-medium">Servicios de Calidad</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight tracking-tight">
@@ -122,7 +122,7 @@ export default function ServiciosPage() {
           {/* TODO: Agregar imagen hero servicios desktop: /images/services-hero-desktop.jpg - Dimensiones: 1400x600px */}
           <div className="hidden lg:block mt-12 relative">
             <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/30 via-coop-purple/30 via-coop-green/30 to-coop-orange/30 flex items-center justify-center">
                 <Zap className="w-32 h-32 text-white/30" />
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function ServiciosPage() {
           {/* TODO: Agregar imagen hero servicios mobile: /images/services-hero-mobile.jpg - Dimensiones: 800x400px */}
           <div className="lg:hidden mt-8 relative">
             <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/30 via-coop-purple/30 via-coop-green/30 to-coop-orange/30 flex items-center justify-center">
                 <Zap className="w-24 h-24 text-white/30" />
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function ServiciosPage() {
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-72 h-72 bg-coop-green rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-coop-orange rounded-full blur-3xl"></div>
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -210,7 +210,7 @@ export default function ServiciosPage() {
                     ))}
                   </ul>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="bg-coop-green hover:bg-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn">
+                    <Button className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn text-white">
                       Contratar Servicio
                       <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
@@ -250,7 +250,7 @@ export default function ServiciosPage() {
           <div className="text-center mt-12">
             <p className="text-gray-600 mb-6">¿No eres socio aún? Únete y accede a todos estos beneficios</p>
             <Link href="/asociarse">
-              <Button size="lg" className="bg-coop-green hover:bg-coop-green/90">
+              <Button size="lg" className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white">
                 Asociarse Ahora
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
@@ -260,7 +260,7 @@ export default function ServiciosPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 bg-coop-green text-white">
+      <section className="py-16 bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -279,7 +279,7 @@ export default function ServiciosPage() {
             </div>
             <div className="text-center lg:text-right">
               <Link href="/contacto">
-                <Button size="lg" className="bg-coop-yellow text-black hover:bg-coop-yellow/90">
+                <Button size="lg" className="bg-coop-orange text-white hover:bg-coop-orange/90">
                   Contactar Ahora
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>

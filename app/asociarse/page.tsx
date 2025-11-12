@@ -115,7 +115,7 @@ export default function AsociarsePage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-coop-green to-green-700 text-white py-16">
+      <section className="bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">Únete a Nuestra Cooperativa</h1>
@@ -322,7 +322,7 @@ export default function AsociarsePage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-coop-green hover:bg-coop-green/90"
+                    className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
                     disabled={isSubmitting || !formData.aceptaTerminos}
                   >
                     {isSubmitting ? (
@@ -342,7 +342,7 @@ export default function AsociarsePage() {
 
         {/* Additional Info */}
         <div className="mt-12 text-center">
-          <Card className="max-w-2xl mx-auto bg-coop-yellow/10 border-coop-yellow/30">
+          <Card className="max-w-2xl mx-auto bg-coop-orange/10 border-coop-orange/30">
             <CardHeader>
               <CardTitle className="text-coop-green">Proceso de Asociación</CardTitle>
             </CardHeader>

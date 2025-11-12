@@ -56,7 +56,7 @@ export default function HomePage() {
 
       {/* Hero Section - Enhanced with Framer Motion */}
       <motion.section 
-        className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white overflow-hidden"
+        className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -64,7 +64,7 @@ export default function HomePage() {
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <motion.div 
-            className="absolute top-0 right-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            className="absolute top-0 right-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
               x: [0, 50, 0],
@@ -109,7 +109,7 @@ export default function HomePage() {
                   animate={{ rotate: [0, 360] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 >
-                  <Sparkles className="w-4 h-4 text-coop-yellow" />
+                  <Sparkles className="w-4 h-4 text-coop-orange" />
                 </motion.div>
                 <span className="text-sm font-medium">Más de 50 años sirviendo a la comunidad</span>
               </motion.div>
@@ -128,7 +128,7 @@ export default function HomePage() {
                 >
                   Bienvenido a la
                   <motion.span 
-                    className="text-coop-yellow block mt-2 bg-gradient-to-r from-coop-yellow to-yellow-300 bg-clip-text text-transparent"
+                    className="text-coop-orange block mt-2 bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
@@ -167,7 +167,7 @@ export default function HomePage() {
                   <Link href="/login" className="group">
                     <Button 
                       size="lg" 
-                      className="bg-coop-yellow text-black hover:bg-coop-yellow/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                      className="bg-coop-orange text-white hover:bg-coop-orange/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
                       Área Socios
                       <motion.span
@@ -223,7 +223,7 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1 }}
                   >
                     <motion.div 
-                      className="text-3xl lg:text-4xl font-bold text-coop-yellow"
+                      className="text-3xl lg:text-4xl font-bold text-coop-orange"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}
@@ -253,7 +253,7 @@ export default function HomePage() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
                     <Image
-                      src="/images/logo-coop.png"
+                      src="/images/logocoopnuevo.jpg"
                       alt="Cooperativa La Dormida"
                       width={400}
                       height={400}
@@ -271,7 +271,7 @@ export default function HomePage() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 to-green-800/20 flex items-center justify-center">
                     <Image
-                      src="/images/logo-coop.png"
+                      src="/images/logocoopnuevo.jpg"
                       alt="Cooperativa La Dormida"
                       width={300}
                       height={300}
@@ -282,7 +282,7 @@ export default function HomePage() {
                 
                 {/* Decorative floating elements */}
                 <motion.div 
-                  className="absolute -top-4 -right-4 w-24 h-24 bg-coop-yellow/20 rounded-full blur-xl"
+                  className="absolute -top-4 -right-4 w-24 h-24 bg-coop-orange/20 rounded-full blur-xl"
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [0.3, 0.5, 0.3],
@@ -335,7 +335,7 @@ export default function HomePage() {
             }}
           />
           <motion.div 
-            className="absolute bottom-20 right-10 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            className="absolute bottom-20 right-10 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
               x: [0, -20, 0],
@@ -491,7 +491,7 @@ export default function HomePage() {
               <Link href="/servicios" className="group inline-block">
                 <Button 
                   size="lg" 
-                  className="bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
+                  className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
                 >
                   Ver Todos los Servicios
                   <motion.span
@@ -526,7 +526,7 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-yellow/10 rounded-full mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-orange/10 rounded-full mb-6">
                   <Award className="w-4 h-4 text-coop-green" />
                   <span className="text-sm font-medium text-coop-green">Ventajas Exclusivas</span>
                 </div>
@@ -596,11 +596,11 @@ export default function HomePage() {
               {/* Community image - Desktop */}
               {/* TODO: Agregar imagen comunidad desktop: /images/community-desktop.jpg - Dimensiones: 1000x800px */}
               <motion.div 
-                className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-yellow/20"
+                className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-orange/20"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 via-coop-yellow/10 to-green-700/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/20 via-coop-purple/20 via-coop-green/20 to-coop-orange/20 flex items-center justify-center">
                   <Users className="w-32 h-32 text-coop-green/30" />
                 </div>
               </motion.div>
@@ -608,18 +608,18 @@ export default function HomePage() {
               {/* Community image - Mobile */}
               {/* TODO: Agregar imagen comunidad mobile: /images/community-mobile.jpg - Dimensiones: 600x500px */}
               <motion.div 
-                className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-yellow/20"
+                className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-orange/20"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/20 via-coop-yellow/10 to-green-700/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/20 via-coop-purple/20 via-coop-green/20 to-coop-orange/20 flex items-center justify-center">
                   <Users className="w-24 h-24 text-coop-green/30" />
                 </div>
               </motion.div>
               
               {/* CTA Card Overlay */}
               <motion.div 
-                className="absolute -bottom-6 -right-2 lg:-bottom-8 lg:-right-8 bg-white rounded-2xl shadow-2xl p-6 lg:p-8 border-2 border-coop-yellow/30 max-w-xs"
+                className="absolute -bottom-6 -right-2 lg:-bottom-8 lg:-right-8 bg-white rounded-2xl shadow-2xl p-6 lg:p-8 border-2 border-coop-orange/30 max-w-xs"
                 initial={{ opacity: 0, y: 30, scale: 0.8 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
@@ -627,7 +627,7 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05, y: -5 }}
               >
                 <div className="text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-coop-green to-green-700 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green rounded-full flex items-center justify-center">
                     <Users className="w-8 h-8 text-white" />
                   </div>
                   <div>
@@ -636,7 +636,7 @@ export default function HomePage() {
                       Más de 5,000 familias confían en nosotros para sus servicios esenciales.
                     </p>
                     <Link href="/asociarse" className="block">
-                      <Button className="w-full bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                         Asociarse Ahora
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
@@ -671,7 +671,7 @@ export default function HomePage() {
           }}
         />
         <motion.div 
-          className="absolute bottom-0 left-0 w-96 h-96 bg-coop-yellow/5 rounded-full blur-3xl"
+          className="absolute bottom-0 left-0 w-96 h-96 bg-coop-orange/5 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
             x: [0, -30, 0],
@@ -696,7 +696,7 @@ export default function HomePage() {
               {/* PFC image - Desktop */}
               {/* TODO: Agregar imagen PFC desktop: /images/pfc-desktop.jpg - Dimensiones: 1000x800px */}
               <div className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/30 via-coop-purple/30 via-coop-green/30 to-coop-orange/30 flex items-center justify-center">
                   <div className="text-center space-y-4">
                     <ShieldCheck className="w-32 h-32 text-coop-green/40 mx-auto" />
                     <div className="text-coop-green/60 font-semibold text-lg">Programa PFC</div>
@@ -707,7 +707,7 @@ export default function HomePage() {
               {/* PFC image - Mobile */}
               {/* TODO: Agregar imagen PFC mobile: /images/pfc-mobile.jpg - Dimensiones: 600x500px */}
               <div className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-coop-green/30 via-green-700/20 to-coop-yellow/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/30 via-coop-purple/30 via-coop-green/30 to-coop-orange/30 flex items-center justify-center">
                   <div className="text-center space-y-3">
                     <ShieldCheck className="w-24 h-24 text-coop-green/40 mx-auto" />
                     <div className="text-coop-green/60 font-semibold">Programa PFC</div>
@@ -717,7 +717,7 @@ export default function HomePage() {
               
               {/* Badge */}
               <motion.div 
-                className="absolute -top-4 -right-4 lg:-top-6 lg:-right-6 bg-coop-yellow rounded-full p-4 lg:p-6 shadow-xl"
+                className="absolute -top-4 -right-4 lg:-top-6 lg:-right-6 bg-coop-orange rounded-full p-4 lg:p-6 shadow-xl"
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 whileHover={{ scale: 1.1, rotate: 360 }}
@@ -781,7 +781,7 @@ export default function HomePage() {
                 <Link href="/pfc" className="inline-block group">
                   <Button 
                     size="lg" 
-                    className="bg-coop-green hover:bg-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
+                    className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
                   >
                     Más Información sobre PFC
                     <motion.span
@@ -801,7 +801,7 @@ export default function HomePage() {
 
       {/* CTA Section - Enhanced with Framer Motion */}
       <motion.section 
-        className="relative bg-gradient-to-br from-coop-green via-green-700 to-green-800 text-white py-20 lg:py-28 overflow-hidden"
+        className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-20 lg:py-28 overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -810,7 +810,7 @@ export default function HomePage() {
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
           <motion.div 
-            className="absolute top-0 left-0 w-96 h-96 bg-coop-yellow rounded-full blur-3xl"
+            className="absolute top-0 left-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
               x: [0, 50, 0],
@@ -862,7 +862,7 @@ export default function HomePage() {
                   animate={{ rotate: [0, 360] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 >
-                  <Phone className="w-4 h-4 text-coop-yellow" />
+                  <Phone className="w-4 h-4 text-coop-orange" />
                 </motion.div>
                 <span className="text-sm font-medium">Estamos aquí para ayudarte</span>
               </motion.div>
@@ -900,7 +900,7 @@ export default function HomePage() {
                 <Link href="/contacto" className="group inline-block">
                   <Button 
                     size="lg" 
-                    className="bg-coop-yellow text-black hover:bg-coop-yellow/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
+                    className="bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
                   >
                     <motion.div
                       className="inline-flex items-center"

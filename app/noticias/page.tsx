@@ -46,7 +46,7 @@ export default function NoticiasPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-coop-green to-green-700 text-white py-16">
+      <section className="bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">Noticias y Novedades</h1>
@@ -90,7 +90,7 @@ export default function NoticiasPage() {
                       {featuredNews.author}
                     </div>
                   </div>
-                  <Button asChild className="bg-coop-green hover:bg-coop-green/90">
+                  <Button asChild className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white">
                     <Link href={`/noticias/${featuredNews.slug}`}>
                       Leer Completa
                       <ArrowRight className="ml-2 w-4 h-4" />

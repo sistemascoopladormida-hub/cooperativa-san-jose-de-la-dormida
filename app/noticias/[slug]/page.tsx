@@ -29,7 +29,7 @@ export default async function NoticiaIndividual({ params }: Props) {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <Link href="/noticias" className="inline-flex items-center text-coop-green mb-6 hover:underline">
+        <Link href="/noticias" className="inline-flex items-center text-coop-green hover:text-coop-blue mb-6 hover:underline transition-colors">
           <ArrowLeft className="w-4 h-4 mr-1" /> Volver a noticias
         </Link>
         <div className="mb-6">
@@ -78,7 +78,7 @@ export default async function NoticiaIndividual({ params }: Props) {
             <ul className="space-y-3">
               {related.map(r => (
                 <li key={r.slug}>
-                  <Link href={`/noticias/${r.slug}`} className="text-coop-green hover:underline font-medium">
+                  <Link href={`/noticias/${r.slug}`} className="text-coop-green hover:text-coop-blue hover:underline font-medium transition-colors">
                     {r.title}
                   </Link>
                 </li>

@@ -134,7 +134,7 @@ export default function Chatbot() {
                 onClick={() => setIsOpen(true)}
                 className={cn(
                   "h-16 w-16 rounded-full shadow-2xl",
-                  "bg-gradient-to-br from-coop-green to-green-700 hover:from-coop-green/90 hover:to-green-600 text-white",
+                  "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white",
                   "border-4 border-white/20 backdrop-blur-sm"
                 )}
                 aria-label="Abrir chat"
@@ -146,7 +146,7 @@ export default function Chatbot() {
                   <Bot className="h-7 w-7" />
                 </motion.div>
                 <motion.span 
-                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-coop-yellow text-xs text-black shadow-lg"
+                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-coop-orange text-xs text-white shadow-lg"
                   animate={{ 
                     scale: [1, 1.15, 1],
                   }}
@@ -169,7 +169,7 @@ export default function Chatbot() {
                     }}
                   >
                     <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400"></span>
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-coop-yellow border border-yellow-600/30"></span>
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-coop-orange border border-orange-600/30"></span>
                   </motion.span>
                 </motion.span>
               </Button>
@@ -191,10 +191,10 @@ export default function Chatbot() {
           >
             <Card className="flex h-[600px] w-[calc(100vw-3rem)] sm:w-[400px] flex-col shadow-2xl md:h-[650px] md:w-[450px] border-2 border-coop-green/20 overflow-hidden">
           {/* Header - Enhanced */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-coop-green to-green-700 p-4 text-white relative overflow-hidden">
+          <div className="flex items-center justify-between bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green p-4 text-white relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-coop-yellow rounded-full blur-2xl"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
             </div>
             
             <div className="flex items-center space-x-3 relative z-10">
@@ -252,8 +252,8 @@ export default function Chatbot() {
                     className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-md transition-transform hover:scale-110",
                       message.sender === "user"
-                        ? "bg-gradient-to-br from-coop-green to-green-700 text-white"
-                        : "bg-gradient-to-br from-coop-yellow to-yellow-400 text-gray-800"
+                        ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
+                        : "bg-gradient-to-br from-coop-orange to-orange-400 text-white"
                     )}
                   >
                     {message.sender === "user" ? (
@@ -266,7 +266,7 @@ export default function Chatbot() {
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm",
                       message.sender === "user"
-                        ? "bg-gradient-to-br from-coop-green to-green-700 text-white"
+                        ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
                         : "bg-white text-gray-800 border border-gray-200"
                     )}
                   >
@@ -296,7 +296,7 @@ export default function Chatbot() {
                     className="flex items-start space-x-2"
                   >
                     <motion.div 
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-yellow text-gray-800"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-orange text-white"
                       animate={{ scale: [1, 1.1, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     >
@@ -343,7 +343,7 @@ export default function Chatbot() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Escribe tu mensaje..."
-                className="flex-1 border-2 border-gray-200 focus:border-coop-green rounded-xl px-4 py-3 transition-all duration-300"
+                className="flex-1 border-2 border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20 rounded-xl px-4 py-3 transition-all duration-300"
                 disabled={isTyping}
               />
               <motion.div
@@ -353,7 +353,7 @@ export default function Chatbot() {
                 <Button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isTyping}
-                  className="bg-gradient-to-br from-coop-green to-green-700 hover:from-coop-green/90 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl px-4"
+                  className="bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl px-4"
                   size="icon"
                 >
                   <motion.div

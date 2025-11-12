@@ -75,7 +75,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   transition={{ duration: 0.5 }}
                 >
                   <Image
-                    src="/images/logo-coop.png"
+                    src="/images/logocoopnuevo.jpg"
                     alt="Cooperativa La Dormida"
                     width={56}
                     height={56}
@@ -84,7 +84,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 </motion.div>
               </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg lg:text-xl font-bold text-coop-green leading-tight transition-colors group-hover:text-green-700">
+              <h1 className="text-lg lg:text-xl font-bold text-coop-green leading-tight transition-colors group-hover:text-coop-blue">
                 Cooperativa
                 <br />
                 <span className="text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900">La Dormida</span>
@@ -115,7 +115,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   <span className="relative">
                     {item.label}
                     <motion.span 
-                      className="absolute bottom-0 left-0 h-0.5 bg-coop-green"
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green"
                       initial={{ width: 0 }}
                       whileHover={{ width: "100%" }}
                       transition={{ duration: 0.3 }}
@@ -133,7 +133,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="hidden lg:flex items-center space-x-2 border-2 border-coop-green/30 text-coop-green hover:bg-coop-green hover:text-white hover:border-coop-green transition-all duration-300 shadow-sm hover:shadow-md font-medium px-4 py-2"
+                    className="hidden lg:flex items-center space-x-2 border-2 border-coop-green/30 text-coop-green hover:bg-gradient-to-r hover:from-coop-blue hover:via-coop-purple hover:to-coop-green hover:text-white hover:border-coop-green transition-all duration-300 shadow-sm hover:shadow-md font-medium px-4 py-2"
                   >
                     <User className="w-4 h-4" />
                     <span className="max-w-24 truncate">{userName || "Usuario"}</span>
@@ -155,7 +155,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
               </DropdownMenu>
             ) : (
               <Link href="/login" className="group">
-                <Button className="hidden lg:flex bg-coop-green hover:bg-coop-green/90 text-white font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg">
+                <Button className="hidden lg:flex bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg">
                   Iniciar Sesión
                 </Button>
               </Link>
@@ -165,7 +165,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden relative w-12 h-12 rounded-xl hover:bg-coop-green/10 active:bg-coop-green/20 transition-all duration-300"
+              className="lg:hidden relative w-12 h-12 rounded-xl hover:bg-gradient-to-br hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 active:bg-coop-green/20 transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
             >
@@ -203,11 +203,11 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     >
                       <Link
                         href={item.href}
-                        className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-coop-green/10 hover:to-green-50 hover:text-coop-green transition-all duration-300 rounded-xl group"
+                        className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 hover:text-coop-green transition-all duration-300 rounded-xl group"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <motion.div 
-                          className="w-11 h-11 rounded-xl bg-gradient-to-br from-coop-green/10 to-green-50 flex items-center justify-center shadow-sm"
+                          className="w-11 h-11 rounded-xl bg-gradient-to-br from-coop-blue/10 via-coop-purple/10 to-coop-green/10 flex items-center justify-center shadow-sm"
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.95 }}
                         >
@@ -219,7 +219,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                           whileHover={{ x: 5 }}
                           transition={{ type: "spring", stiffness: 400 }}
                         >
-                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-coop-green" />
+                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-coop-green transition-colors" />
                         </motion.div>
                       </Link>
                     </motion.div>
@@ -262,7 +262,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   </div>
                 ) : (
                   <Link href="/login" className="block mx-2" onClick={() => setIsMenuOpen(false)}>
-                    <Button className="w-full bg-gradient-to-r from-coop-green to-green-700 hover:from-coop-green/90 hover:to-green-600 text-white font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                    <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl">
                       Iniciar Sesión
                     </Button>
                   </Link>
