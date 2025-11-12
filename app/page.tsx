@@ -72,7 +72,7 @@ export default function HomePage() {
             sizes="100vw"
           />
           {/* Overlay para mejorar legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/70 via-coop-green/80 to-coop-orange/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
         </div>
         
         {/* Background Image - Mobile */}
@@ -86,7 +86,7 @@ export default function HomePage() {
             sizes="100vw"
           />
           {/* Overlay para mejorar legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/70 via-coop-green/80 to-coop-orange/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
         </div>
         
         {/* Background decorative elements */}
