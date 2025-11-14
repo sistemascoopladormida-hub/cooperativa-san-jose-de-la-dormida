@@ -19,7 +19,7 @@ export default function Footer() {
               <div className="relative">
                 <div className="absolute inset-0 bg-white/20 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <Image
-                  src="/images/logocoopnuevo.jpg"
+                  src="/images/logocoopnuevo.png"
                   alt="Cooperativa La Dormida"
                   width={56}
                   height={56}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
-import { MessageCircle, X, Send, Bot, User, Clock } from "lucide-react"
+import { MessageCircle, X, Send, Bot, User, Clock, Zap, Phone, HelpCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -21,7 +21,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "¡Hola! Soy el asistente virtual de la Cooperativa La Dormida. Estoy aquí para ayudarte 24/7. ¿En qué puedo asistirte hoy?",
+      text: "¡Hola! 👋 Soy el asistente virtual de la Cooperativa La Dormida. Estoy aquí para ayudarte 24/7. ¿En qué puedo asistirte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -39,11 +39,8 @@ export default function Chatbot() {
     scrollToBottom()
   }, [messages, isTyping])
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isOpen])
+  // Removido el auto-focus para evitar que se abra el teclado en móviles
+  // El usuario puede hacer click en el input cuando quiera escribir
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
@@ -113,6 +110,21 @@ export default function Chatbot() {
     }
   }
 
+  const quickActions = [
+    { text: "¿Qué servicios ofrecen?", icon: Zap },
+    { text: "¿Cuáles son los horarios?", icon: Clock },
+    { text: "¿Cómo me contacto?", icon: Phone },
+    { text: "¿Cómo me asocio?", icon: HelpCircle },
+  ]
+
+  const handleQuickAction = (actionText: string) => {
+    setInputValue(actionText)
+    // Enfocar el input después de un pequeño delay para que el usuario pueda ver la acción
+    setTimeout(() => {
+      inputRef.current?.focus()
+    }, 100)
+  }
+
   return (
     <>
       {/* Botón flotante - Enhanced with Framer Motion */}
@@ -145,33 +157,20 @@ export default function Chatbot() {
                 >
                   <Bot className="h-7 w-7" />
                 </motion.div>
+                {/* Círculo naranja con animación de parpadeo fluida */}
                 <motion.span 
-                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-coop-orange text-xs text-white shadow-lg"
+                  className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-coop-orange shadow-lg z-10"
                   animate={{ 
-                    scale: [1, 1.15, 1],
+                    opacity: [1, 0.4, 1],
+                    scale: [1, 1.1, 1]
                   }}
                   transition={{ 
-                    duration: 2,
+                    duration: 1.2,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: "easeInOut",
+                    times: [0, 0.5, 1]
                   }}
-                >
-                  <motion.span 
-                    className="relative flex h-3 w-3 items-center justify-center"
-                    animate={{ 
-                      scale: [1, 1.5, 1],
-                      opacity: [0.75, 0, 0.75]
-                    }}
-                    transition={{ 
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeOut"
-                    }}
-                  >
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400"></span>
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-coop-orange border border-orange-600/30"></span>
-                  </motion.span>
-                </motion.span>
+                />
               </Button>
             </motion.div>
           </motion.div>
@@ -231,6 +230,37 @@ export default function Chatbot() {
           {/* Área de mensajes - Enhanced with Framer Motion */}
           <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white">
             <div className="space-y-4">
+              {/* Botones de acción rápida - Solo se muestran cuando hay pocos mensajes */}
+              {messages.length <= 1 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-2"
+                >
+                  <p className="text-xs font-medium text-gray-500 mb-2 px-1">Preguntas frecuentes:</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {quickActions.map((action, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleQuickAction(action.text)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-coop-green hover:bg-green-50/50 transition-all duration-200 text-left group"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-coop-blue/10 to-coop-purple/10 flex items-center justify-center group-hover:from-coop-blue/20 group-hover:to-coop-purple/20 transition-colors">
+                          <action.icon className="w-4 h-4 text-coop-green" />
+                        </div>
+                        <span className="text-sm text-gray-700 group-hover:text-coop-green font-medium flex-1">
+                          {action.text}
+                        </span>
+                        <Send className="w-3 h-3 text-gray-400 group-hover:text-coop-green opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
               <AnimatePresence mode="popLayout">
                 {messages.map((message) => (
                   <motion.div
@@ -270,7 +300,7 @@ export default function Chatbot() {
                         : "bg-white text-gray-800 border border-gray-200"
                     )}
                   >
-                    <p className="text-sm leading-relaxed">{message.text}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
                     <p className={cn(
                       "mt-2 text-xs",
                       message.sender === "user" ? "text-green-100" : "text-gray-500"
@@ -342,9 +372,11 @@ export default function Chatbot() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Escribe tu mensaje..."
+                placeholder="Escribe tu mensaje aquí..."
                 className="flex-1 border-2 border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20 rounded-xl px-4 py-3 transition-all duration-300"
                 disabled={isTyping}
+                autoComplete="off"
+                autoFocus={false}
               />
               <motion.div
                 whileHover={{ scale: 1.05 }}

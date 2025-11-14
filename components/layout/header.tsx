@@ -75,7 +75,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   transition={{ duration: 0.5 }}
                 >
                   <Image
-                    src="/images/logocoopnuevo.jpg"
+                    src="/images/logocoopnuevo.png"
                     alt="Cooperativa La Dormida"
                     width={56}
                     height={56}
@@ -167,22 +167,45 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
             )}
 
             {/* Mobile Menu Button - Enhanced */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden relative w-12 h-12 rounded-xl hover:bg-gradient-to-br hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 active:bg-coop-green/20 transition-all duration-300"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            <motion.div
+              whileTap={{ scale: 0.95 }}
+              className="lg:hidden"
             >
-              <div className="relative w-6 h-6">
-                <Menu
-                  className={`w-6 h-6 absolute transition-all duration-300 ${isMenuOpen ? "rotate-90 opacity-0 scale-0" : "rotate-0 opacity-100 scale-100"}`}
-                />
-                <X
-                  className={`w-6 h-6 absolute transition-all duration-300 ${isMenuOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-0"}`}
-                />
-              </div>
-            </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-coop-blue/10 via-coop-purple/10 to-coop-green/10 hover:from-coop-blue/20 hover:via-coop-purple/20 hover:to-coop-green/20 active:from-coop-blue/30 active:via-coop-purple/30 active:to-coop-green/30 border-2 border-coop-green/20 hover:border-coop-green/40 transition-all duration-300 shadow-md hover:shadow-lg"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              >
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <motion.div
+                    initial={false}
+                    animate={isMenuOpen ? { rotate: 90, opacity: 0, scale: 0 } : { rotate: 0, opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="absolute"
+                  >
+                    <Menu className="w-5 h-5 text-coop-green" />
+                  </motion.div>
+                  <motion.div
+                    initial={false}
+                    animate={isMenuOpen ? { rotate: 0, opacity: 1, scale: 1 } : { rotate: -90, opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="absolute"
+                  >
+                    <X className="w-5 h-5 text-coop-green" />
+                  </motion.div>
+                </div>
+                {/* Indicador de estado */}
+                {isMenuOpen && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-coop-orange rounded-full border-2 border-white"
+                  />
+                )}
+              </Button>
+            </motion.div>
           </div>
         </div>
 
