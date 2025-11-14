@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import Chatbot from "@/components/chatbot"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -25,6 +26,8 @@ export default function RootLayout({
       <body className={inter.className}>
         {children}
         <Chatbot />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
