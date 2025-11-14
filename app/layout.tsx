@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 import Chatbot from "@/components/chatbot"
 
 const inter = Inter({ subsets: ["latin"] })
