@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { MessageCircle, X, Send, Bot, User, Clock, Zap, Phone, HelpCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import ReactMarkdown from "react-markdown"
 
 interface Message {
   id: string
@@ -56,51 +57,47 @@ export default function Chatbot() {
     setInputValue("")
     setIsTyping(true)
 
-    // Simular respuesta del bot (aquí puedes integrar con tu API de chatbot)
-    setTimeout(() => {
+    try {
+      // Preparar mensajes para enviar a la API (solo los últimos 10 para mantener el contexto)
+      const messagesToSend = [...messages, userMessage].slice(-10).map(msg => ({
+        text: msg.text,
+        sender: msg.sender,
+      }))
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: messagesToSend }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al obtener respuesta')
+      }
+
+      const data = await response.json()
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateBotResponse(inputValue),
+        text: data.response || "Lo siento, no pude procesar tu consulta en este momento. Por favor, intenta de nuevo o contacta directamente con nuestra oficina.",
         sender: "bot",
         timestamp: new Date(),
       }
+      
       setMessages((prev) => [...prev, botResponse])
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error)
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Lo siento, hubo un error al procesar tu consulta. Por favor, intenta de nuevo o contacta directamente con nuestra oficina al 3521-401330.",
+        sender: "bot",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorResponse])
+    } finally {
       setIsTyping(false)
-    }, 1000)
-  }
-
-  const generateBotResponse = (userInput: string): string => {
-    const lowerInput = userInput.toLowerCase()
-
-    if (lowerInput.includes("servicio") || lowerInput.includes("electricidad") || lowerInput.includes("internet")) {
-      return "Ofrecemos servicios de electricidad, internet, televisión y farmacia social. Puedes encontrar más información en la sección de Servicios de nuestra página web."
     }
-
-    if (lowerInput.includes("asociarse") || lowerInput.includes("socio") || lowerInput.includes("asociado")) {
-      return "Para asociarte a nuestra cooperativa, puedes visitar nuestra oficina o completar el formulario en la sección 'Asociarse' de nuestra página web. ¡Estaremos encantados de tenerte como parte de nuestra familia cooperativa!"
-    }
-
-    if (lowerInput.includes("contacto") || lowerInput.includes("teléfono") || lowerInput.includes("telefono")) {
-      return "Puedes contactarnos a través de la sección 'Contacto' de nuestra página web, donde encontrarás nuestros números de teléfono, correo electrónico y dirección. También puedes visitarnos en nuestras oficinas."
-    }
-
-    if (lowerInput.includes("pago") || lowerInput.includes("boleta") || lowerInput.includes("factura")) {
-      return "Para realizar pagos o consultar tus boletas, puedes acceder al Área de Socios en nuestra página web. Si necesitas ayuda con el proceso, no dudes en contactarnos."
-    }
-
-    if (lowerInput.includes("reclamo") || lowerInput.includes("problema") || lowerInput.includes("queja")) {
-      return "Lamentamos cualquier inconveniente. Puedes presentar tu reclamo a través de la sección 'Reclamos' en nuestra página web o contactarnos directamente. Nos comprometemos a resolver tu situación lo antes posible."
-    }
-
-    if (lowerInput.includes("horario") || lowerInput.includes("atención") || lowerInput.includes("atencion")) {
-      return "Nuestro horario de atención presencial es de lunes a viernes de 7:00 a 12:00 horas. Sin embargo, este asistente virtual está disponible 24/7 para ayudarte con tus consultas. Para emergencias, puedes contactar nuestros números de guardia 24/7 que encontrarás en la sección de Teléfonos de Guardia."
-    }
-
-    if (lowerInput.includes("hola") || lowerInput.includes("buenos días") || lowerInput.includes("buenas tardes") || lowerInput.includes("buenas noches")) {
-      return "¡Hola! Gracias por contactarnos. ¿En qué puedo ayudarte hoy? Puedo asistirte con información sobre nuestros servicios, asociación, pagos y más."
-    }
-
-    return "Gracias por tu consulta. Puedo ayudarte con información sobre nuestros servicios, cómo asociarte, realizar pagos, presentar reclamos y más. ¿Hay algo específico en lo que pueda asistirte?"
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -300,7 +297,23 @@ export default function Chatbot() {
                         : "bg-white text-gray-800 border border-gray-200"
                     )}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                    {message.sender === "bot" ? (
+                      <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                            li: ({ children }) => <li className="ml-2">{children}</li>,
+                            strong: ({ children }) => <strong className="font-semibold text-coop-green">{children}</strong>,
+                            em: ({ children }) => <em className="italic">{children}</em>,
+                          }}
+                        >
+                          {message.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                    )}
                     <p className={cn(
                       "mt-2 text-xs",
                       message.sender === "user" ? "text-green-100" : "text-gray-500"
