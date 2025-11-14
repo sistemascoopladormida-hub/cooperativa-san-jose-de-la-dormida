@@ -270,11 +270,11 @@ export default function ServiciosPage() {
               </p>
               <div className="flex items-center space-x-3 mb-4">
                 <Clock className="w-5 h-5" />
-                <span>Atención: Lunes a Viernes de 8:00 a 17:00</span>
+                <span>Atención: Lunes a Viernes de 7:00 a 12:00</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5" />
-                <span>(0123) 456-7890</span>
+                <a href="tel:+543521401330" className="hover:underline">3521-401330</a>
               </div>
             </div>
             <div className="text-center lg:text-right">

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react"
+import { Phone, Mail, MapPin, Clock, Facebook, Instagram, AlertCircle, PhoneCall, Heart, Zap, Wifi, Building2, FileText } from "lucide-react"
 
 export default function Footer() {
   return (
@@ -164,7 +164,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Dirección</p>
-                  <p className="text-green-100 text-sm">Av. Principal 123, La Dormida</p>
+                  <p className="text-green-100 text-sm">Av. Perón 557 - CP 5244</p>
+                  <p className="text-green-100 text-sm">Córdoba, San José de la Dormida</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3 group">
@@ -173,8 +174,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Teléfono</p>
-                  <a href="tel:+541234567890" className="text-green-100 text-sm hover:text-coop-orange transition-colors">
-                    (0123) 456-7890
+                  <a href="tel:+543521401330" className="text-green-100 text-sm hover:text-coop-orange transition-colors">
+                    3521-401330
                   </a>
                 </div>
               </div>
@@ -184,8 +185,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Email</p>
-                  <a href="mailto:info@coopladormida.com.ar" className="text-green-100 text-sm hover:text-coop-orange transition-colors break-all">
-                    info@coopladormida.com.ar
+                  <a href="mailto:sistemascoopladormida@gmail.com" className="text-green-100 text-sm hover:text-coop-orange transition-colors break-all">
+                    sistemascoopladormida@gmail.com
                   </a>
                 </div>
               </div>
@@ -195,8 +196,70 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Horario</p>
-                  <p className="text-green-100 text-sm">Lun-Vie: 8:00-17:00</p>
+                  <p className="text-green-100 text-sm">Lun-Vie: 7:00-12:00</p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Teléfonos de Guardia - Enhanced */}
+          <div className="lg:col-span-4 mt-8 lg:mt-0">
+            <div className="bg-red-500/20 backdrop-blur-sm rounded-xl p-6 border-2 border-red-400/30">
+              <div className="flex items-center justify-center gap-2 mb-8">
+                <AlertCircle className="w-5 h-5 text-red-300" />
+                <h4 className="font-bold text-lg text-white">Teléfonos de Guardia 24/7</h4>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                <a 
+                  href="tel:+543521406183" 
+                  className="flex items-center gap-2 text-green-50 hover:text-red-300 transition-colors text-sm group"
+                >
+                  <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Ambulancia</p>
+                    <p className="text-xs text-green-100">3521 406183</p>
+                  </div>
+                </a>
+                <a 
+                  href="tel:+543521406186" 
+                  className="flex items-center gap-2 text-green-50 hover:text-yellow-300 transition-colors text-sm group"
+                >
+                  <Zap className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Eléctrica</p>
+                    <p className="text-xs text-green-100">3521 406186</p>
+                  </div>
+                </a>
+                <a 
+                  href="tel:+543521438313" 
+                  className="flex items-center gap-2 text-green-50 hover:text-blue-300 transition-colors text-sm group"
+                >
+                  <Wifi className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Internet</p>
+                    <p className="text-xs text-green-100">3521 438313</p>
+                  </div>
+                </a>
+                <a 
+                  href="tel:+54352140130" 
+                  className="flex items-center gap-2 text-green-50 hover:text-green-300 transition-colors text-sm group"
+                >
+                  <Building2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Adm.</p>
+                    <p className="text-xs text-green-100">3521 40130</p>
+                  </div>
+                </a>
+                <a 
+                  href="tel:+543521406189" 
+                  className="flex items-center gap-2 text-green-50 hover:text-gray-300 transition-colors text-sm group"
+                >
+                  <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Sepelio</p>
+                    <p className="text-xs text-green-100">3521 406189</p>
+                  </div>
+                </a>
               </div>
             </div>
           </div>

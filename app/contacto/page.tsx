@@ -40,25 +40,25 @@ export default function ContactoPage() {
     {
       icon: MapPin,
       title: "Dirección",
-      details: ["Av. Principal 123", "La Dormida, Provincia"],
+      details: ["Av. Perón 557 - CP 5244", "Córdoba, San José de la Dormida"],
       color: "text-blue-600",
     },
     {
       icon: Phone,
-      title: "Teléfonos",
-      details: ["(0123) 456-7890", "(0123) 456-7891"],
+      title: "Teléfono",
+      details: ["3521-401330"],
       color: "text-green-600",
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["info@coopladormida.com.ar", "reclamos@coopladormida.com.ar"],
+      details: ["sistemascoopladormida@gmail.com"],
       color: "text-purple-600",
     },
     {
       icon: Clock,
       title: "Horarios",
-      details: ["Lun-Vie: 8:00 - 17:00", "Sáb: 8:00 - 12:00"],
+      details: ["Lunes a Viernes: 7:00 - 12:00"],
       color: "text-orange-600",
     },
   ]
@@ -194,14 +194,46 @@ export default function ContactoPage() {
               </Card>
             ))}
 
-            {/* Emergency Contact */}
+            {/* Emergency Contact - Teléfonos de Guardia */}
             <Card className="border-red-200 bg-red-50">
               <CardHeader>
-                <CardTitle className="text-red-800">Emergencias 24hs</CardTitle>
+                <CardTitle className="text-red-800 flex items-center gap-2">
+                  <Phone className="w-5 h-5" />
+                  Emergencias 24hs
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-red-700 font-semibold">📞 (0123) 456-7899</p>
-                <p className="text-red-600 text-sm mt-1">Para cortes de luz, fugas de gas o emergencias técnicas</p>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Ambulancia</p>
+                  <a href="tel:+543521406183" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 406183
+                  </a>
+                </div>
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Eléctrica</p>
+                  <a href="tel:+543521406186" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 406186
+                  </a>
+                </div>
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Internet</p>
+                  <a href="tel:+543521438313" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 438313
+                  </a>
+                </div>
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Administración</p>
+                  <a href="tel:+54352140130" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 40130
+                  </a>
+                </div>
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Sepelio</p>
+                  <a href="tel:+543521406189" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 406189
+                  </a>
+                </div>
+                <p className="text-red-600 text-xs mt-3 pt-3 border-t border-red-200">Disponibles las 24 horas, los 7 días de la semana</p>
               </CardContent>
             </Card>
           </div>
@@ -219,7 +251,8 @@ export default function ContactoPage() {
                 <div className="text-center text-gray-500">
                   <MapPin className="w-12 h-12 mx-auto mb-2" />
                   <p className="text-lg font-medium">Mapa Interactivo</p>
-                  <p className="text-sm">Av. Principal 123, La Dormida</p>
+                  <p className="text-sm">Av. Perón 557 - CP 5244</p>
+                  <p className="text-sm">Córdoba, San José de la Dormida</p>
                   <p className="text-xs mt-2">(Aquí se integraría Google Maps o similar)</p>
                 </div>
               </div>

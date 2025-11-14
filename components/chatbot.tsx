@@ -96,7 +96,7 @@ export default function Chatbot() {
     }
 
     if (lowerInput.includes("horario") || lowerInput.includes("atención") || lowerInput.includes("atencion")) {
-      return "Nuestro horario de atención presencial es de lunes a viernes de 8:00 a 17:00 horas. Sin embargo, este asistente virtual está disponible 24/7 para ayudarte con tus consultas."
+      return "Nuestro horario de atención presencial es de lunes a viernes de 7:00 a 12:00 horas. Sin embargo, este asistente virtual está disponible 24/7 para ayudarte con tus consultas. Para emergencias, puedes contactar nuestros números de guardia 24/7 que encontrarás en la sección de Teléfonos de Guardia."
     }
 
     if (lowerInput.includes("hola") || lowerInput.includes("buenos días") || lowerInput.includes("buenas tardes") || lowerInput.includes("buenas noches")) {

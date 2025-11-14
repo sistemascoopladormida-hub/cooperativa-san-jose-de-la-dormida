@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function HomePage() {
@@ -894,6 +894,211 @@ export default function HomePage() {
                 </Link>
               </motion.div>
             </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Teléfonos de Guardia Section - Prominent and Accessible */}
+      <motion.section 
+        className="py-16 lg:py-20 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 relative overflow-hidden border-t-4 border-red-500"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-red-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 rounded-full mb-4">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-sm font-bold text-red-700">EMERGENCIAS 24/7</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Teléfonos de Guardia
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Contacta con nuestros servicios de guardia las 24 horas del día, los 7 días de la semana
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Ambulancia */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group"
+            >
+              <Card className="h-full border-2 border-red-200 bg-white hover:border-red-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-red-100 to-red-200 group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300">
+                      <Heart className="w-8 h-8 text-red-600" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Ambulancia</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <a 
+                    href="tel:+543521406183" 
+                    className="text-2xl font-bold text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 406183
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Eléctrica */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group"
+            >
+              <Card className="h-full border-2 border-yellow-200 bg-white hover:border-yellow-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-100 to-yellow-200 group-hover:from-yellow-200 group-hover:to-yellow-300 transition-all duration-300">
+                      <ZapIcon className="w-8 h-8 text-yellow-600" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Eléctrica</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <a 
+                    href="tel:+543521406186" 
+                    className="text-2xl font-bold text-yellow-600 hover:text-yellow-700 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 406186
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Internet */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group"
+            >
+              <Card className="h-full border-2 border-blue-200 bg-white hover:border-blue-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
+                      <WifiIcon className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Internet</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <a 
+                    href="tel:+543521438313" 
+                    className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 438313
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Administración */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group"
+            >
+              <Card className="h-full border-2 border-green-200 bg-white hover:border-green-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 group-hover:from-green-200 group-hover:to-green-300 transition-all duration-300">
+                      <Building2 className="w-8 h-8 text-green-600" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Administración</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <a 
+                    href="tel:+54352140130" 
+                    className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 40130
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Sepelio */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group sm:col-span-2 lg:col-span-1"
+            >
+              <Card className="h-full border-2 border-gray-200 bg-white hover:border-gray-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300 transition-all duration-300">
+                      <FileText className="w-8 h-8 text-gray-600" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Sepelio</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <a 
+                    href="tel:+543521406189" 
+                    className="text-2xl font-bold text-gray-600 hover:text-gray-700 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 406189
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Call to action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="text-center mt-12"
+          >
+            <p className="text-gray-600 text-lg mb-4">
+              <span className="font-semibold text-red-600">¿Emergencia?</span> No dudes en contactarnos
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+              <Clock className="w-4 h-4" />
+              <span>Disponibles las 24 horas, los 7 días de la semana</span>
+            </div>
           </motion.div>
         </div>
       </motion.section>
