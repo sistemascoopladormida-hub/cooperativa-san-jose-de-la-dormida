@@ -258,6 +258,7 @@ export default function Chatbot() {
                 </motion.div>
               )}
 
+
               <AnimatePresence mode="popLayout">
                 {messages.map((message) => (
                   <motion.div
