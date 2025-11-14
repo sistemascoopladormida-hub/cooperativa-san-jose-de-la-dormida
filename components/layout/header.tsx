@@ -137,7 +137,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   >
                     <User className="w-4 h-4" />
                     <span className="max-w-24 truncate">{userName || "Usuario"}</span>
-                    {isPFC && <ShieldCheck className="w-4 h-4 text-blue-500 animate-pulse" title="Usuario PFC" />}
+                    {isPFC && <ShieldCheck className="w-4 h-4 text-blue-500 animate-pulse" />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 shadow-xl border-gray-200">
@@ -154,11 +154,16 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="group">
+              <a 
+                href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group"
+              >
                 <Button className="hidden lg:flex bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg">
-                  Iniciar Sesión
+                  Pagar Factura
                 </Button>
-              </Link>
+              </a>
             )}
 
             {/* Mobile Menu Button - Enhanced */}
@@ -261,11 +266,17 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     </button>
                   </div>
                 ) : (
-                  <Link href="/login" className="block mx-2" onClick={() => setIsMenuOpen(false)}>
+                  <a 
+                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block mx-2" 
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                      Iniciar Sesión
+                      Pagar Factura
                     </Button>
-                  </Link>
+                  </a>
                 )}
               </div>
             </nav>

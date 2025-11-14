@@ -156,7 +156,7 @@ export default function HomePage() {
                 >
                   Bienvenido a la
                   <motion.span 
-                    className="text-coop-orange block mt-2 bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
+                    className="text-coop-orange block bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
@@ -164,7 +164,7 @@ export default function HomePage() {
                     Cooperativa
                   </motion.span>
                   <motion.span 
-                    className="block mt-2"
+                    className="block"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.8 }}
@@ -192,12 +192,17 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Link href="/login" className="group">
+                  <a 
+                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
                     <Button 
                       size="lg" 
                       className="bg-coop-orange text-white hover:bg-coop-orange/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
-                      Área Socios
+                      Pagar Factura
                       <motion.span
                         className="inline-block ml-2"
                         whileHover={{ x: 5 }}
@@ -206,7 +211,7 @@ export default function HomePage() {
                         <ArrowRight className="w-5 h-5" />
                       </motion.span>
                     </Button>
-                  </Link>
+                  </a>
                 </motion.div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -216,7 +221,7 @@ export default function HomePage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                      className="border-2 border-white/30 bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
                       Asociarse
                       <motion.span
@@ -239,7 +244,7 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: 1.4 }}
               >
                 {[
-                  { value: "5,000+", label: "Familias" },
+                  { value: "2,500+", label: "Familias" },
                   { value: "50+", label: "Años" },
                   { value: "24/7", label: "Atención" },
                 ].map((stat, index) => (
@@ -589,7 +594,7 @@ export default function HomePage() {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Únete a nuestra familia</h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      Más de 5,000 familias confían en nosotros para sus servicios esenciales.
+                      Más de 2,500 familias confían en nosotros para sus servicios esenciales.
                     </p>
                     <Link href="/asociarse" className="block">
                       <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -876,7 +881,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
+                    className="border-2 border-white/30 bg-white/20 backdrop-blur-sm text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
                   >
                     <motion.div
                       className="inline-flex items-center"
