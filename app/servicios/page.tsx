@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Shield, Users, ArrowRight, CheckCircle, Star, Clock, Phone } from "lucide-react"
+import { Zap, Wifi, Tv, Shield, Users, ArrowRight, CheckCircle, Star, Clock, Phone, ShieldCheck, PhoneCall } from "lucide-react"
 
 export default function ServiciosPage() {
   const mainServices = [
@@ -52,22 +52,51 @@ export default function ServiciosPage() {
       bgGradient: "from-purple-50 to-purple-100/50",
     },
     {
-      icon: Heart,
-      title: "Farmacia Social",
-      description: "Medicamentos y productos de salud a precios accesibles",
+      icon: ShieldCheck,
+      title: "Programa PFC",
+      description: "Cobertura integral de salud y acompañamiento para toda la familia",
       features: [
-        "Descuentos especiales para socios",
-        "Medicamentos genéricos",
-        "Atención farmacéutica profesional",
-        "Entrega a domicilio",
+        "Traslados en ambulancia para urgencias",
+        "Servicio de sepelio completo",
+        "Análisis clínicos y estudios de laboratorio",
+        "Servicio óptico (un par por año)",
+        "Elementos ortopédicos",
+        "Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, psicología y diabetología",
+        "Taller interdisciplinario (fonoaudiología, psicopedagogía, psicología y maestra integradora) para niños y adultos mayores con dificultades de aprendizaje, TEA y otras condiciones",
       ],
-      price: "Descuentos hasta 40%",
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
-      bgGradient: "from-red-50 to-red-100/50",
+      price: "Incluido para socios PFC",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      borderColor: "border-emerald-200",
+      bgGradient: "from-emerald-50 to-emerald-100/50",
     },
   ]
+
+  const guardContacts: Record<
+    string,
+    { label: string; phoneDisplay: string; phoneHref: string }
+  > = {
+    Electricidad: {
+      label: "Guardia Eléctrica 24/7",
+      phoneDisplay: "3521 406186",
+      phoneHref: "+543521406186",
+    },
+    Internet: {
+      label: "Guardia Internet 24/7",
+      phoneDisplay: "3521 438313",
+      phoneHref: "+543521438313",
+    },
+    Televisión: {
+      label: "Soporte Técnico / Administración",
+      phoneDisplay: "3521 40130",
+      phoneHref: "+54352140130",
+    },
+    "Programa PFC": {
+      label: "Urgencias Ambulancia PFC",
+      phoneDisplay: "3521 406183",
+      phoneHref: "+543521406183",
+    },
+  }
 
   const socialServices = [
     {
@@ -163,7 +192,9 @@ export default function ServiciosPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-            {mainServices.map((service, index) => (
+            {mainServices.map((service, index) => {
+              const guard = guardContacts[service.title as keyof typeof guardContacts]
+              return (
               <Card 
                 key={index} 
                 className={`group ${service.borderColor} border-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden relative bg-white`}
@@ -209,6 +240,21 @@ export default function ServiciosPage() {
                       </li>
                     ))}
                   </ul>
+                  {guard && (
+                    <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-coop-green/30 bg-coop-green/5 px-4 py-3">
+                      <div>
+                        <p className="text-xs font-semibold text-coop-green uppercase tracking-wide">Guardia 24/7</p>
+                        <p className="text-sm text-gray-700 font-semibold">{guard.label}</p>
+                      </div>
+                      <a
+                        href={`tel:${guard.phoneHref}`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-coop-green shadow-sm transition-all hover:bg-coop-green/10"
+                      >
+                        <PhoneCall className="w-4 h-4" />
+                        {guard.phoneDisplay}
+                      </a>
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn text-white">
                       Contratar Servicio
@@ -220,7 +266,8 @@ export default function ServiciosPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

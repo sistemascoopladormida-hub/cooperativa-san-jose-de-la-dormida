@@ -20,6 +20,7 @@ import {
   Heart,
   ShieldCheck,
   ArrowRight,
+  Users,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -38,8 +39,10 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/", label: "Inicio", icon: Home },
     { href: "/servicios", label: "Servicios", icon: Zap },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
+    { href: "/autoridades", label: "Autoridades", icon: Users },
     { href: "/contacto", label: "Contacto", icon: Phone },
     { href: "/asociarse", label: "Asociarse", icon: UserPlus },
+
   ]
 
   const privateMenuItems = [
@@ -49,6 +52,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/reclamos", label: "Reclamos", icon: MessageSquare },
     { href: "/beneficios", label: "Beneficios", icon: Gift },
     { href: "/farmacia", label: "Farmacia", icon: Heart },
+    { href: "/autoridades", label: "Autoridades", icon: Users },
   ]
 
   const menuItems = isLoggedIn ? privateMenuItems : publicMenuItems

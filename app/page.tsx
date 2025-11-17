@@ -33,11 +33,11 @@ export default function HomePage() {
       bgGradient: "from-purple-50 to-purple-100/50",
     },
     {
-      icon: Heart,
-      title: "Farmacia Social",
-      description: "Medicamentos a precios accesibles para socios",
-      color: "text-red-600",
-      bgGradient: "from-red-50 to-red-100/50",
+      icon: ShieldCheck,
+      title: "Programa PFC",
+      description: "Cobertura integral en salud: ambulancia, sepelio, análisis, óptica y consultorios especializados",
+      color: "text-emerald-600",
+      bgGradient: "from-emerald-50 to-emerald-100/50",
     },
   ]
 

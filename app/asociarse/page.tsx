@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Users,
   Shield,
-  Heart,
+  ShieldCheck,
   Zap,
   Wifi,
   Tv,
@@ -57,9 +57,9 @@ export default function AsociarsePage() {
       description: "Cobertura completa para ti y tu familia",
     },
     {
-      icon: Heart,
-      title: "Farmacia Social",
-      description: "Medicamentos a precios reducidos",
+      icon: ShieldCheck,
+      title: "Programa PFC",
+      description: "Cobertura integral: ambulancia, sepelio, óptica y consultorios especializados",
     },
     {
       icon: Star,
@@ -82,7 +82,7 @@ export default function AsociarsePage() {
     { id: "electricidad", name: "Electricidad", icon: Zap },
     { id: "internet", name: "Internet", icon: Wifi },
     { id: "television", name: "Televisión", icon: Tv },
-    { id: "farmacia", name: "Farmacia Social", icon: Heart },
+    { id: "pfc", name: "Programa PFC", icon: ShieldCheck },
   ]
 
   const handleServiceChange = (serviceId: string, checked: boolean) => {
