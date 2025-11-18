@@ -25,6 +25,7 @@ import {
   Calendar,
   Send,
   FileText,
+  Heart,
 } from "lucide-react"
 
 export default function AsociarsePage() {
@@ -83,6 +84,7 @@ export default function AsociarsePage() {
     { id: "internet", name: "Internet", icon: Wifi },
     { id: "television", name: "Televisión", icon: Tv },
     { id: "pfc", name: "Programa PFC", icon: ShieldCheck },
+    { id: "farmacia", name: "Farmacia Social", icon: Heart },
   ]
 
   const handleServiceChange = (serviceId: string, checked: boolean) => {

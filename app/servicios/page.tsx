@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Shield, Users, ArrowRight, CheckCircle, Star, Clock, Phone, ShieldCheck, PhoneCall } from "lucide-react"
+import { Zap, Wifi, Tv, Shield, Users, ArrowRight, CheckCircle, Star, Clock, Phone, ShieldCheck, PhoneCall, Heart } from "lucide-react"
 
 export default function ServiciosPage() {
   const mainServices = [
@@ -69,6 +69,22 @@ export default function ServiciosPage() {
       bgColor: "bg-emerald-50",
       borderColor: "border-emerald-200",
       bgGradient: "from-emerald-50 to-emerald-100/50",
+    },
+    {
+      icon: Heart,
+      title: "Farmacia Social",
+      description: "Medicamentos y perfumería con beneficios exclusivos para socios",
+      features: [
+        "3 cuotas sin interés con tarjetas bancarizadas",
+        "10% de descuento en compra de contado en medicamentos o perfumería",
+        "Aceptamos obras sociales: PAMI, APROSS, UNIMED",
+        "Bono solidario aceptado",
+      ],
+      price: "Beneficios exclusivos",
+      color: "text-pink-600",
+      bgColor: "bg-pink-50",
+      borderColor: "border-pink-200",
+      bgGradient: "from-pink-50 to-pink-100/50",
     },
   ]
 

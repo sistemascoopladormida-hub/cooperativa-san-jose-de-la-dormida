@@ -2,12 +2,234 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
+
+type Service = {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
+  color: string
+  bgGradient: string
+}
+
+function ServicesCarousel({ services }: { services: Service[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+
+  const checkScrollButtons = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
+    }
+  }
+
+  useEffect(() => {
+    // Verificar después de que el componente se monte
+    const timer = setTimeout(() => {
+      checkScrollButtons()
+    }, 100)
+    
+    const scrollElement = scrollRef.current
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', checkScrollButtons)
+      window.addEventListener('resize', checkScrollButtons)
+    }
+    return () => {
+      clearTimeout(timer)
+      if (scrollElement) {
+        scrollElement.removeEventListener('scroll', checkScrollButtons)
+      }
+      window.removeEventListener('resize', checkScrollButtons)
+    }
+  }, [])
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = scrollRef.current.clientWidth * 0.8
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      })
+    }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scrollRef.current) {
+      setIsDragging(true)
+      const rect = scrollRef.current.getBoundingClientRect()
+      setStartX(e.pageX - rect.left)
+      setScrollLeft(scrollRef.current.scrollLeft)
+      scrollRef.current.style.cursor = 'grabbing'
+      scrollRef.current.style.userSelect = 'none'
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setIsDragging(false)
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grab'
+      scrollRef.current.style.userSelect = 'auto'
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grab'
+      scrollRef.current.style.userSelect = 'auto'
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return
+    e.preventDefault()
+    const rect = scrollRef.current.getBoundingClientRect()
+    const x = e.pageX - rect.left
+    const walk = (x - startX) * 2
+    scrollRef.current.scrollLeft = scrollLeft - walk
+  }
+
+  // Prevenir el drag cuando se hace click en un link o botón
+  const handleCardMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest('a') || target.closest('button')) {
+      e.stopPropagation()
+    }
+  }
+
+  return (
+    <div className="mb-12 relative -mx-4 px-4 lg:px-16">
+      {/* Botón izquierdo - Solo visible en desktop */}
+      {canScrollLeft && (
+        <Button
+          onClick={() => scroll('left')}
+          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border-2 border-coop-green/20 hover:border-coop-green/40 transition-all hover:scale-110"
+          aria-label="Scroll izquierda"
+        >
+          <ChevronLeft className="w-6 h-6 text-coop-green" />
+        </Button>
+      )}
+
+      {/* Botón derecho - Solo visible en desktop */}
+      {canScrollRight && (
+        <Button
+          onClick={() => scroll('right')}
+          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border-2 border-coop-green/20 hover:border-coop-green/40 transition-all hover:scale-110"
+          aria-label="Scroll derecha"
+        >
+          <ChevronRight className="w-6 h-6 text-coop-green" />
+        </Button>
+      )}
+
+      <motion.div
+        ref={scrollRef}
+        className="flex gap-6 lg:gap-8 overflow-x-auto pb-4 scrollbar-horizontal scroll-smooth cursor-grab active:cursor-grabbing"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.15,
+            },
+          },
+        }}
+      >
+        {services.map((service, index) => (
+          <motion.div
+            key={index}
+            className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[300px]"
+            variants={{
+              hidden: { opacity: 0, y: 50, scale: 0.9 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15,
+                },
+              },
+            }}
+            whileHover={{
+              y: -8,
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
+            <Card
+              className="group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-coop-green/20 overflow-hidden relative bg-white h-full"
+              onMouseDown={handleCardMouseDown}
+            >
+              {/* Service image placeholder */}
+              {/* TODO: Agregar imagen de servicio desktop: /images/service-{service.title.toLowerCase()}-desktop.jpg - Dimensiones: 600x400px */}
+              <div className="hidden lg:block relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
+                <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+              </div>
+
+              {/* Service image placeholder - Mobile */}
+              {/* TODO: Agregar imagen de servicio mobile: /images/service-{service.title.toLowerCase()}-mobile.jpg - Dimensiones: 400x300px */}
+              <div className="lg:hidden relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
+                <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
+              </div>
+
+              <CardHeader className="text-center pb-4">
+                <div className="mb-4 flex justify-center">
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${service.bgGradient} group-hover:scale-110 transition-transform duration-300`}>
+                    <service.icon className={`w-8 h-8 ${service.color}`} />
+                  </div>
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-coop-green transition-colors">
+                  {service.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="text-center text-gray-600 leading-relaxed">
+                  {service.description}
+                </CardDescription>
+                <div className="mt-6 flex justify-center">
+                  <Link href={`/servicios#${service.title.toLowerCase()}`} className="group/link">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-coop-green hover:text-white hover:bg-coop-green group-hover/link:gap-2"
+                    >
+                      Más info
+                      <ArrowRight className="ml-1 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
 
 export default function HomePage() {
   const services = [
@@ -38,6 +260,13 @@ export default function HomePage() {
       description: "Cobertura integral en salud: ambulancia, sepelio, análisis, óptica y consultorios especializados",
       color: "text-emerald-600",
       bgGradient: "from-emerald-50 to-emerald-100/50",
+    },
+    {
+      icon: Heart,
+      title: "Farmacia Social",
+      description: "Medicamentos y perfumería con 3 cuotas sin interés y 10% de descuento en efectivo",
+      color: "text-pink-600",
+      bgGradient: "from-pink-50 to-pink-100/50",
     },
   ]
 
@@ -352,91 +581,7 @@ export default function HomePage() {
             </motion.p>
           </motion.div>
 
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.15,
-                },
-              },
-            }}
-          >
-            {services.map((service, index) => (
-              <motion.div
-                key={index}
-                variants={{
-                  hidden: { opacity: 0, y: 50, scale: 0.9 },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: {
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15,
-                    },
-                  },
-                }}
-                whileHover={{ 
-                  y: -8, 
-                  scale: 1.02,
-                  transition: { duration: 0.2 }
-                }}
-              >
-                <Card 
-                  className="group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-coop-green/20 overflow-hidden relative bg-white h-full"
-                >
-                {/* Service image placeholder */}
-                {/* TODO: Agregar imagen de servicio desktop: /images/service-{service.title.toLowerCase()}-desktop.jpg - Dimensiones: 600x400px */}
-                <div className="hidden lg:block relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
-                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
-                </div>
-                
-                {/* Service image placeholder - Mobile */}
-                {/* TODO: Agregar imagen de servicio mobile: /images/service-{service.title.toLowerCase()}-mobile.jpg - Dimensiones: 400x300px */}
-                <div className="lg:hidden relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${service.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity`}></div>
-                  <service.icon className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${service.color} opacity-20 group-hover:opacity-30 transition-opacity`} />
-                </div>
-                
-                <CardHeader className="text-center pb-4">
-                  <div className="mb-4 flex justify-center">
-                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${service.bgGradient} group-hover:scale-110 transition-transform duration-300`}>
-                      <service.icon className={`w-8 h-8 ${service.color}`} />
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-coop-green transition-colors">
-                    {service.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <CardDescription className="text-center text-gray-600 leading-relaxed">
-                    {service.description}
-                  </CardDescription>
-                  <div className="mt-6 flex justify-center">
-                    <Link href={`/servicios#${service.title.toLowerCase()}`} className="group/link">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-coop-green hover:text-white hover:bg-coop-green group-hover/link:gap-2"
-                      >
-                        Más info
-                        <ArrowRight className="ml-1 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+          <ServicesCarousel services={services} />
 
           <motion.div 
             className="text-center"

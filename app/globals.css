@@ -81,6 +81,30 @@ body {
   .slide-in-from-bottom-2 {
     animation: slide-in-from-bottom 0.3s ease-out;
   }
+  
+  /* Custom horizontal scrollbar */
+  .scrollbar-horizontal {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
+  }
+  
+  .scrollbar-horizontal::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .scrollbar-horizontal::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 0.5);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-horizontal::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
+  }
 }
 
 @layer base {
