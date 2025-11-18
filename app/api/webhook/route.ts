@@ -6,9 +6,11 @@ import OpenAI from 'openai'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Inicializar OpenAI
+// Inicializar OpenAI con timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 25000, // 25 segundos (Vercel tiene límite de 30s en funciones)
+  maxRetries: 1,
 })
 
 // Contexto de la Cooperativa La Dormida
@@ -80,18 +82,39 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       { role: 'user' as const, content: userMessage },
     ]
 
-    console.log('CHATBOT_CALLING_OPENAI:', { from, messagesCount: messages.length })
+    console.log('CHATBOT_CALLING_OPENAI:', { 
+      from, 
+      messagesCount: messages.length,
+      timestamp: new Date().toISOString()
+    })
 
-    const completion = await openai.chat.completions.create({
+    // Crear promise con timeout manual para mejor control
+    const startTime = Date.now()
+    
+    const completionPromise = openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
     })
 
+    // Timeout de 20 segundos
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('OpenAI request timeout after 20 seconds'))
+      }, 20000)
+    })
+
+    console.log('CHATBOT_AWAITING_OPENAI:', { from, timestamp: new Date().toISOString() })
+
+    const completion = await Promise.race([completionPromise, timeoutPromise]) as any
+
+    const elapsedTime = Date.now() - startTime
     console.log('CHATBOT_OPENAI_RESPONSE:', { 
       from, 
-      hasResponse: !!completion.choices[0]?.message?.content 
+      hasResponse: !!completion.choices?.[0]?.message?.content,
+      elapsedTime: `${elapsedTime}ms`,
+      timestamp: new Date().toISOString()
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -112,9 +135,23 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     console.error('CHATBOT_ERROR:', {
       from,
       error: error.message,
-      errorType: error.constructor?.name,
+      errorName: error.name,
+      errorType: error.constructor?.name || typeof error,
       status: error.status || error.response?.status,
+      code: error.code,
+      stack: error.stack?.substring(0, 200),
+      timestamp: new Date().toISOString()
     })
+    
+    // Si es un error de OpenAI, loggear más detalles
+    if (error.response) {
+      console.error('CHATBOT_OPENAI_ERROR_DETAILS:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      })
+    }
+    
     return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
   }
 }
@@ -236,9 +273,17 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ status: 'received' })
 
     // Procesar eventos de forma asíncrona
+    // IMPORTANTE: En Vercel, el proceso puede cortarse si tarda mucho
+    // Por eso respondemos primero y luego procesamos
     processWebhookEvents(body).catch(error => {
-      console.error('WEBHOOK_PROCESSING_ERROR:', error)
+      console.error('WEBHOOK_PROCESSING_ERROR:', {
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      })
     })
+    
+    console.log('WEBHOOK_RESPONSE_SENT:', { timestamp: new Date().toISOString() })
 
     return response
   } catch (error: any) {
@@ -251,23 +296,38 @@ export async function POST(request: NextRequest) {
  * Procesa los eventos recibidos del webhook
  */
 async function processWebhookEvents(body: any): Promise<void> {
+  console.log('PROCESS_WEBHOOK_EVENTS_START:', { timestamp: new Date().toISOString() })
+  
   if (!body.entry || !Array.isArray(body.entry)) {
+    console.log('PROCESS_WEBHOOK_EVENTS: No entries found')
     return
   }
 
-  for (const entry of body.entry) {
-    const changes = entry.changes || []
+  try {
+    for (const entry of body.entry) {
+      const changes = entry.changes || []
 
-    for (const change of changes) {
-      const value = change.value
+      for (const change of changes) {
+        const value = change.value
 
-      // Procesar mensajes entrantes
-      if (value.messages && Array.isArray(value.messages)) {
-        for (const message of value.messages) {
-          await processIncomingMessage(message)
+        // Procesar mensajes entrantes
+        if (value.messages && Array.isArray(value.messages)) {
+          for (const message of value.messages) {
+            console.log('PROCESSING_MESSAGE:', { from: message.from, type: message.type })
+            await processIncomingMessage(message)
+            console.log('MESSAGE_PROCESSED:', { from: message.from })
+          }
         }
       }
     }
+    console.log('PROCESS_WEBHOOK_EVENTS_COMPLETE:', { timestamp: new Date().toISOString() })
+  } catch (error: any) {
+    console.error('PROCESS_WEBHOOK_EVENTS_ERROR:', {
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    })
+    throw error
   }
 }
 
