@@ -108,13 +108,21 @@ const conversationHistory = new Map<string, Array<{ role: 'user' | 'assistant'; 
  * @returns Respuesta del chatbot
  */
 async function getChatbotResponse(from: string, userMessage: string): Promise<string> {
+  console.log('GET_CHATBOT_RESPONSE_START:', {
+    from,
+    messageLength: userMessage.length,
+    hasOpenAIKey: !!process.env.OPENAI_API_KEY
+  })
+
   if (!process.env.OPENAI_API_KEY) {
+    console.error('CHATBOT_ERROR: OPENAI_API_KEY no configurada')
     return 'Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.'
   }
 
   try {
     // Obtener historial de conversación (últimos 10 mensajes)
     const history = conversationHistory.get(from) || []
+    console.log('CHATBOT_HISTORY:', { from, historyLength: history.length })
     
     // Construir mensaje del sistema con contexto
     const systemMessage = {
@@ -133,11 +141,23 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       { role: 'user' as const, content: userMessage },
     ]
 
+    console.log('CHATBOT_CALLING_OPENAI:', {
+      from,
+      messagesCount: messages.length,
+      model: 'gpt-4o-mini'
+    })
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
+    })
+
+    console.log('CHATBOT_OPENAI_RESPONSE:', {
+      from,
+      hasResponse: !!completion.choices[0]?.message?.content,
+      usage: completion.usage
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -151,9 +171,21 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
 
     conversationHistory.set(from, updatedHistory)
 
+    console.log('CHATBOT_RESPONSE_READY:', {
+      from,
+      responseLength: response.length,
+      historyUpdated: true
+    })
+
     return response
   } catch (error: any) {
-    console.error('CHATBOT_ERROR:', error)
+    console.error('CHATBOT_ERROR:', {
+      from,
+      error: error.message,
+      errorType: error.constructor.name,
+      stack: error.stack,
+      response: error.response?.data || 'No response data'
+    })
     return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
   }
 }
@@ -218,12 +250,32 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
   const token = process.env.WHATSAPP_TOKEN
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
+  console.log('SEND_TEXT_MESSAGE_CALLED:', {
+    to,
+    textLength: text.length,
+    hasToken: !!token,
+    hasPhoneId: !!phoneId,
+    phoneId: phoneId ? `${phoneId.substring(0, 4)}...` : 'undefined',
+    apiVersion: WHATSAPP_API_VERSION
+  })
+
   if (!token || !phoneId) {
-    console.error('SEND_MESSAGE_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados')
+    console.error('SEND_MESSAGE_ERROR: Variables de entorno faltantes', {
+      hasToken: !!token,
+      hasPhoneId: !!phoneId,
+      tokenLength: token?.length || 0,
+      phoneIdLength: phoneId?.length || 0
+    })
     return { success: false, error: 'Configuración faltante' }
   }
 
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`
+
+  console.log('SENDING_TO_WHATSAPP_API:', {
+    url: url.replace(phoneId, `${phoneId.substring(0, 4)}...`),
+    to,
+    textLength: text.length
+  })
 
   try {
     const response = await fetch(url, {
@@ -249,8 +301,13 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
     if (!response.ok) {
       console.error('SEND_MESSAGE_ERROR:', {
         status: response.status,
+        statusText: response.statusText,
         error: data.error || data,
+        errorCode: data.error?.code,
+        errorType: data.error?.type,
+        errorSubcode: data.error?.error_subcode,
         to,
+        url: url.replace(phoneId, `${phoneId.substring(0, 4)}...`)
       })
       return { success: false, error: data.error?.message || 'Error desconocido' }
     }
@@ -567,11 +624,30 @@ async function processWebhookEvents(body: any): Promise<void> {
     return
   }
 
+  // Verificar variables de entorno al inicio
+  const phoneIdFromEnv = process.env.WHATSAPP_PHONE_NUMBER_ID
+  console.log('WEBHOOK_PROCESSING_START:', {
+    hasPhoneIdEnv: !!phoneIdFromEnv,
+    phoneIdEnv: phoneIdFromEnv ? `${phoneIdFromEnv.substring(0, 4)}...` : 'undefined',
+    hasToken: !!process.env.WHATSAPP_TOKEN,
+    hasOpenAIKey: !!process.env.OPENAI_API_KEY
+  })
+
   for (const entry of body.entry) {
     const changes = entry.changes || []
 
     for (const change of changes) {
       const value = change.value
+      
+      // Verificar que el phone_number_id del webhook coincida con la variable de entorno
+      const phoneIdFromWebhook = value.metadata?.phone_number_id
+      if (phoneIdFromWebhook && phoneIdFromEnv && phoneIdFromWebhook !== phoneIdFromEnv) {
+        console.warn('WEBHOOK_WARNING: phone_number_id no coincide', {
+          webhookPhoneId: phoneIdFromWebhook,
+          envPhoneId: phoneIdFromEnv,
+          message: 'El phone_number_id del webhook no coincide con WHATSAPP_PHONE_NUMBER_ID'
+        })
+      }
 
       // Procesar mensajes entrantes
       if (value.messages && Array.isArray(value.messages)) {
@@ -745,8 +821,38 @@ async function processTextMessage(from: string, text: string, messageId: string)
 
   // Para todos los demás mensajes, usar el chatbot inteligente (OpenAI)
   console.log('CHATBOT_REQUEST:', { from, text })
-  const chatbotResponse = await getChatbotResponse(from, text)
-  await sendTextMessage(from, chatbotResponse)
+  
+  try {
+    const chatbotResponse = await getChatbotResponse(from, text)
+    console.log('CHATBOT_RESPONSE:', { from, responseLength: chatbotResponse.length, responsePreview: chatbotResponse.substring(0, 50) })
+    
+    const sendResult = await sendTextMessage(from, chatbotResponse)
+    console.log('SEND_RESULT:', sendResult)
+    
+    if (!sendResult.success) {
+      console.error('FAILED_TO_SEND_MESSAGE:', {
+        from,
+        error: sendResult.error,
+        responseLength: chatbotResponse.length
+      })
+    }
+  } catch (error: any) {
+    console.error('CHATBOT_PROCESSING_ERROR:', {
+      from,
+      error: error.message,
+      stack: error.stack
+    })
+    
+    // Intentar enviar mensaje de error al usuario
+    try {
+      await sendTextMessage(
+        from,
+        'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
+      )
+    } catch (sendError) {
+      console.error('FAILED_TO_SEND_ERROR_MESSAGE:', sendError)
+    }
+  }
 }
 
 /**
