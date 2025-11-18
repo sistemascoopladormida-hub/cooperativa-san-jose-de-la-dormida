@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
 
+// Configuración para Next.js 15 - necesario para leer el body como texto
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // Inicializar OpenAI para el chatbot
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
