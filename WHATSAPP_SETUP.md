@@ -16,7 +16,7 @@ WHATSAPP_VERIFY_TOKEN=tu_token_secreto_aqui
 WHATSAPP_TOKEN=EAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Phone Number ID de WhatsApp (obtenido de Meta Business)
-WHATSAPP_PHONE_ID=123456789012345
+WHATSAPP_PHONE_NUMBER_ID=123456789012345
 
 # App Secret de WhatsApp (opcional pero recomendado para verificación HMAC)
 WHATSAPP_APP_SECRET=tu_app_secret_aqui
@@ -29,7 +29,7 @@ WHATSAPP_APP_SECRET=tu_app_secret_aqui
 3. **Agrega el producto "WhatsApp"** a tu app
 4. **Obtén las credenciales**:
    - **WHATSAPP_TOKEN**: Access Token (puede ser temporal o permanente)
-   - **WHATSAPP_PHONE_ID**: Phone Number ID (en la sección de WhatsApp)
+   - **WHATSAPP_PHONE_NUMBER_ID**: Phone Number ID (en la sección de WhatsApp)
    - **WHATSAPP_APP_SECRET**: App Secret (en Configuración > Básico)
    - **WHATSAPP_VERIFY_TOKEN**: Crea uno tú mismo (cualquier string seguro)
 
@@ -79,7 +79,7 @@ Usa la herramienta de pruebas de Meta Business o envía un mensaje real desde Wh
 - Verifica que `WHATSAPP_APP_SECRET` esté correctamente configurado
 - O remueve la verificación de firma (solo para desarrollo)
 
-### Error: "WHATSAPP_TOKEN o WHATSAPP_PHONE_ID no configurados"
+### Error: "WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados"
 - Verifica que ambas variables estén configuradas
 - Verifica que el token tenga permisos para enviar mensajes
 

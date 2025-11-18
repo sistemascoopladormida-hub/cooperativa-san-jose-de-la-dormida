@@ -168,12 +168,12 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
  * Variables de entorno requeridas:
  * - WHATSAPP_VERIFY_TOKEN: Token para verificar el webhook
  * - WHATSAPP_TOKEN: Access Token de WhatsApp Cloud API
- * - WHATSAPP_PHONE_ID: Phone Number ID
+ * - WHATSAPP_PHONE_NUMBER_ID: Phone Number ID
  * - WHATSAPP_APP_SECRET: (Opcional) Secret para verificar firma HMAC
  * - FACTURAS_DIR: (Opcional) Ruta donde están las facturas locales
  */
 
-const WHATSAPP_API_VERSION = 'v21.0'
+const WHATSAPP_API_VERSION = 'v22.0'
 
 /**
  * Verifica la firma HMAC del webhook para asegurar que viene de Meta
@@ -216,10 +216,10 @@ function verifySignature(rawBody: string, signatureHeader: string | null): boole
  */
 async function sendTextMessage(to: string, text: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN
-  const phoneId = process.env.WHATSAPP_PHONE_ID
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
   if (!token || !phoneId) {
-    console.error('SEND_MESSAGE_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_ID no configurados')
+    console.error('SEND_MESSAGE_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados')
     return { success: false, error: 'Configuración faltante' }
   }
 
@@ -324,10 +324,10 @@ async function sendDocumentMessage(
   caption?: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN
-  const phoneId = process.env.WHATSAPP_PHONE_ID
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
   if (!token || !phoneId) {
-    console.error('SEND_DOCUMENT_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_ID no configurados')
+    console.error('SEND_DOCUMENT_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados')
     return { success: false, error: 'Configuración faltante' }
   }
 
@@ -780,7 +780,7 @@ async function processTextMessage(from: string, text: string, messageId: string)
  *      }'
  * 
  * 3. Probar sendTextMessage (requiere WHATSAPP_TOKEN):
- *    curl -X POST "https://graph.facebook.com/v21.0/PHONE_ID/messages" \
+ *    curl -X POST "https://graph.facebook.com/v20.0/PHONE_ID/messages" \
  *      -H "Authorization: Bearer WHATSAPP_TOKEN" \
  *      -H "Content-Type: application/json" \
  *      -d '{
