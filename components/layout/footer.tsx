@@ -281,9 +281,9 @@ export default function Footer() {
               &copy; {new Date().getFullYear()} Cooperativa La Dormida. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-6 text-sm text-green-100">
-              <a href="#" className="hover:text-coop-orange transition-colors">Política de Privacidad</a>
+              <Link href="/politicadeprivacidad" className="hover:text-coop-orange transition-colors">Política de Privacidad</Link>
               <span className="text-white/30">|</span>
-              <a href="#" className="hover:text-coop-orange transition-colors">Términos y Condiciones</a>
+              <Link href="/condicionesdeservicios" className="hover:text-coop-orange transition-colors">Términos y Condiciones</Link>
             </div>
           </div>
         </div>
