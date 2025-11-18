@@ -5,6 +5,7 @@ import OpenAI from 'openai'
 // Configuración para Next.js 15
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30 // Máximo 30 segundos (Vercel Pro permite hasta 60s)
 
 // Inicializar OpenAI (igual que en /api/chat)
 const openai = new OpenAI({
@@ -80,19 +81,41 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       { role: 'user' as const, content: userMessage },
     ]
 
-    console.log('CHATBOT_CALLING_OPENAI:', { from, messagesCount: messages.length })
+    console.log('CHATBOT_CALLING_OPENAI:', { 
+      from, 
+      messagesCount: messages.length,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7)
+    })
 
     // Llamar a OpenAI exactamente igual que en /api/chat
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 500,
-    })
+    console.log('ABOUT_TO_CALL_OPENAI:', { from, timestamp: Date.now() })
+    
+    let completion
+    try {
+      console.log('CALLING_OPENAI_NOW:', { from })
+      completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 500,
+      })
+      console.log('OPENAI_CALL_SUCCESS:', { from, timestamp: Date.now() })
+    } catch (openaiError: any) {
+      console.error('OPENAI_CALL_FAILED:', {
+        from,
+        error: openaiError.message,
+        status: openaiError.status,
+        code: openaiError.code,
+        timestamp: Date.now()
+      })
+      throw openaiError
+    }
 
     console.log('CHATBOT_OPENAI_RESPONSE:', { 
       from, 
-      hasResponse: !!completion.choices[0]?.message?.content 
+      hasResponse: !!completion.choices[0]?.message?.content,
+      timestamp: Date.now()
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -247,15 +270,21 @@ export async function POST(request: NextRequest) {
     const body = JSON.parse(rawBody)
     console.log('WEBHOOK_RECEIVED')
 
-    // Responder rápidamente a Meta para evitar reintentos
-    const response = NextResponse.json({ status: 'received' })
+    // Procesar primero (igual que /api/chat espera la respuesta)
+    // Meta espera hasta 20 segundos, así que tenemos tiempo
+    try {
+      await processWebhookEvents(body)
+      console.log('WEBHOOK_PROCESSING_COMPLETE')
+    } catch (error: any) {
+      console.error('WEBHOOK_PROCESSING_ERROR:', {
+        error: error.message,
+        stack: error.stack
+      })
+      // Continuar y responder de todas formas
+    }
 
-    // Procesar eventos de forma asíncrona (no bloquea la respuesta)
-    processWebhookEvents(body).catch(error => {
-      console.error('WEBHOOK_PROCESSING_ERROR:', error)
-    })
-
-    return response
+    // Responder a Meta después de procesar
+    return NextResponse.json({ status: 'received' })
   } catch (error: any) {
     console.error('WEBHOOK_ERROR:', error)
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
