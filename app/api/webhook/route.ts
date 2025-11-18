@@ -2,18 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
 
-// Configuración para Next.js 15 - necesario para leer el body como texto
+// Configuración para Next.js 15
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Inicializar OpenAI para el chatbot
+// Inicializar OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30000, // 30 segundos de timeout
-  maxRetries: 2,
 })
 
-// Contexto de la Cooperativa La Dormida (mismo que usa el chatbot web)
+// Contexto de la Cooperativa La Dormida
 const cooperativeContext = `
 INFORMACIÓN SOBRE COOPERATIVA LA DORMIDA:
 
@@ -33,61 +31,10 @@ TELÉFONOS DE GUARDIA 24/7:
 - Sepelio: 3521 406189
 
 SERVICIOS OFRECIDOS:
-1. Electricidad:
-   - Suministro eléctrico confiable las 24 horas del día
-   - Tarifas preferenciales para socios
-   - Atención técnica 24/7
-   - Medidores inteligentes
-   - Precio: Desde $8,500/mes
-
-2. Internet:
-   - Conexión de alta velocidad con fibra óptica
-   - Velocidades hasta 100 Mbps
-   - Fibra óptica hasta el hogar
-   - Soporte técnico especializado
-   - Sin límite de datos
-   - Precio: Desde $4,200/mes
-
-3. Televisión:
-   - Amplia variedad de canales y entretenimiento
-   - Más de 80 canales
-   - Canales HD incluidos
-   - Programación familiar
-   - Servicio técnico gratuito
-   - Precio: Desde $3,800/mes
-
-4. Programa PFC:
-   - Traslados en ambulancia para urgencias
-   - Servicio de sepelio completo
-   - Análisis clínicos y estudios de laboratorio
-   - Servicio óptico (un par por año)
-   - Elementos ortopédicos
-   - Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, psicología y diabetología
-   - Taller interdisciplinario (fonoaudiología, psicopedagogía, psicología y maestra integradora) para niños y adultos mayores
-
-SERVICIOS SOCIALES:
-- Servicios Fúnebres
-- Eventos Sociales
-- Asesoramiento Legal
-- Descuentos Comerciales
-
-BENEFICIOS PARA SOCIOS:
-- Tarifas preferenciales para socios
-- Atención personalizada y cercana
-- Servicios sociales y beneficios especiales
-- Más de 50 años de experiencia
-- Compromiso con la comunidad local
-- Tecnología moderna y confiable
-
-PAGOS Y FACTURACIÓN:
-- Los socios pueden pagar facturas a través de: https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login
-- Área de socios disponible en la página web
-
-ASOCIARSE:
-- Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
-
-RECLAMOS:
-- Los reclamos se pueden presentar a través de la sección "Reclamos" en la página web o contactando directamente
+1. Electricidad: Suministro eléctrico confiable las 24 horas del día. Tarifas preferenciales para socios. Atención técnica 24/7. Precio: Desde $8,500/mes
+2. Internet: Conexión de alta velocidad con fibra óptica hasta 100 Mbps. Sin límite de datos. Precio: Desde $4,200/mes
+3. Televisión: Más de 80 canales, incluyendo canales HD. Precio: Desde $3,800/mes
+4. Programa PFC: Traslados en ambulancia, servicio de sepelio, análisis clínicos, servicio óptico, consultorios externos
 
 INSTRUCCIONES PARA EL ASISTENTE:
 - Responde de forma amigable, profesional y humana
@@ -99,22 +46,16 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Estás respondiendo por WhatsApp, así que sé breve pero completo
 `
 
-// Almacenamiento de historial de conversación por número de teléfono
-// TODO: En producción, usar base de datos (Redis, PostgreSQL, etc.)
+// Historial de conversación
 const conversationHistory = new Map<string, Array<{ role: 'user' | 'assistant'; content: string }>>()
+
+const WHATSAPP_API_VERSION = 'v22.0'
 
 /**
  * Obtiene respuesta del chatbot usando OpenAI
- * @param from - Número de teléfono del usuario
- * @param userMessage - Mensaje del usuario
- * @returns Respuesta del chatbot
  */
 async function getChatbotResponse(from: string, userMessage: string): Promise<string> {
-  console.log('GET_CHATBOT_RESPONSE_START:', {
-    from,
-    messageLength: userMessage.length,
-    hasOpenAIKey: !!process.env.OPENAI_API_KEY
-  })
+  console.log('GET_CHATBOT_RESPONSE_START:', { from, messageLength: userMessage.length })
 
   if (!process.env.OPENAI_API_KEY) {
     console.error('CHATBOT_ERROR: OPENAI_API_KEY no configurada')
@@ -122,87 +63,35 @@ async function getChatbotResponse(from: string, userMessage: string): Promise<st
   }
 
   try {
-    // Obtener historial de conversación (últimos 10 mensajes)
     const history = conversationHistory.get(from) || []
-    console.log('CHATBOT_HISTORY:', { from, historyLength: history.length })
     
-    // Construir mensaje del sistema con contexto
     const systemMessage = {
       role: 'system' as const,
       content: `Eres un asistente virtual amigable y profesional de la Cooperativa La Dormida. Estás respondiendo por WhatsApp. Tu objetivo es ayudar a los usuarios con información sobre los servicios, horarios, contacto y más.
 
 ${cooperativeContext}
 
-Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa. Mantén las respuestas concisas pero completas, ya que es WhatsApp.`
+Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional.`
     }
 
-    // Preparar mensajes para OpenAI
     const messages = [
       systemMessage,
-      ...history.slice(-10), // Últimos 10 mensajes del historial
+      ...history.slice(-10),
       { role: 'user' as const, content: userMessage },
     ]
 
-    console.log('CHATBOT_CALLING_OPENAI:', {
-      from,
-      messagesCount: messages.length,
-      model: 'gpt-4o-mini',
-      timestamp: new Date().toISOString()
-    })
+    console.log('CHATBOT_CALLING_OPENAI:', { from, messagesCount: messages.length })
 
-    // Agregar timeout a la llamada de OpenAI
-    console.log('CHATBOT_ABOUT_TO_CALL_OPENAI:', {
-      from,
-      timestamp: new Date().toISOString(),
-      messagesPreview: messages.map(m => ({ role: m.role, contentLength: m.content?.length || 0 }))
-    })
-
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        console.error('CHATBOT_OPENAI_TIMEOUT:', { from, timestamp: new Date().toISOString() })
-        reject(new Error('OpenAI timeout after 30 seconds'))
-      }, 30000)
-    })
-
-    const completionPromise = openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
-    }).then(result => {
-      console.log('CHATBOT_OPENAI_PROMISE_RESOLVED:', {
-        from,
-        timestamp: new Date().toISOString(),
-        hasResult: !!result
-      })
-      return result
-    }).catch(error => {
-      console.error('CHATBOT_OPENAI_PROMISE_REJECTED:', {
-        from,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      })
-      throw error
     })
 
-    console.log('CHATBOT_WAITING_FOR_OPENAI:', {
-      from,
-      timestamp: new Date().toISOString()
-    })
-
-    const completion = await Promise.race([completionPromise, timeoutPromise]) as any
-    
-    console.log('CHATBOT_OPENAI_RACE_COMPLETE:', {
-      from,
-      timestamp: new Date().toISOString(),
-      hasCompletion: !!completion
-    })
-
-    console.log('CHATBOT_OPENAI_RESPONSE:', {
-      from,
-      hasResponse: !!completion.choices?.[0]?.message?.content,
-      usage: completion.usage,
-      timestamp: new Date().toISOString()
+    console.log('CHATBOT_OPENAI_RESPONSE:', { 
+      from, 
+      hasResponse: !!completion.choices[0]?.message?.content 
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -212,129 +101,37 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       ...history,
       { role: 'user' as const, content: userMessage },
       { role: 'assistant' as const, content: response },
-    ].slice(-20) // Mantener máximo 20 mensajes en historial
+    ].slice(-20)
 
     conversationHistory.set(from, updatedHistory)
 
-    console.log('CHATBOT_RESPONSE_READY:', {
-      from,
-      responseLength: response.length,
-      historyUpdated: true
-    })
+    console.log('CHATBOT_RESPONSE_READY:', { from, responseLength: response.length })
 
     return response
   } catch (error: any) {
     console.error('CHATBOT_ERROR:', {
       from,
       error: error.message,
-      errorType: error.constructor?.name || typeof error,
-      errorName: error.name,
-      stack: error.stack,
-      response: error.response?.data || error.response || 'No response data',
+      errorType: error.constructor?.name,
       status: error.status || error.response?.status,
-      code: error.code,
-      timestamp: new Date().toISOString()
     })
-    
-    // Si es un error de OpenAI, intentar dar más detalles
-    if (error.response) {
-      console.error('CHATBOT_OPENAI_ERROR_DETAILS:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        data: error.response.data
-      })
-    }
-    
     return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
   }
 }
 
 /**
- * Webhook para WhatsApp Cloud API de Meta
- * 
- * Este endpoint maneja:
- * - Verificación del webhook (GET)
- * - Recepción de eventos y mensajes (POST)
- * 
- * Variables de entorno requeridas:
- * - WHATSAPP_VERIFY_TOKEN: Token para verificar el webhook
- * - WHATSAPP_TOKEN: Access Token de WhatsApp Cloud API
- * - WHATSAPP_PHONE_NUMBER_ID: Phone Number ID
- * - WHATSAPP_APP_SECRET: (Opcional) Secret para verificar firma HMAC
- * - FACTURAS_DIR: (Opcional) Ruta donde están las facturas locales
- */
-
-const WHATSAPP_API_VERSION = 'v22.0'
-
-/**
- * Verifica la firma HMAC del webhook para asegurar que viene de Meta
- * @param rawBody - Body raw del request
- * @param signatureHeader - Header x-hub-signature-256
- * @returns true si la firma es válida
- */
-function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
-  const secret = process.env.WHATSAPP_APP_SECRET
-  if (!secret || !signatureHeader) {
-    // Si no hay secret configurado, no verificamos (solo para desarrollo)
-    console.warn('WEBHOOK_WARNING: WHATSAPP_APP_SECRET no configurado, saltando verificación de firma')
-    return true
-  }
-
-  // El header viene como "sha256=hash"
-  const hash = signatureHeader.replace('sha256=', '')
-  const expectedHash = crypto
-    .createHmac('sha256', secret)
-    .update(rawBody)
-    .digest('hex')
-
-  const isValid = crypto.timingSafeEqual(
-    Buffer.from(hash),
-    Buffer.from(expectedHash)
-  )
-
-  if (!isValid) {
-    console.error('WEBHOOK_ERROR: Firma HMAC inválida')
-  }
-
-  return isValid
-}
-
-/**
  * Envía un mensaje de texto a través de WhatsApp Cloud API
- * @param to - Número de teléfono destino (formato internacional sin +)
- * @param text - Texto del mensaje
- * @returns Resultado de la operación
  */
 async function sendTextMessage(to: string, text: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
-  console.log('SEND_TEXT_MESSAGE_CALLED:', {
-    to,
-    textLength: text.length,
-    hasToken: !!token,
-    hasPhoneId: !!phoneId,
-    phoneId: phoneId ? `${phoneId.substring(0, 4)}...` : 'undefined',
-    apiVersion: WHATSAPP_API_VERSION
-  })
-
   if (!token || !phoneId) {
-    console.error('SEND_MESSAGE_ERROR: Variables de entorno faltantes', {
-      hasToken: !!token,
-      hasPhoneId: !!phoneId,
-      tokenLength: token?.length || 0,
-      phoneIdLength: phoneId?.length || 0
-    })
+    console.error('SEND_MESSAGE_ERROR: Variables de entorno faltantes')
     return { success: false, error: 'Configuración faltante' }
   }
 
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`
-
-  console.log('SENDING_TO_WHATSAPP_API:', {
-    url: url.replace(phoneId, `${phoneId.substring(0, 4)}...`),
-    to,
-    textLength: text.length
-  })
 
   try {
     const response = await fetch(url, {
@@ -351,7 +148,6 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
           body: text,
         },
       }),
-      // Timeout de 10 segundos
       signal: AbortSignal.timeout(10000),
     })
 
@@ -360,235 +156,46 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
     if (!response.ok) {
       console.error('SEND_MESSAGE_ERROR:', {
         status: response.status,
-        statusText: response.statusText,
         error: data.error || data,
-        errorCode: data.error?.code,
-        errorType: data.error?.type,
-        errorSubcode: data.error?.error_subcode,
-        to,
-        url: url.replace(phoneId, `${phoneId.substring(0, 4)}...`)
       })
       return { success: false, error: data.error?.message || 'Error desconocido' }
     }
 
-    console.log('SEND_MESSAGE_OK:', {
-      messageId: data.messages?.[0]?.id,
-      to,
-    })
+    console.log('SEND_MESSAGE_OK:', { messageId: data.messages?.[0]?.id, to })
 
     return {
       success: true,
       messageId: data.messages?.[0]?.id,
     }
   } catch (error: any) {
-    console.error('SEND_MESSAGE_ERROR:', {
-      error: error.message,
-      to,
-    })
-
-    // Reintento simple con backoff
-    if (error.name !== 'AbortError') {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const retryResponse = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
-            to: to,
-            type: 'text',
-            text: {
-              body: text,
-            },
-          }),
-          signal: AbortSignal.timeout(10000),
-        })
-
-        const retryData = await retryResponse.json()
-        if (retryResponse.ok) {
-          console.log('SEND_MESSAGE_OK (retry):', {
-            messageId: retryData.messages?.[0]?.id,
-            to,
-          })
-          return {
-            success: true,
-            messageId: retryData.messages?.[0]?.id,
-          }
-        }
-      } catch (retryError) {
-        console.error('SEND_MESSAGE_ERROR (retry failed):', retryError)
-      }
-    }
-
+    console.error('SEND_MESSAGE_ERROR:', { error: error.message, to })
     return { success: false, error: error.message }
   }
 }
 
 /**
- * Envía un documento (PDF) a través de WhatsApp Cloud API
- * @param to - Número de teléfono destino
- * @param documentUrl - URL pública del documento
- * @param caption - Texto opcional que acompaña el documento
- * @returns Resultado de la operación
+ * Verifica la firma HMAC del webhook
  */
-async function sendDocumentMessage(
-  to: string,
-  documentUrl: string,
-  caption?: string
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  const token = process.env.WHATSAPP_TOKEN
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
-
-  if (!token || !phoneId) {
-    console.error('SEND_DOCUMENT_ERROR: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados')
-    return { success: false, error: 'Configuración faltante' }
+function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
+  const secret = process.env.WHATSAPP_APP_SECRET
+  if (!secret || !signatureHeader) {
+    return true // En desarrollo, saltar verificación
   }
 
-  const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`
+  const hash = signatureHeader.replace('sha256=', '')
+  const expectedHash = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex')
 
-  try {
-    const payload: any = {
-      messaging_product: 'whatsapp',
-      to: to,
-      type: 'document',
-      document: {
-        link: documentUrl,
-      },
-    }
-
-    if (caption) {
-      payload.document.caption = caption
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(15000), // Más tiempo para documentos
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      console.error('SEND_DOCUMENT_ERROR:', {
-        status: response.status,
-        error: data.error || data,
-        to,
-      })
-      return { success: false, error: data.error?.message || 'Error desconocido' }
-    }
-
-    console.log('SEND_DOCUMENT_OK:', {
-      messageId: data.messages?.[0]?.id,
-      to,
-    })
-
-    return {
-      success: true,
-      messageId: data.messages?.[0]?.id,
-    }
-  } catch (error: any) {
-    console.error('SEND_DOCUMENT_ERROR:', {
-      error: error.message,
-      to,
-    })
-    return { success: false, error: error.message }
-  }
-}
-
-/**
- * Busca el PDF de factura para un número de teléfono
- * TODO: Implementar búsqueda real en base de datos o sistema de archivos
- * @param from - Número de teléfono del usuario
- * @returns Información del PDF encontrado o error
- */
-async function findPdfForNumber(from: string): Promise<{ ok: boolean; url?: string; path?: string; reason?: string }> {
-  console.log('FIND_PDF: Buscando factura para', from)
-
-  // TODO: Implementar búsqueda real
-  // Opción 1: Buscar en carpeta local
-  // const facturasDir = process.env.FACTURAS_DIR || './facturas'
-  // const pdfPath = path.join(facturasDir, `${from}.pdf`)
-  // if (fs.existsSync(pdfPath)) {
-  //   return { ok: true, path: pdfPath }
-  // }
-
-  // Opción 2: Llamar a endpoint interno
-  // try {
-  //   const response = await fetch(`${process.env.INTERNAL_API_URL}/api/facturas/lookup?phone=${from}`)
-  //   const data = await response.json()
-  //   if (data.pdfUrl) {
-  //     return { ok: true, url: data.pdfUrl }
-  //   }
-  // } catch (error) {
-  //   console.error('FIND_PDF_ERROR:', error)
-  // }
-
-  // Por ahora, stub que siempre retorna no encontrado
-  return {
-    ok: false,
-    reason: 'no_pdf',
-  }
-}
-
-/**
- * Obtiene el saldo de un usuario
- * TODO: Implementar consulta real a base de datos
- * @param from - Número de teléfono del usuario
- * @returns Saldo o error
- */
-async function getBalanceForNumber(from: string): Promise<{ ok: boolean; balance?: number; reason?: string }> {
-  console.log('GET_BALANCE: Consultando saldo para', from)
-
-  // TODO: Implementar consulta real
-  // const response = await fetch(`${process.env.INTERNAL_API_URL}/api/usuarios/saldo?phone=${from}`)
-  // const data = await response.json()
-  // return { ok: true, balance: data.saldo }
-
-  return {
-    ok: false,
-    reason: 'not_implemented',
-  }
-}
-
-/**
- * Deriva la conversación a un operador humano
- * TODO: Implementar sistema de cola/tickets
- * @param from - Número de teléfono del usuario
- * @param message - Mensaje original
- */
-async function escalateToOperator(from: string, message: string): Promise<void> {
-  console.log('ESCALATE_TO_OPERATOR:', { from, message })
-
-  // TODO: Implementar sistema de tickets
-  // - Crear ticket en base de datos
-  // - Notificar a operadores disponibles
-  // - Marcar conversación como "en espera de operador"
-}
-
-/**
- * Encola una tarea pesada para procesamiento asíncrono
- * TODO: Implementar con Redis, RabbitMQ o base de datos
- * @param job - Datos del trabajo a encolar
- */
-async function enqueueJob(job: { type: string; data: any }): Promise<void> {
-  console.log('ENQUEUE_JOB:', job)
-
-  // TODO: Implementar cola real
-  // - Redis: await redis.lpush('jobs', JSON.stringify(job))
-  // - RabbitMQ: channel.sendToQueue('jobs', Buffer.from(JSON.stringify(job)))
-  // - Base de datos: INSERT INTO job_queue (type, data) VALUES (job.type, job.data)
+  return crypto.timingSafeEqual(
+    Buffer.from(hash),
+    Buffer.from(expectedHash)
+  )
 }
 
 /**
  * Handler GET para verificación del webhook
- * Meta envía un challenge que debemos devolver para verificar el endpoint
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -599,66 +206,36 @@ export async function GET(request: NextRequest) {
   const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN
 
   if (!verifyToken) {
-    console.error('WEBHOOK_ERROR: WHATSAPP_VERIFY_TOKEN no configurado')
-    return NextResponse.json(
-      { error: 'Configuración faltante' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Configuración faltante' }, { status: 500 })
   }
 
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('WEBHOOK_VERIFIED: Challenge aceptado')
+    console.log('WEBHOOK_VERIFIED')
     return new NextResponse(challenge, { status: 200 })
   }
 
-  console.error('WEBHOOK_ERROR: Verificación fallida', {
-    mode,
-    tokenMatch: token === verifyToken,
-  })
-
-  return NextResponse.json(
-    { error: 'Token de verificación inválido' },
-    { status: 403 }
-  )
+  return NextResponse.json({ error: 'Token inválido' }, { status: 403 })
 }
 
 /**
  * Handler POST para recibir eventos del webhook
- * Procesa mensajes entrantes, actualizaciones de estado, etc.
  */
 export async function POST(request: NextRequest) {
   try {
-    // Leer el body como texto para verificación de firma
     const rawBody = await request.text()
     const signatureHeader = request.headers.get('x-hub-signature-256')
 
-    // Verificar firma HMAC si está configurado
     if (!verifySignature(rawBody, signatureHeader)) {
-      return NextResponse.json(
-        { error: 'Firma inválida' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Firma inválida' }, { status: 403 })
     }
 
-    // Parsear el body JSON
-    let body: any
-    try {
-      body = JSON.parse(rawBody)
-    } catch (error) {
-      console.error('WEBHOOK_ERROR: Body JSON inválido')
-      return NextResponse.json(
-        { error: 'Body JSON inválido' },
-        { status: 400 }
-      )
-    }
+    const body = JSON.parse(rawBody)
+    console.log('WEBHOOK_RECEIVED')
 
-    console.log('WEBHOOK_RECEIVED:', JSON.stringify(body, null, 2))
-
-    // Responder rápidamente a Meta para evitar reintentos
-    // El procesamiento continúa después de la respuesta
+    // Responder rápidamente a Meta
     const response = NextResponse.json({ status: 'received' })
 
-    // Procesar eventos de forma asíncrona (no bloquea la respuesta)
+    // Procesar eventos de forma asíncrona
     processWebhookEvents(body).catch(error => {
       console.error('WEBHOOK_PROCESSING_ERROR:', error)
     })
@@ -666,65 +243,28 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error: any) {
     console.error('WEBHOOK_ERROR:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
 
 /**
  * Procesa los eventos recibidos del webhook
- * @param body - Body parseado del webhook
  */
 async function processWebhookEvents(body: any): Promise<void> {
   if (!body.entry || !Array.isArray(body.entry)) {
-    console.warn('WEBHOOK_WARNING: Estructura de entrada inválida')
     return
   }
-
-  // Verificar variables de entorno al inicio
-  const phoneIdFromEnv = process.env.WHATSAPP_PHONE_NUMBER_ID
-  console.log('WEBHOOK_PROCESSING_START:', {
-    hasPhoneIdEnv: !!phoneIdFromEnv,
-    phoneIdEnv: phoneIdFromEnv ? `${phoneIdFromEnv.substring(0, 4)}...` : 'undefined',
-    hasToken: !!process.env.WHATSAPP_TOKEN,
-    hasOpenAIKey: !!process.env.OPENAI_API_KEY
-  })
 
   for (const entry of body.entry) {
     const changes = entry.changes || []
 
     for (const change of changes) {
       const value = change.value
-      
-      // Verificar que el phone_number_id del webhook coincida con la variable de entorno
-      const phoneIdFromWebhook = value.metadata?.phone_number_id
-      if (phoneIdFromWebhook && phoneIdFromEnv && phoneIdFromWebhook !== phoneIdFromEnv) {
-        console.warn('WEBHOOK_WARNING: phone_number_id no coincide', {
-          webhookPhoneId: phoneIdFromWebhook,
-          envPhoneId: phoneIdFromEnv,
-          message: 'El phone_number_id del webhook no coincide con WHATSAPP_PHONE_NUMBER_ID'
-        })
-      }
 
       // Procesar mensajes entrantes
       if (value.messages && Array.isArray(value.messages)) {
         for (const message of value.messages) {
-          await processIncomingMessage(message, value.metadata?.phone_number_id)
-        }
-      }
-
-      // Procesar actualizaciones de estado
-      if (value.statuses && Array.isArray(value.statuses)) {
-        for (const status of value.statuses) {
-          console.log('STATUS_UPDATE:', {
-            messageId: status.id,
-            status: status.status,
-            timestamp: status.timestamp,
-          })
-          // TODO: Guardar en base de datos o logs
-          // await saveMessageStatus(status)
+          await processIncomingMessage(message)
         }
       }
     }
@@ -733,236 +273,29 @@ async function processWebhookEvents(body: any): Promise<void> {
 
 /**
  * Procesa un mensaje entrante
- * @param message - Objeto del mensaje
- * @param phoneNumberId - ID del número de teléfono
  */
-async function processIncomingMessage(message: any, phoneNumberId?: string): Promise<void> {
+async function processIncomingMessage(message: any): Promise<void> {
   const from = message.from
-  const messageId = message.id
   const type = message.type
 
-  console.log('MESSAGE_RECEIVED:', {
-    from,
-    messageId,
-    type,
-  })
+  console.log('MESSAGE_RECEIVED:', { from, type })
 
-  // Procesar según el tipo de mensaje
-  switch (type) {
-    case 'text':
-      await processTextMessage(from, message.text?.body || '', messageId)
-      break
+  if (type === 'text') {
+    const text = message.text?.body || ''
+    console.log('CHATBOT_REQUEST:', { from, text })
 
-    case 'document':
-      console.log('MESSAGE_DOCUMENT:', {
-        from,
-        filename: message.document?.filename,
-        caption: message.document?.caption,
-      })
-      await sendTextMessage(
-        from,
-        'Recibí tu documento. Nuestro equipo lo revisará pronto. ¿En qué más puedo ayudarte?'
-      )
-      break
-
-    case 'image':
-      console.log('MESSAGE_IMAGE:', {
-        from,
-        caption: message.image?.caption,
-      })
-      await sendTextMessage(
-        from,
-        'Recibí tu imagen. ¿En qué puedo ayudarte?'
-      )
-      break
-
-    case 'contacts':
-      console.log('MESSAGE_CONTACTS:', {
-        from,
-        contacts: message.contacts,
-      })
-      await sendTextMessage(
-        from,
-        'Gracias por compartir tu contacto. ¿Cómo puedo ayudarte?'
-      )
-      break
-
-    default:
-      console.log('MESSAGE_UNKNOWN_TYPE:', {
-        from,
-        type,
-      })
-      await sendTextMessage(
-        from,
-        'Recibí tu mensaje. Nuestro equipo te responderá pronto. ¿Hay algo urgente en lo que pueda ayudarte?'
-      )
-  }
-}
-
-/**
- * Procesa un mensaje de texto
- * Detecta palabras clave y ejecuta acciones correspondientes
- * @param from - Número de teléfono del remitente
- * @param text - Texto del mensaje
- * @param messageId - ID del mensaje
- */
-async function processTextMessage(from: string, text: string, messageId: string): Promise<void> {
-  const lowerText = text.toLowerCase().trim()
-
-  // Detectar palabra clave: factura
-  if (lowerText.includes('factura') || lowerText.includes('boleta')) {
-    console.log('KEYWORD_DETECTED: factura', { from, text })
-
-    const pdfResult = await findPdfForNumber(from)
-
-    if (pdfResult.ok && pdfResult.url) {
-      // Enviar PDF
-      const docResult = await sendDocumentMessage(
-        from,
-        pdfResult.url,
-        'Aquí está tu factura. ¿Necesitas algo más?'
-      )
-
-      if (docResult.success) {
-        console.log('PDF_SENT_SUCCESS:', { from, messageId: docResult.messageId })
-      } else {
-        await sendTextMessage(
-          from,
-          'Hubo un problema al enviar tu factura. Por favor, intenta más tarde o contacta con nuestra oficina al 3521-401330.'
-        )
-      }
-    } else {
-      // No se encontró PDF
-      await sendTextMessage(
-        from,
-        'No encontramos tu última factura. Por favor, envíanos tu número de suministro o DNI para buscarla. También puedes contactarnos al 3521-401330.'
-      )
-    }
-    return
-  }
-
-  // Detectar palabra clave: saldo
-  if (lowerText.includes('saldo') || lowerText.includes('deuda')) {
-    console.log('KEYWORD_DETECTED: saldo', { from, text })
-
-    const balanceResult = await getBalanceForNumber(from)
-
-    if (balanceResult.ok && balanceResult.balance !== undefined) {
-      await sendTextMessage(
-        from,
-        `Tu saldo actual es: $${balanceResult.balance.toFixed(2)}. ¿Necesitas más información?`
-      )
-    } else {
-      await sendTextMessage(
-        from,
-        'No pude consultar tu saldo en este momento. Por favor, contacta con nuestra oficina al 3521-401330 o visita nuestra página web.'
-      )
-    }
-    return
-  }
-
-  // Detectar solicitud de operador humano
-  if (
-    lowerText.includes('hablar') ||
-    lowerText.includes('operador') ||
-    lowerText.includes('humano') ||
-    lowerText.includes('persona')
-  ) {
-    console.log('KEYWORD_DETECTED: operador humano', { from, text })
-
-    await escalateToOperator(from, text)
-    await sendTextMessage(
-      from,
-      'Te he derivado a un operador. Nuestro equipo se comunicará contigo pronto. Horario de atención: Lunes a Viernes de 7:00 a 12:00. Para emergencias, llama al 3521-401330.'
-    )
-    return
-  }
-
-  // Para todos los demás mensajes, usar el chatbot inteligente (OpenAI)
-  console.log('CHATBOT_REQUEST:', { from, text })
-  
-  try {
-    const chatbotResponse = await getChatbotResponse(from, text)
-    console.log('CHATBOT_RESPONSE:', { from, responseLength: chatbotResponse.length, responsePreview: chatbotResponse.substring(0, 50) })
-    
-    const sendResult = await sendTextMessage(from, chatbotResponse)
-    console.log('SEND_RESULT:', sendResult)
-    
-    if (!sendResult.success) {
-      console.error('FAILED_TO_SEND_MESSAGE:', {
-        from,
-        error: sendResult.error,
-        responseLength: chatbotResponse.length
-      })
-    }
-  } catch (error: any) {
-    console.error('CHATBOT_PROCESSING_ERROR:', {
-      from,
-      error: error.message,
-      stack: error.stack
-    })
-    
-    // Intentar enviar mensaje de error al usuario
     try {
-      await sendTextMessage(
-        from,
-        'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
-      )
-    } catch (sendError) {
-      console.error('FAILED_TO_SEND_ERROR_MESSAGE:', sendError)
+      const chatbotResponse = await getChatbotResponse(from, text)
+      console.log('CHATBOT_RESPONSE:', { from, responseLength: chatbotResponse.length })
+      
+      const sendResult = await sendTextMessage(from, chatbotResponse)
+      console.log('SEND_RESULT:', sendResult)
+      
+      if (!sendResult.success) {
+        console.error('FAILED_TO_SEND_MESSAGE:', { from, error: sendResult.error })
+      }
+    } catch (error: any) {
+      console.error('CHATBOT_PROCESSING_ERROR:', { from, error: error.message })
     }
   }
 }
-
-/**
- * INSTRUCCIONES DE PRUEBA:
- * 
- * 1. Verificación GET:
- *    curl "https://tu-dominio.com/api/webhook?hub.mode=subscribe&hub.verify_token=TU_VERIFY_TOKEN&hub.challenge=CHALLENGE_123"
- * 
- * 2. Probar POST con mensaje de texto (simplificado):
- *    curl -X POST https://tu-dominio.com/api/webhook \
- *      -H "Content-Type: application/json" \
- *      -H "x-hub-signature-256: sha256=..." \
- *      -d '{
- *        "object": "whatsapp_business_account",
- *        "entry": [{
- *          "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
- *          "changes": [{
- *            "value": {
- *              "messaging_product": "whatsapp",
- *              "metadata": {"phone_number_id": "PHONE_NUMBER_ID"},
- *              "messages": [{
- *                "from": "5491234567890",
- *                "id": "wamid.xxx",
- *                "type": "text",
- *                "text": {"body": "factura"}
- *              }]
- *            },
- *            "field": "messages"
- *          }]
- *        }]
- *      }'
- * 
- * 3. Probar sendTextMessage (requiere WHATSAPP_TOKEN):
- *    curl -X POST "https://graph.facebook.com/v20.0/PHONE_ID/messages" \
- *      -H "Authorization: Bearer WHATSAPP_TOKEN" \
- *      -H "Content-Type: application/json" \
- *      -d '{
- *        "messaging_product": "whatsapp",
- *        "to": "5491234567890",
- *        "type": "text",
- *        "text": {"body": "Mensaje de prueba"}
- *      }'
- * 
- * NOTAS DE PRODUCCIÓN:
- * 
- * - Configurar todas las variables de entorno en el hosting (Vercel/Netlify)
- * - WHATSAPP_TOKEN debe ser un token de larga duración o renovarse automáticamente
- * - Implementar enqueueJob con Redis/RabbitMQ para tareas pesadas
- * - Implementar findPdfForNumber con consulta real a base de datos
- * - Usar HTTPS (Vercel lo proporciona automáticamente)
- * - Considerar rate limiting para evitar abusos
- * - Monitorear logs y errores con servicios como Sentry
- */
-
