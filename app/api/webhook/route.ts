@@ -6,11 +6,9 @@ import OpenAI from 'openai'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Inicializar OpenAI con timeout
+// Inicializar OpenAI (igual que en /api/chat)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 25000, // 25 segundos (Vercel tiene límite de 30s en funciones)
-  maxRetries: 1,
 })
 
 // Contexto de la Cooperativa La Dormida
@@ -82,39 +80,19 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       { role: 'user' as const, content: userMessage },
     ]
 
-    console.log('CHATBOT_CALLING_OPENAI:', { 
-      from, 
-      messagesCount: messages.length,
-      timestamp: new Date().toISOString()
-    })
+    console.log('CHATBOT_CALLING_OPENAI:', { from, messagesCount: messages.length })
 
-    // Crear promise con timeout manual para mejor control
-    const startTime = Date.now()
-    
-    const completionPromise = openai.chat.completions.create({
+    // Llamar a OpenAI exactamente igual que en /api/chat
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
     })
 
-    // Timeout de 20 segundos
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('OpenAI request timeout after 20 seconds'))
-      }, 20000)
-    })
-
-    console.log('CHATBOT_AWAITING_OPENAI:', { from, timestamp: new Date().toISOString() })
-
-    const completion = await Promise.race([completionPromise, timeoutPromise]) as any
-
-    const elapsedTime = Date.now() - startTime
     console.log('CHATBOT_OPENAI_RESPONSE:', { 
       from, 
-      hasResponse: !!completion.choices?.[0]?.message?.content,
-      elapsedTime: `${elapsedTime}ms`,
-      timestamp: new Date().toISOString()
+      hasResponse: !!completion.choices[0]?.message?.content 
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -269,21 +247,13 @@ export async function POST(request: NextRequest) {
     const body = JSON.parse(rawBody)
     console.log('WEBHOOK_RECEIVED')
 
-    // Responder rápidamente a Meta
+    // Responder rápidamente a Meta para evitar reintentos
     const response = NextResponse.json({ status: 'received' })
 
-    // Procesar eventos de forma asíncrona
-    // IMPORTANTE: En Vercel, el proceso puede cortarse si tarda mucho
-    // Por eso respondemos primero y luego procesamos
+    // Procesar eventos de forma asíncrona (no bloquea la respuesta)
     processWebhookEvents(body).catch(error => {
-      console.error('WEBHOOK_PROCESSING_ERROR:', {
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      })
+      console.error('WEBHOOK_PROCESSING_ERROR:', error)
     })
-    
-    console.log('WEBHOOK_RESPONSE_SENT:', { timestamp: new Date().toISOString() })
 
     return response
   } catch (error: any) {
