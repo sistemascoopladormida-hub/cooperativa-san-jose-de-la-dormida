@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic'
 // Inicializar OpenAI para el chatbot
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30000, // 30 segundos de timeout
+  maxRetries: 2,
 })
 
 // Contexto de la Cooperativa La Dormida (mismo que usa el chatbot web)
@@ -144,20 +146,63 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     console.log('CHATBOT_CALLING_OPENAI:', {
       from,
       messagesCount: messages.length,
-      model: 'gpt-4o-mini'
+      model: 'gpt-4o-mini',
+      timestamp: new Date().toISOString()
     })
 
-    const completion = await openai.chat.completions.create({
+    // Agregar timeout a la llamada de OpenAI
+    console.log('CHATBOT_ABOUT_TO_CALL_OPENAI:', {
+      from,
+      timestamp: new Date().toISOString(),
+      messagesPreview: messages.map(m => ({ role: m.role, contentLength: m.content?.length || 0 }))
+    })
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        console.error('CHATBOT_OPENAI_TIMEOUT:', { from, timestamp: new Date().toISOString() })
+        reject(new Error('OpenAI timeout after 30 seconds'))
+      }, 30000)
+    })
+
+    const completionPromise = openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
+    }).then(result => {
+      console.log('CHATBOT_OPENAI_PROMISE_RESOLVED:', {
+        from,
+        timestamp: new Date().toISOString(),
+        hasResult: !!result
+      })
+      return result
+    }).catch(error => {
+      console.error('CHATBOT_OPENAI_PROMISE_REJECTED:', {
+        from,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      })
+      throw error
+    })
+
+    console.log('CHATBOT_WAITING_FOR_OPENAI:', {
+      from,
+      timestamp: new Date().toISOString()
+    })
+
+    const completion = await Promise.race([completionPromise, timeoutPromise]) as any
+    
+    console.log('CHATBOT_OPENAI_RACE_COMPLETE:', {
+      from,
+      timestamp: new Date().toISOString(),
+      hasCompletion: !!completion
     })
 
     console.log('CHATBOT_OPENAI_RESPONSE:', {
       from,
-      hasResponse: !!completion.choices[0]?.message?.content,
-      usage: completion.usage
+      hasResponse: !!completion.choices?.[0]?.message?.content,
+      usage: completion.usage,
+      timestamp: new Date().toISOString()
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -182,10 +227,24 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     console.error('CHATBOT_ERROR:', {
       from,
       error: error.message,
-      errorType: error.constructor.name,
+      errorType: error.constructor?.name || typeof error,
+      errorName: error.name,
       stack: error.stack,
-      response: error.response?.data || 'No response data'
+      response: error.response?.data || error.response || 'No response data',
+      status: error.status || error.response?.status,
+      code: error.code,
+      timestamp: new Date().toISOString()
     })
+    
+    // Si es un error de OpenAI, intentar dar más detalles
+    if (error.response) {
+      console.error('CHATBOT_OPENAI_ERROR_DETAILS:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      })
+    }
+    
     return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
   }
 }
