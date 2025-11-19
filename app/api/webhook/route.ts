@@ -2,22 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
 
-// Forzar runtime Node.js (Edge no soporta el SDK oficial de OpenAI)
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-export const maxDuration = 30
-
 // Configuración para Next.js 15
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 30 // Máximo 30 segundos (Vercel Pro permite hasta 60s)
 
-// Inicializar OpenAI (igual que en /api/chat)
+// Inicializar OpenAI (exactamente igual que en /api/chat)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Contexto de la Cooperativa La Dormida
+// Contexto de la Cooperativa La Dormida (igual que en /api/chat)
 const cooperativeContext = `
 INFORMACIÓN SOBRE COOPERATIVA LA DORMIDA:
 
@@ -37,10 +31,60 @@ TELÉFONOS DE GUARDIA 24/7:
 - Sepelio: 3521 406189
 
 SERVICIOS OFRECIDOS:
-1. Electricidad: Suministro eléctrico confiable las 24 horas del día. Tarifas preferenciales para socios. Atención técnica 24/7. Precio: Desde $8,500/mes
-2. Internet: Conexión de alta velocidad con fibra óptica hasta 100 Mbps. Sin límite de datos. Precio: Desde $4,200/mes
-3. Televisión: Más de 80 canales, incluyendo canales HD. Precio: Desde $3,800/mes
-4. Programa PFC: Traslados en ambulancia, servicio de sepelio, análisis clínicos, servicio óptico, consultorios externos
+1. Electricidad:
+   - Suministro eléctrico confiable las 24 horas del día
+   - Tarifas preferenciales para socios
+   - Atención técnica 24/7
+   - Medidores inteligentes
+   - Precio: Desde $8,500/mes
+
+2. Internet:
+   - Conexión de alta velocidad con fibra óptica
+   - Velocidades hasta 100 Mbps
+   - Fibra óptica hasta el hogar
+   - Soporte técnico especializado
+   - Sin límite de datos
+   - Precio: Desde $4,200/mes
+
+3. Televisión:
+   - Amplia variedad de canales y entretenimiento
+   - Más de 80 canales
+   - Canales HD incluidos
+   - Programación familiar
+   - Servicio técnico gratuito
+   - Precio: Desde $3,800/mes
+
+4. Farmacia Social:
+   - Medicamentos y productos de salud a precios accesibles
+   - Descuentos especiales para socios
+   - Medicamentos genéricos
+   - Atención farmacéutica profesional
+   - Entrega a domicilio
+   - Descuentos hasta 40%
+
+SERVICIOS SOCIALES:
+- Servicios Fúnebres
+- Eventos Sociales
+- Asesoramiento Legal
+- Descuentos Comerciales
+
+BENEFICIOS PARA SOCIOS:
+- Tarifas preferenciales para socios
+- Atención personalizada y cercana
+- Servicios sociales y beneficios especiales
+- Más de 50 años de experiencia
+- Compromiso con la comunidad local
+- Tecnología moderna y confiable
+
+PAGOS Y FACTURACIÓN:
+- Los socios pueden pagar facturas a través de: https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login
+- Área de socios disponible en la página web
+
+ASOCIARSE:
+- Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
+
+RECLAMOS:
+- Los reclamos se pueden presentar a través de la sección "Reclamos" en la página web o contactando directamente
 
 INSTRUCCIONES PARA EL ASISTENTE:
 - Responde de forma amigable, profesional y humana
@@ -58,13 +102,10 @@ const conversationHistory = new Map<string, Array<{ role: 'user' | 'assistant'; 
 const WHATSAPP_API_VERSION = 'v22.0'
 
 /**
- * Obtiene respuesta del chatbot usando OpenAI
+ * Obtiene respuesta del chatbot usando OpenAI (igual que /api/chat)
  */
 async function getChatbotResponse(from: string, userMessage: string): Promise<string> {
-  console.log('GET_CHATBOT_RESPONSE_START:', { from, messageLength: userMessage.length })
-
   if (!process.env.OPENAI_API_KEY) {
-    console.error('CHATBOT_ERROR: OPENAI_API_KEY no configurada')
     return 'Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.'
   }
 
@@ -77,7 +118,7 @@ async function getChatbotResponse(from: string, userMessage: string): Promise<st
 
 ${cooperativeContext}
 
-Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional.`
+Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`
     }
 
     const messages = [
@@ -86,41 +127,12 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       { role: 'user' as const, content: userMessage },
     ]
 
-    console.log('CHATBOT_CALLING_OPENAI:', { 
-      from, 
-      messagesCount: messages.length,
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-      apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7)
-    })
-
     // Llamar a OpenAI exactamente igual que en /api/chat
-    console.log('ABOUT_TO_CALL_OPENAI:', { from, timestamp: Date.now() })
-    
-    let completion
-    try {
-      console.log('CALLING_OPENAI_NOW:', { from })
-      completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 500,
-      })
-      console.log('OPENAI_CALL_SUCCESS:', { from, timestamp: Date.now() })
-    } catch (openaiError: any) {
-      console.error('OPENAI_CALL_FAILED:', {
-        from,
-        error: openaiError.message,
-        status: openaiError.status,
-        code: openaiError.code,
-        timestamp: Date.now()
-      })
-      throw openaiError
-    }
-
-    console.log('CHATBOT_OPENAI_RESPONSE:', { 
-      from, 
-      hasResponse: !!completion.choices[0]?.message?.content,
-      timestamp: Date.now()
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500,
     })
 
     const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
@@ -134,30 +146,9 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
 
     conversationHistory.set(from, updatedHistory)
 
-    console.log('CHATBOT_RESPONSE_READY:', { from, responseLength: response.length })
-
     return response
   } catch (error: any) {
-    console.error('CHATBOT_ERROR:', {
-      from,
-      error: error.message,
-      errorName: error.name,
-      errorType: error.constructor?.name || typeof error,
-      status: error.status || error.response?.status,
-      code: error.code,
-      stack: error.stack?.substring(0, 200),
-      timestamp: new Date().toISOString()
-    })
-    
-    // Si es un error de OpenAI, loggear más detalles
-    if (error.response) {
-      console.error('CHATBOT_OPENAI_ERROR_DETAILS:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        data: error.response.data
-      })
-    }
-    
+    console.error('Error en chatbot:', error)
     return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
   }
 }
@@ -170,7 +161,6 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
   if (!token || !phoneId) {
-    console.error('SEND_MESSAGE_ERROR: Variables de entorno faltantes')
     return { success: false, error: 'Configuración faltante' }
   }
 
@@ -191,27 +181,21 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
           body: text,
         },
       }),
-      signal: AbortSignal.timeout(10000),
     })
 
     const data = await response.json()
 
     if (!response.ok) {
-      console.error('SEND_MESSAGE_ERROR:', {
-        status: response.status,
-        error: data.error || data,
-      })
+      console.error('Error enviando mensaje:', data.error || data)
       return { success: false, error: data.error?.message || 'Error desconocido' }
     }
-
-    console.log('SEND_MESSAGE_OK:', { messageId: data.messages?.[0]?.id, to })
 
     return {
       success: true,
       messageId: data.messages?.[0]?.id,
     }
   } catch (error: any) {
-    console.error('SEND_MESSAGE_ERROR:', { error: error.message, to })
+    console.error('Error enviando mensaje:', error)
     return { success: false, error: error.message }
   }
 }
@@ -222,7 +206,7 @@ async function sendTextMessage(to: string, text: string): Promise<{ success: boo
 function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
   const secret = process.env.WHATSAPP_APP_SECRET
   if (!secret || !signatureHeader) {
-    return true // En desarrollo, saltar verificación
+    return true
   }
 
   const hash = signatureHeader.replace('sha256=', '')
@@ -253,7 +237,6 @@ export async function GET(request: NextRequest) {
   }
 
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('WEBHOOK_VERIFIED')
     return new NextResponse(challenge, { status: 200 })
   }
 
@@ -273,93 +256,34 @@ export async function POST(request: NextRequest) {
     }
 
     const body = JSON.parse(rawBody)
-    console.log('WEBHOOK_RECEIVED')
 
-    // Procesar primero (igual que /api/chat espera la respuesta)
-    // Meta espera hasta 20 segundos, así que tenemos tiempo
-    try {
-      await processWebhookEvents(body)
-      console.log('WEBHOOK_PROCESSING_COMPLETE')
-    } catch (error: any) {
-      console.error('WEBHOOK_PROCESSING_ERROR:', {
-        error: error.message,
-        stack: error.stack
-      })
-      // Continuar y responder de todas formas
-    }
-
-    // Responder a Meta después de procesar
-    return NextResponse.json({ status: 'received' })
-  } catch (error: any) {
-    console.error('WEBHOOK_ERROR:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
-  }
-}
-
-/**
- * Procesa los eventos recibidos del webhook
- */
-async function processWebhookEvents(body: any): Promise<void> {
-  console.log('PROCESS_WEBHOOK_EVENTS_START:', { timestamp: new Date().toISOString() })
-  
-  if (!body.entry || !Array.isArray(body.entry)) {
-    console.log('PROCESS_WEBHOOK_EVENTS: No entries found')
-    return
-  }
-
-  try {
-    for (const entry of body.entry) {
-      const changes = entry.changes || []
-
-      for (const change of changes) {
-        const value = change.value
-
-        // Procesar mensajes entrantes
-        if (value.messages && Array.isArray(value.messages)) {
-          for (const message of value.messages) {
-            console.log('PROCESSING_MESSAGE:', { from: message.from, type: message.type })
-            await processIncomingMessage(message)
-            console.log('MESSAGE_PROCESSED:', { from: message.from })
+    // Procesar mensajes
+    if (body.entry && Array.isArray(body.entry)) {
+      for (const entry of body.entry) {
+        const changes = entry.changes || []
+        for (const change of changes) {
+          const value = change.value
+          if (value.messages && Array.isArray(value.messages)) {
+            for (const message of value.messages) {
+              if (message.type === 'text') {
+                const from = message.from
+                const text = message.text?.body || ''
+                
+                // Obtener respuesta del chatbot (igual que /api/chat)
+                const chatbotResponse = await getChatbotResponse(from, text)
+                
+                // Enviar respuesta a WhatsApp
+                await sendTextMessage(from, chatbotResponse)
+              }
+            }
           }
         }
       }
     }
-    console.log('PROCESS_WEBHOOK_EVENTS_COMPLETE:', { timestamp: new Date().toISOString() })
+
+    return NextResponse.json({ status: 'received' })
   } catch (error: any) {
-    console.error('PROCESS_WEBHOOK_EVENTS_ERROR:', {
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    })
-    throw error
-  }
-}
-
-/**
- * Procesa un mensaje entrante
- */
-async function processIncomingMessage(message: any): Promise<void> {
-  const from = message.from
-  const type = message.type
-
-  console.log('MESSAGE_RECEIVED:', { from, type })
-
-  if (type === 'text') {
-    const text = message.text?.body || ''
-    console.log('CHATBOT_REQUEST:', { from, text })
-
-    try {
-      const chatbotResponse = await getChatbotResponse(from, text)
-      console.log('CHATBOT_RESPONSE:', { from, responseLength: chatbotResponse.length })
-      
-      const sendResult = await sendTextMessage(from, chatbotResponse)
-      console.log('SEND_RESULT:', sendResult)
-      
-      if (!sendResult.success) {
-        console.error('FAILED_TO_SEND_MESSAGE:', { from, error: sendResult.error })
-      }
-    } catch (error: any) {
-      console.error('CHATBOT_PROCESSING_ERROR:', { from, error: error.message })
-    }
+    console.error('Error en webhook:', error)
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
