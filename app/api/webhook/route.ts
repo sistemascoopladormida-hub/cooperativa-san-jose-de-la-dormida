@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
 
+// Forzar runtime Node.js (Edge no soporta el SDK oficial de OpenAI)
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 30
+
 // Configuración para Next.js 15
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
