@@ -80,6 +80,29 @@ PAGOS Y FACTURACIÓN:
 - Los socios pueden pagar facturas a través de: https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login
 - Área de socios disponible en la página web
 
+ESTADO DE FACTURAS Y BOLETAS:
+- FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV):
+  * Ya están disponibles para retirar en los boxes de atención al público de la cooperativa
+  * Fueron enviadas a las bandejas de correo electrónico de los socios
+  * Período: Noviembre
+  * Vencimientos:
+    - Primer vencimiento: 10 de diciembre
+    - Segundo vencimiento: 22 de diciembre
+  * Medios de pago habilitados:
+    - Caja de cobro (Efectivo, Tarjetas de crédito y débito)
+    - App CoopOnline
+    - IMPORTANTE: El pago mediante transferencia se encuentra INHABILITADO
+
+- FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA:
+  * Todavía no están disponibles
+
+TURNERO DE FARMACIAS:
+- 6 de diciembre: Farmacia Carreño
+- 7 de diciembre: Farmacia Robledo
+- 8 de diciembre: Farmacia Centro
+- 9 de diciembre: Farmacia Social
+- 10 de diciembre: Farmacia Carreño
+
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
 
@@ -94,6 +117,10 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Para emergencias, siempre menciona los números de guardia 24/7
 - Mantén las respuestas concisas pero completas
 - Estás respondiendo por WhatsApp, así que sé breve pero completo
+- Cuando te pregunten por facturas o boletas, siempre aclara el estado específico:
+  * Para servicios (P.F.C, Internet, WiFi, Cable, TV): menciona que ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), incluye los vencimientos (10 y 22 de diciembre) y los medios de pago habilitados (caja de cobro con efectivo/tarjetas y App CoopOnline). Recuerda mencionar que las transferencias están INHABILITADAS
+  * Para energía eléctrica: menciona que todavía no están disponibles
+- Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
 `
 
 // Historial de conversación

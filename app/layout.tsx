@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   description:
     "Página web informativa de la Cooperativa Eléctrica La Dormida.",
   keywords: "cooperativa, electricidad, internet, television, farmacia, La Dormida",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
