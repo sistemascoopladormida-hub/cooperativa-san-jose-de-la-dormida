@@ -23,18 +23,23 @@ export async function sendDocumentMessage(
     const mediaUrl = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/media`;
 
     const formData = new FormData();
+    // Asegurarse de agregar messaging_product primero
     formData.append("messaging_product", "whatsapp");
     formData.append("type", "document");
+    // Agregar el archivo usando Buffer directamente
     formData.append("file", fileBuffer, {
-      filename,
+      filename: filename,
       contentType: "application/pdf",
     });
+
+    // Obtener los headers de FormData (incluye Content-Type con boundary)
+    const formHeaders = formData.getHeaders ? formData.getHeaders() : {};
 
     const uploadResponse = await fetch(mediaUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        ...formData.getHeaders(),
+        ...formHeaders,
       },
       body: formData as any,
     });

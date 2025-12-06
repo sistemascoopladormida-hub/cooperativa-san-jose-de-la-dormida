@@ -36,10 +36,30 @@ export function detectInvoiceRequest(
   }
 
   // Si no se encontró con patrones, buscar cualquier número de 3-6 dígitos
+  // PERO excluir años (20XX) y priorizar números que no sean años
   if (!accountNumber) {
-    const numberMatch = message.match(/\b(\d{3,6})\b/);
-    if (numberMatch && numberMatch[1]) {
-      accountNumber = numberMatch[1];
+    // Buscar todos los números de 3-6 dígitos
+    const allNumbers = message.match(/\b(\d{3,6})\b/g);
+    if (allNumbers) {
+      // Filtrar años (20XX) y priorizar números que no sean años
+      const nonYearNumbers = allNumbers.filter(
+        (num) => !num.startsWith("20") || num.length !== 4
+      );
+      
+      // Si hay números que no son años, usar el primero
+      if (nonYearNumbers.length > 0) {
+        accountNumber = nonYearNumbers[0];
+      } else {
+        // Si solo hay años, usar el primero que no sea el año actual
+        const currentYear = new Date().getFullYear().toString();
+        const filtered = allNumbers.filter((num) => num !== currentYear);
+        if (filtered.length > 0) {
+          accountNumber = filtered[0];
+        } else {
+          // Último recurso: usar el primero
+          accountNumber = allNumbers[0];
+        }
+      }
     }
   }
 
