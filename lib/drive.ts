@@ -158,35 +158,53 @@ async function searchPDFInFolder(
     console.log(`[DRIVE] Buscando PDF con cuenta ${accountNumber} en carpeta ${folderId}`);
     const drive = await getDriveClient();
 
-    // Listar todos los PDFs en la carpeta
-    const response = await drive.files.list({
-      q: `'${folderId}' in parents and mimeType='application/pdf' and trashed=false`,
-      fields: "files(id, name)",
-    });
+    let nextPageToken: string | undefined = undefined;
+    let totalChecked = 0;
 
-    const pdfCount = response.data.files?.length || 0;
-    console.log(`[DRIVE] PDFs encontrados en carpeta: ${pdfCount}`);
+    // Buscar con paginación para obtener todos los PDFs
+    do {
+      // Listar PDFs en la carpeta (con paginación)
+      const response = await drive.files.list({
+        q: `'${folderId}' in parents and mimeType='application/pdf' and trashed=false`,
+        fields: "nextPageToken, files(id, name)",
+        pageSize: 1000, // Máximo permitido por la API
+        pageToken: nextPageToken,
+      });
 
-    if (!response.data.files || response.data.files.length === 0) {
-      console.log(`[DRIVE] No hay PDFs en la carpeta ${folderId}`);
-      return null;
-    }
+      const pdfs = response.data.files || [];
+      const pdfCount = pdfs.length;
+      console.log(`[DRIVE] PDFs en esta página: ${pdfCount} (total revisados: ${totalChecked})`);
 
-    // Buscar el PDF que coincida con el número de cuenta
-    console.log(`[DRIVE] Comparando ${pdfCount} PDFs con cuenta ${accountNumber}...`);
-    for (const file of response.data.files) {
-      const extractedAccount = extractAccountNumber(file.name!);
-      console.log(`[DRIVE] PDF: ${file.name} -> Cuenta extraída: ${extractedAccount}`);
-      if (extractedAccount === accountNumber) {
-        console.log(`[DRIVE] ✅ PDF encontrado: ${file.name} (ID: ${file.id})`);
-        return {
-          fileId: file.id!,
-          fileName: file.name!,
-        };
+      if (pdfCount === 0 && totalChecked === 0) {
+        console.log(`[DRIVE] No hay PDFs en la carpeta ${folderId}`);
+        return null;
       }
-    }
 
-    console.log(`[DRIVE] ❌ No se encontró PDF con cuenta ${accountNumber} en esta carpeta`);
+      // Buscar el PDF que coincida con el número de cuenta
+      console.log(`[DRIVE] Comparando ${pdfCount} PDFs con cuenta ${accountNumber}...`);
+      for (const file of pdfs) {
+        totalChecked++;
+        const extractedAccount = extractAccountNumber(file.name!);
+        if (extractedAccount === accountNumber) {
+          console.log(`[DRIVE] ✅ PDF encontrado: ${file.name} (ID: ${file.id}) después de revisar ${totalChecked} archivos`);
+          return {
+            fileId: file.id!,
+            fileName: file.name!,
+          };
+        }
+        // Solo loguear algunos para no saturar los logs
+        if (totalChecked <= 5 || totalChecked % 50 === 0) {
+          console.log(`[DRIVE] PDF: ${file.name} -> Cuenta extraída: ${extractedAccount}`);
+        }
+      }
+
+      nextPageToken = response.data.nextPageToken || undefined;
+      if (nextPageToken) {
+        console.log(`[DRIVE] Hay más páginas, continuando búsqueda...`);
+      }
+    } while (nextPageToken);
+
+    console.log(`[DRIVE] ❌ No se encontró PDF con cuenta ${accountNumber} en esta carpeta (revisados ${totalChecked} archivos)`);
     return null;
   } catch (error) {
     console.error("[DRIVE] Error buscando PDF en carpeta:", error);
@@ -222,25 +240,34 @@ export async function findInvoiceInDrive(
       "electricidad",
     ];
 
-    for (const type of types) {
+    // Buscar en ambas carpetas (servicios y electricidad) del mes objetivo
+    console.log(`[DRIVE] 🔍 Iniciando búsqueda en ${types.length} carpetas del mes ${targetMonth} ${targetYear}`);
+    for (let i = 0; i < types.length; i++) {
+      const type = types[i];
       const folderName = getFolderName(targetMonth, targetYear, type);
-      console.log(`[DRIVE] Buscando en carpeta: ${folderName}`);
+      console.log(`[DRIVE] 📁 [${i + 1}/${types.length}] Buscando en carpeta: ${folderName}`);
       const folderId = await findFolderByName(folderName);
 
       if (folderId) {
+        console.log(`[DRIVE] ✅ Carpeta encontrada: ${folderName}, buscando PDF con cuenta ${accountNumber}...`);
         const pdf = await searchPDFInFolder(folderId, accountNumber);
         if (pdf) {
-          console.log(`[DRIVE] ✅ Factura encontrada: ${pdf.fileName} (tipo: ${type})`);
+          console.log(`[DRIVE] ✅✅✅ FACTURA ENCONTRADA: ${pdf.fileName} (tipo: ${type})`);
           return {
             fileId: pdf.fileId,
             fileName: pdf.fileName,
             type,
           };
+        } else {
+          const nextType = i < types.length - 1 ? types[i + 1] : null;
+          console.log(`[DRIVE] ⚠️ PDF no encontrado en ${folderName}${nextType ? `, continuando con ${nextType}...` : ', búsqueda en este mes completada'}`);
         }
       } else {
-        console.log(`[DRIVE] Carpeta no encontrada: ${folderName}`);
+        const nextType = i < types.length - 1 ? types[i + 1] : null;
+        console.log(`[DRIVE] ⚠️ Carpeta no encontrada: ${folderName}${nextType ? `, continuando con ${nextType}...` : ', búsqueda en este mes completada'}`);
       }
     }
+    console.log(`[DRIVE] ❌ No se encontró factura en ninguna carpeta de ${targetMonth} ${targetYear}`);
 
     // Si no se encuentra en el mes especificado, buscar en meses anteriores (hasta 3 meses atrás)
     if (!month && !year) {
@@ -256,6 +283,7 @@ export async function findInvoiceInDrive(
           const folderId = await findFolderByName(folderName);
 
           if (folderId) {
+            console.log(`[DRIVE] ✅ Carpeta encontrada: ${folderName}, buscando PDF...`);
             const pdf = await searchPDFInFolder(folderId, accountNumber);
             if (pdf) {
               console.log(`[DRIVE] ✅ Factura encontrada en mes anterior: ${pdf.fileName} (tipo: ${type})`);
@@ -264,7 +292,11 @@ export async function findInvoiceInDrive(
                 fileName: pdf.fileName,
                 type,
               };
+            } else {
+              console.log(`[DRIVE] ⚠️ PDF no encontrado en ${folderName}, continuando búsqueda...`);
             }
+          } else {
+            console.log(`[DRIVE] ⚠️ Carpeta no encontrada: ${folderName}, continuando búsqueda...`);
           }
         }
       }
