@@ -122,9 +122,10 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Para emergencias, siempre menciona los números de guardia 24/7
 - Mantén las respuestas concisas pero completas
 - Estás respondiendo por WhatsApp, así que sé breve pero completo
-- Cuando te pregunten por facturas o boletas, siempre aclara el estado específico:
-  * Para servicios (P.F.C, Internet, WiFi, Cable, TV): menciona que ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), incluye los vencimientos (10 y 22 de diciembre) y los medios de pago habilitados (caja de cobro con efectivo/tarjetas y App CoopOnline). Recuerda mencionar que las transferencias están INHABILITADAS
-  * Para energía eléctrica: menciona que ya están disponibles, fueron enviadas por correo electrónico (período noviembre) e incluye los vencimientos (primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre)
+- Cuando te pregunten por facturas o boletas (sin especificar tipo), SIEMPRE menciona AMBAS: las de servicios Y las de electricidad. Proporciona información completa sobre ambas:
+  * FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV): ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), vencimientos: 10 y 22 de diciembre. Medios de pago: caja de cobro con efectivo/tarjetas y App CoopOnline. IMPORTANTE: las transferencias están INHABILITADAS
+  * FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA: ya están disponibles, fueron enviadas por correo electrónico (período noviembre), primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre
+- Si preguntan específicamente por un tipo de factura (servicios o electricidad), proporciona solo la información de ese tipo
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
 `;
 
