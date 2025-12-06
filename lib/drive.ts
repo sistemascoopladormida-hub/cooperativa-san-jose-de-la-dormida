@@ -9,12 +9,10 @@ let jwtModule: any = null;
 
 async function getDriveClient() {
   if (driveClient) {
-    console.log("[DRIVE] Usando cliente Drive existente");
     return driveClient;
   }
 
   try {
-    console.log("[DRIVE] Inicializando cliente Drive...");
     let credentials: any;
 
     // Intentar leer desde variables de entorno primero (producción)
@@ -23,24 +21,18 @@ async function getDriveClient() {
       process.env.GOOGLE_DRIVE_PRIVATE_KEY &&
       process.env.GOOGLE_DRIVE_PROJECT_ID
     ) {
-      console.log("[DRIVE] ✅ Credenciales encontradas en variables de entorno");
       credentials = {
         client_email: process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL,
         private_key: process.env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, "\n"),
         project_id: process.env.GOOGLE_DRIVE_PROJECT_ID,
       };
-      console.log("[DRIVE] Email:", credentials.client_email);
-      console.log("[DRIVE] Project ID:", credentials.project_id);
-      console.log("[DRIVE] Private Key length:", credentials.private_key.length);
     } else {
-      console.log("[DRIVE] ⚠️ Variables de entorno no encontradas, intentando leer desde archivo JSON...");
       // Fallback: leer desde archivo JSON (desarrollo local)
       try {
         const credentialsPath = path.join(process.cwd(), "keyapidrive.json");
         credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
-        console.log("[DRIVE] ✅ Credenciales leídas desde archivo JSON");
       } catch (fileError) {
-        console.error("[DRIVE] ❌ Error leyendo archivo JSON:", fileError);
+        console.error("[DRIVE] ❌ Error: No se encontraron credenciales de Google Drive");
         throw new Error(
           "No se encontraron credenciales de Google Drive. Configura las variables de entorno GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL, GOOGLE_DRIVE_PRIVATE_KEY y GOOGLE_DRIVE_PROJECT_ID, o coloca el archivo keyapidrive.json en la raíz del proyecto."
         );
@@ -60,13 +52,9 @@ async function getDriveClient() {
     });
 
     driveClient = google.drive({ version: "v3", auth });
-    console.log("[DRIVE] ✅ Cliente Drive inicializado correctamente");
     return driveClient;
   } catch (error) {
-    console.error("[DRIVE] ❌ Error inicializando Google Drive:", error);
-    if (error instanceof Error) {
-      console.error("[DRIVE] Error details:", error.message, error.stack);
-    }
+    console.error("[DRIVE] ❌ Error inicializando Google Drive:", error instanceof Error ? error.message : error);
     throw error;
   }
 }
@@ -83,24 +71,20 @@ export function extractAccountNumber(filename: string): string | null {
 
     // Verificar que tenga al menos 5 caracteres
     if (nameWithoutExt.length < 5) {
-      console.log(`[DRIVE] ⚠️ Nombre de archivo muy corto: ${filename} (${nameWithoutExt.length} caracteres)`);
       return null;
     }
 
     // Obtener caracteres de posición 2-5 (índices 1-4)
     const accountPart = nameWithoutExt.substring(1, 5);
-    console.log(`[DRIVE] Extracción: ${filename} -> parte (1-4): "${accountPart}"`);
 
     // Convertir a número para eliminar ceros a la izquierda, luego a string
     const accountNumber = parseInt(accountPart, 10).toString();
 
     // Validar que sea un número válido
     if (isNaN(parseInt(accountNumber))) {
-      console.log(`[DRIVE] ⚠️ No se pudo convertir a número: ${accountPart}`);
       return null;
     }
 
-    console.log(`[DRIVE] Cuenta extraída: ${filename} -> ${accountNumber}`);
     return accountNumber;
   } catch (error) {
     console.error("[DRIVE] Error extrayendo número de cuenta:", error);
@@ -125,24 +109,19 @@ function getFolderName(
  */
 async function findFolderByName(folderName: string): Promise<string | null> {
   try {
-    console.log(`[DRIVE] Buscando carpeta: ${folderName}`);
     const drive = await getDriveClient();
     const response = await drive.files.list({
       q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
       fields: "files(id, name)",
     });
-
-    console.log(`[DRIVE] Resultado búsqueda carpeta ${folderName}:`, response.data.files?.length || 0, "carpetas encontradas");
     
     if (response.data.files && response.data.files.length > 0) {
-      console.log(`[DRIVE] Carpeta encontrada: ${folderName} (ID: ${response.data.files[0].id})`);
       return response.data.files[0].id!;
     }
 
-    console.log(`[DRIVE] Carpeta no encontrada: ${folderName}`);
     return null;
   } catch (error) {
-    console.error(`[DRIVE] Error buscando carpeta ${folderName}:`, error);
+    console.error(`[DRIVE] ❌ Error buscando carpeta ${folderName}:`, error instanceof Error ? error.message : error);
     return null;
   }
 }
@@ -155,7 +134,6 @@ async function searchPDFInFolder(
   accountNumber: string
 ): Promise<{ fileId: string; fileName: string } | null> {
   try {
-    console.log(`[DRIVE] Buscando PDF con cuenta ${accountNumber} en carpeta ${folderId}`);
     const drive = await getDriveClient();
 
     let nextPageToken: string | undefined = undefined;
@@ -173,41 +151,31 @@ async function searchPDFInFolder(
 
       const pdfs = response.data.files || [];
       const pdfCount = pdfs.length;
-      console.log(`[DRIVE] PDFs en esta página: ${pdfCount} (total revisados: ${totalChecked})`);
 
       if (pdfCount === 0 && totalChecked === 0) {
-        console.log(`[DRIVE] No hay PDFs en la carpeta ${folderId}`);
         return null;
       }
-
+      
       // Buscar el PDF que coincida con el número de cuenta
-      console.log(`[DRIVE] Comparando ${pdfCount} PDFs con cuenta ${accountNumber}...`);
       for (const file of pdfs) {
         totalChecked++;
         const extractedAccount = extractAccountNumber(file.name!);
         if (extractedAccount === accountNumber) {
-          console.log(`[DRIVE] ✅ PDF encontrado: ${file.name} (ID: ${file.id}) después de revisar ${totalChecked} archivos`);
+          console.log(`[DRIVE] ✅ ENCONTRADO: ${file.name}`);
           return {
             fileId: file.id!,
             fileName: file.name!,
           };
         }
-        // Solo loguear algunos para no saturar los logs
-        if (totalChecked <= 5 || totalChecked % 50 === 0) {
-          console.log(`[DRIVE] PDF: ${file.name} -> Cuenta extraída: ${extractedAccount}`);
-        }
       }
 
       nextPageToken = response.data.nextPageToken || undefined;
-      if (nextPageToken) {
-        console.log(`[DRIVE] Hay más páginas, continuando búsqueda...`);
-      }
     } while (nextPageToken);
 
-    console.log(`[DRIVE] ❌ No se encontró PDF con cuenta ${accountNumber} en esta carpeta (revisados ${totalChecked} archivos)`);
+    console.log(`[DRIVE] ❌ No encontrado (${totalChecked} archivos revisados)`);
     return null;
   } catch (error) {
-    console.error("[DRIVE] Error buscando PDF en carpeta:", error);
+    console.error("[DRIVE] ❌ Error:", error instanceof Error ? error.message : error);
     return null;
   }
 }
@@ -225,14 +193,12 @@ export async function findInvoiceInDrive(
   type: "servicios" | "electricidad";
 } | null> {
   try {
-    console.log(`[DRIVE] Iniciando búsqueda de factura - Cuenta: ${accountNumber}, Mes: ${month || "no especificado"}, Año: ${year || "no especificado"}`);
-    
     // Si no se especifica mes/año, usar el mes actual
     const now = new Date();
     const targetMonth = month || getMonthName(now.getMonth() + 1);
     const targetYear = year || now.getFullYear().toString();
 
-    console.log(`[DRIVE] Mes objetivo: ${targetMonth}, Año objetivo: ${targetYear}`);
+    console.log(`[DRIVE] 🔍 Buscando cuenta ${accountNumber} en ${targetMonth} ${targetYear}`);
 
     // Buscar en ambas carpetas
     const types: Array<"servicios" | "electricidad"> = [
@@ -241,74 +207,76 @@ export async function findInvoiceInDrive(
     ];
 
     // Buscar en ambas carpetas (servicios y electricidad) del mes objetivo
-    console.log(`[DRIVE] 🔍 Iniciando búsqueda en ${types.length} carpetas del mes ${targetMonth} ${targetYear}`);
     for (let i = 0; i < types.length; i++) {
       const type = types[i];
       const folderName = getFolderName(targetMonth, targetYear, type);
-      console.log(`[DRIVE] 📁 [${i + 1}/${types.length}] Buscando en carpeta: ${folderName}`);
       const folderId = await findFolderByName(folderName);
 
       if (folderId) {
-        console.log(`[DRIVE] ✅ Carpeta encontrada: ${folderName}, buscando PDF con cuenta ${accountNumber}...`);
+        console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
         const pdf = await searchPDFInFolder(folderId, accountNumber);
         if (pdf) {
-          console.log(`[DRIVE] ✅✅✅ FACTURA ENCONTRADA: ${pdf.fileName} (tipo: ${type})`);
+          console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
           return {
             fileId: pdf.fileId,
             fileName: pdf.fileName,
             type,
           };
         } else {
-          const nextType = i < types.length - 1 ? types[i + 1] : null;
-          console.log(`[DRIVE] ⚠️ PDF no encontrado en ${folderName}${nextType ? `, continuando con ${nextType}...` : ', búsqueda en este mes completada'}`);
+          if (i < types.length - 1) {
+            console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[i + 1]}...`);
+          }
         }
       } else {
-        const nextType = i < types.length - 1 ? types[i + 1] : null;
-        console.log(`[DRIVE] ⚠️ Carpeta no encontrada: ${folderName}${nextType ? `, continuando con ${nextType}...` : ', búsqueda en este mes completada'}`);
+        if (i < types.length - 1) {
+          console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe, continuando con ${types[i + 1]}...`);
+        }
       }
     }
-    console.log(`[DRIVE] ❌ No se encontró factura en ninguna carpeta de ${targetMonth} ${targetYear}`);
+    console.log(`[DRIVE] ❌ No encontrado en ${targetMonth} ${targetYear}`);
 
     // Si no se encuentra en el mes especificado, buscar en meses anteriores (hasta 3 meses atrás)
     if (!month && !year) {
-      console.log(`[DRIVE] No se encontró en ${targetMonth} ${targetYear}, buscando en meses anteriores...`);
+      console.log(`[DRIVE] 🔍 Buscando en meses anteriores...`);
       for (let i = 1; i <= 3; i++) {
         const pastDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const pastMonth = getMonthName(pastDate.getMonth() + 1);
         const pastYear = pastDate.getFullYear().toString();
 
-        console.log(`[DRIVE] Buscando en mes anterior ${i}: ${pastMonth} ${pastYear}`);
-        for (const type of types) {
+        console.log(`[DRIVE] 🔍 Mes anterior ${i}: ${pastMonth} ${pastYear}`);
+        for (let j = 0; j < types.length; j++) {
+          const type = types[j];
           const folderName = getFolderName(pastMonth, pastYear, type);
           const folderId = await findFolderByName(folderName);
 
           if (folderId) {
-            console.log(`[DRIVE] ✅ Carpeta encontrada: ${folderName}, buscando PDF...`);
+            console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
             const pdf = await searchPDFInFolder(folderId, accountNumber);
             if (pdf) {
-              console.log(`[DRIVE] ✅ Factura encontrada en mes anterior: ${pdf.fileName} (tipo: ${type})`);
+              console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
               return {
                 fileId: pdf.fileId,
                 fileName: pdf.fileName,
                 type,
               };
             } else {
-              console.log(`[DRIVE] ⚠️ PDF no encontrado en ${folderName}, continuando búsqueda...`);
+              if (j < types.length - 1) {
+                console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[j + 1]}...`);
+              }
             }
           } else {
-            console.log(`[DRIVE] ⚠️ Carpeta no encontrada: ${folderName}, continuando búsqueda...`);
+            if (j < types.length - 1) {
+              console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe, continuando con ${types[j + 1]}...`);
+            }
           }
         }
       }
     }
 
-    console.log(`[DRIVE] ❌ No se encontró factura para cuenta ${accountNumber}`);
+    console.log(`[DRIVE] ❌❌❌ NO ENCONTRADO para cuenta ${accountNumber}`);
     return null;
   } catch (error) {
-    console.error("[DRIVE] Error buscando factura en Drive:", error);
-    if (error instanceof Error) {
-      console.error("[DRIVE] Error details:", error.message, error.stack);
-    }
+    console.error("[DRIVE] ❌ Error:", error instanceof Error ? error.message : error);
     return null;
   }
 }
