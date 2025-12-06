@@ -94,15 +94,50 @@ export function extractAccountNumber(filename: string): string | null {
 }
 
 /**
+ * Determina si un mes/año usa la estructura antigua (facturas) o nueva (servicios/electricidad separadas)
+ * Estructura antigua: agosto, septiembre, octubre 2025 → "facturas-{mes}-{año}"
+ * Estructura nueva: noviembre 2025 en adelante → "servicios-{mes}-{año}" y "electricidad-{mes}-{año}"
+ */
+function usesOldStructure(month: string, year: string): boolean {
+  const monthNumber = getMonthNumber(month);
+  const yearNumber = parseInt(year, 10);
+  
+  // Agosto, septiembre, octubre 2025 usan estructura antigua
+  if (yearNumber === 2025 && monthNumber) {
+    return monthNumber >= 8 && monthNumber <= 10;
+  }
+  
+  // Antes de agosto 2025 también usa estructura antigua (por si acaso)
+  if (yearNumber === 2025 && monthNumber && monthNumber < 8) {
+    return true;
+  }
+  
+  // Años anteriores a 2025 usan estructura antigua
+  if (yearNumber < 2025) {
+    return true;
+  }
+  
+  // Noviembre 2025 en adelante usa estructura nueva
+  return false;
+}
+
+/**
  * Obtiene el nombre de la carpeta según el mes y tipo
- * Formato: "servicios-[mes]-[año]" o "electricidad-[mes]-[año]"
+ * Para meses antiguos (agosto-octubre 2025): "facturas-[mes]-[año]"
+ * Para meses nuevos (noviembre 2025+): "servicios-[mes]-[año]" o "electricidad-[mes]-[año]"
  */
 function getFolderName(
   month: string,
   year: string,
   type: "servicios" | "electricidad"
-): string {
-  return `${type}-${month}-${year}`;
+): string | null {
+  if (usesOldStructure(month, year)) {
+    // Estructura antigua: una sola carpeta "facturas-{mes}-{año}"
+    return `facturas-${month}-${year}`;
+  } else {
+    // Estructura nueva: carpetas separadas por tipo
+    return `${type}-${month}-${year}`;
+  }
 }
 
 /**
@@ -207,37 +242,64 @@ export async function findInvoiceInDrive(
 
     console.log(`[DRIVE] 🔍 Buscando cuenta ${accountNumber} en ${targetMonth} ${targetYear}`);
 
-    // Buscar en ambas carpetas
-    const types: Array<"servicios" | "electricidad"> = [
-      "servicios",
-      "electricidad",
-    ];
+    // Determinar qué estructura usar
+    const isOldStructure = usesOldStructure(targetMonth, targetYear);
 
-    // Buscar en ambas carpetas (servicios y electricidad) del mes objetivo
-    for (let i = 0; i < types.length; i++) {
-      const type = types[i];
-      const folderName = getFolderName(targetMonth, targetYear, type);
+    if (isOldStructure) {
+      // Estructura antigua: buscar en carpeta "facturas-{mes}-{año}"
+      const folderName = `facturas-${targetMonth}-${targetYear}`;
       const folderId = await findFolderByName(folderName);
 
       if (folderId) {
         console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
         const pdf = await searchPDFInFolder(folderId, accountNumber);
         if (pdf) {
-          console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
+          // En estructura antigua, no sabemos si es servicios o electricidad
+          // Usamos "servicios" como default, pero podría ser cualquiera
+          console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
           return {
             fileId: pdf.fileId,
             fileName: pdf.fileName,
-            type,
+            type: "servicios", // Default, ya que en la estructura antigua están juntas
           };
-        } else {
-          if (i < types.length - 1) {
-            console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[i + 1]}...`);
-          }
         }
       } else {
         console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
-        if (i < types.length - 1) {
-          console.log(`[DRIVE] Continuando con ${types[i + 1]}...`);
+      }
+    } else {
+      // Estructura nueva: buscar en carpetas separadas "servicios" y "electricidad"
+      const types: Array<"servicios" | "electricidad"> = [
+        "servicios",
+        "electricidad",
+      ];
+
+      for (let i = 0; i < types.length; i++) {
+        const type = types[i];
+        const folderName = getFolderName(targetMonth, targetYear, type);
+        if (!folderName) continue;
+
+        const folderId = await findFolderByName(folderName);
+
+        if (folderId) {
+          console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
+          const pdf = await searchPDFInFolder(folderId, accountNumber);
+          if (pdf) {
+            console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
+            return {
+              fileId: pdf.fileId,
+              fileName: pdf.fileName,
+              type,
+            };
+          } else {
+            if (i < types.length - 1) {
+              console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[i + 1]}...`);
+            }
+          }
+        } else {
+          console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
+          if (i < types.length - 1) {
+            console.log(`[DRIVE] Continuando con ${types[i + 1]}...`);
+          }
         }
       }
     }
@@ -252,30 +314,62 @@ export async function findInvoiceInDrive(
         const pastYear = pastDate.getFullYear().toString();
 
         console.log(`[DRIVE] 🔍 Mes anterior ${i}: ${pastMonth} ${pastYear}`);
-        for (let j = 0; j < types.length; j++) {
-          const type = types[j];
-          const folderName = getFolderName(pastMonth, pastYear, type);
+        
+        const isPastOldStructure = usesOldStructure(pastMonth, pastYear);
+
+        if (isPastOldStructure) {
+          // Estructura antigua: buscar en carpeta "facturas-{mes}-{año}"
+          const folderName = `facturas-${pastMonth}-${pastYear}`;
           const folderId = await findFolderByName(folderName);
 
           if (folderId) {
             console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
             const pdf = await searchPDFInFolder(folderId, accountNumber);
             if (pdf) {
-              console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
+              console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
               return {
                 fileId: pdf.fileId,
                 fileName: pdf.fileName,
-                type,
+                type: "servicios", // Default
               };
-            } else {
-              if (j < types.length - 1) {
-                console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[j + 1]}...`);
-              }
             }
           } else {
             console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
-            if (j < types.length - 1) {
-              console.log(`[DRIVE] Continuando con ${types[j + 1]}...`);
+          }
+        } else {
+          // Estructura nueva: buscar en carpetas separadas
+          const types: Array<"servicios" | "electricidad"> = [
+            "servicios",
+            "electricidad",
+          ];
+
+          for (let j = 0; j < types.length; j++) {
+            const type = types[j];
+            const folderName = getFolderName(pastMonth, pastYear, type);
+            if (!folderName) continue;
+
+            const folderId = await findFolderByName(folderName);
+
+            if (folderId) {
+              console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
+              const pdf = await searchPDFInFolder(folderId, accountNumber);
+              if (pdf) {
+                console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (${type})`);
+                return {
+                  fileId: pdf.fileId,
+                  fileName: pdf.fileName,
+                  type,
+                };
+              } else {
+                if (j < types.length - 1) {
+                  console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[j + 1]}...`);
+                }
+              }
+            } else {
+              console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
+              if (j < types.length - 1) {
+                console.log(`[DRIVE] Continuando con ${types[j + 1]}...`);
+              }
             }
           }
         }

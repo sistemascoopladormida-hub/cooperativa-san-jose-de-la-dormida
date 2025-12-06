@@ -121,14 +121,19 @@ RECLAMOS:
 ENVÍO DE FACTURAS:
 - Los usuarios pueden solicitar sus facturas proporcionando su número de cuenta
 - El número de cuenta es un número de 3 a 6 dígitos que aparece en la factura
-- Los usuarios pueden especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025")
+- FACTURAS DISPONIBLES: Las facturas están disponibles desde agosto 2025 en adelante
+- Los usuarios pueden especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025", "factura de agosto 2025")
 - Si no especifican mes/año, se buscará en el mes actual o más reciente disponible
-- Los usuarios pueden solicitar facturas de servicios o electricidad específicamente
+- Para meses anteriores a noviembre 2025 (agosto, septiembre, octubre 2025): las facturas de servicios y electricidad están juntas en una sola carpeta
+- Para noviembre 2025 en adelante: las facturas están separadas por tipo (servicios y electricidad)
+- Los usuarios pueden solicitar facturas de servicios o electricidad específicamente (solo para noviembre 2025+)
 - Ejemplos de solicitudes:
   * "Quiero mi factura, mi número de cuenta es 6370"
   * "Necesito la factura 239 de noviembre"
   * "Factura de electricidad número 1234"
   * "Boleta de servicios cuenta 5678 de diciembre 2025"
+  * "Factura de agosto 2025, número de cuenta 4296"
+  * "Quiero mi factura de septiembre, cuenta 7226"
 
 INSTRUCCIONES PARA EL ASISTENTE:
 - Responde de forma amigable, profesional y humana
@@ -143,7 +148,7 @@ INSTRUCCIONES PARA EL ASISTENTE:
   * FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA: ya están disponibles, fueron enviadas por correo electrónico (período noviembre), primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre
 - Si preguntan específicamente por un tipo de factura (servicios o electricidad), proporciona solo la información de ese tipo
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
-- Cuando un usuario solicite su factura proporcionando su número de cuenta, confirma que buscarás y enviarás la factura. El sistema automáticamente buscará la factura en Google Drive y la enviará por WhatsApp. Si no se encuentra, informa al usuario amablemente y sugiere que verifique el número de cuenta o contacte con la oficina.
+- Cuando un usuario solicite su factura proporcionando su número de cuenta, confirma que buscarás y enviarás la factura. El sistema automáticamente buscará la factura en Google Drive y la enviará por WhatsApp. Las facturas disponibles son desde agosto 2025 en adelante. Si no se encuentra, informa al usuario amablemente y sugiere que verifique el número de cuenta, el mes/año, o contacte con la oficina.
 `;
 
 const WHATSAPP_API_VERSION = "v22.0";
