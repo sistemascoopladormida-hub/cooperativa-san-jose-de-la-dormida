@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import OpenAI from "openai";
+import { supabase } from "@/lib/supabase";
 
 // Configuración para Next.js 15
 export const runtime = "nodejs";
@@ -129,27 +130,117 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
 `;
 
-// Historial de conversación
-const conversationHistory = new Map<
-  string,
-  Array<{ role: "user" | "assistant"; content: string }>
->();
-
 const WHATSAPP_API_VERSION = "v22.0";
+
+/**
+ * Obtiene o crea una conversación en Supabase
+ */
+async function getOrCreateConversation(
+  phoneNumber: string
+): Promise<number> {
+  // Buscar conversación existente
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("phone_number", phoneNumber)
+    .single();
+
+  if (existing) {
+    return existing.id;
+  }
+
+  // Crear nueva conversación
+  const { data: newConversation, error } = await supabase
+    .from("conversations")
+    .insert({ phone_number: phoneNumber })
+    .select("id")
+    .single();
+
+  if (error || !newConversation) {
+    console.error("Error creando conversación:", error);
+    throw new Error("Error al crear conversación");
+  }
+
+  return newConversation.id;
+}
+
+/**
+ * Guarda un mensaje en Supabase
+ */
+async function saveMessage(
+  conversationId: number,
+  role: "user" | "assistant",
+  content: string,
+  whatsappMessageId?: string
+): Promise<void> {
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    role,
+    content,
+    whatsapp_message_id: whatsappMessageId,
+  });
+
+  if (error) {
+    console.error("Error guardando mensaje:", error);
+  }
+}
+
+/**
+ * Obtiene el historial de conversación desde Supabase
+ */
+async function getConversationHistory(
+  phoneNumber: string
+): Promise<Array<{ role: "user" | "assistant"; content: string }>> {
+  try {
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("phone_number", phoneNumber)
+      .single();
+
+    if (!conversation) {
+      return [];
+    }
+
+    const { data: messages, error } = await supabase
+      .from("messages")
+      .select("role, content")
+      .eq("conversation_id", conversation.id)
+      .order("created_at", { ascending: true })
+      .limit(20);
+
+    if (error) {
+      console.error("Error obteniendo historial:", error);
+      return [];
+    }
+
+    return (
+      messages?.map((msg) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      })) || []
+    );
+  } catch (error) {
+    console.error("Error en getConversationHistory:", error);
+    return [];
+  }
+}
 
 /**
  * Obtiene respuesta del chatbot usando OpenAI (igual que /api/chat)
  */
 async function getChatbotResponse(
   from: string,
-  userMessage: string
+  userMessage: string,
+  whatsappMessageId?: string
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     return "Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.";
   }
 
   try {
-    const history = conversationHistory.get(from) || [];
+    // Obtener historial desde Supabase
+    const history = await getConversationHistory(from);
 
     const systemMessage = {
       role: "system" as const,
@@ -178,14 +269,20 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       completion.choices[0]?.message?.content ||
       "Lo siento, no pude generar una respuesta en este momento.";
 
-    // Guardar en historial
-    const updatedHistory = [
-      ...history,
-      { role: "user" as const, content: userMessage },
-      { role: "assistant" as const, content: response },
-    ].slice(-20);
-
-    conversationHistory.set(from, updatedHistory);
+    // Guardar mensajes en Supabase
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(
+        conversationId,
+        "user",
+        userMessage,
+        whatsappMessageId
+      );
+      // El messageId de la respuesta se guardará después de enviarla
+    } catch (dbError) {
+      console.error("Error guardando en base de datos:", dbError);
+      // Continuar aunque falle el guardado en BD
+    }
 
     return response;
   } catch (error: any) {
@@ -318,12 +415,35 @@ export async function POST(request: NextRequest) {
               if (message.type === "text") {
                 const from = message.from;
                 const text = message.text?.body || "";
+                const whatsappMessageId = message.id;
 
                 // Obtener respuesta del chatbot (igual que /api/chat)
-                const chatbotResponse = await getChatbotResponse(from, text);
+                const chatbotResponse = await getChatbotResponse(
+                  from,
+                  text,
+                  whatsappMessageId
+                );
 
                 // Enviar respuesta a WhatsApp
-                await sendTextMessage(from, chatbotResponse);
+                const sendResult = await sendTextMessage(from, chatbotResponse);
+
+                // Guardar el mensaje de respuesta con su messageId
+                if (sendResult.success && sendResult.messageId) {
+                  try {
+                    const conversationId = await getOrCreateConversation(from);
+                    await saveMessage(
+                      conversationId,
+                      "assistant",
+                      chatbotResponse,
+                      sendResult.messageId
+                    );
+                  } catch (dbError) {
+                    console.error(
+                      "Error guardando mensaje de respuesta:",
+                      dbError
+                    );
+                  }
+                }
               }
             }
           }
