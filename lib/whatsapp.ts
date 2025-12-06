@@ -55,14 +55,29 @@ export async function sendDocumentMessage(
         },
         (err, res) => {
           if (err) {
+            console.error("[WHATSAPP] Error en submit:", err);
             reject(err);
             return;
           }
 
-          res.on("data", (chunk) => chunks.push(chunk));
+          console.log("[WHATSAPP] Status code:", res.statusCode);
+          console.log("[WHATSAPP] Headers:", res.headers);
+
+          res.on("data", (chunk) => {
+            chunks.push(chunk);
+          });
+
           res.on("end", () => {
             try {
               const body = Buffer.concat(chunks).toString();
+              console.log("[WHATSAPP] Respuesta completa:", body);
+
+              if (!body || body.trim() === "") {
+                console.error("[WHATSAPP] Respuesta vacía del servidor");
+                reject(new Error("Respuesta vacía del servidor de WhatsApp"));
+                return;
+              }
+
               const data = JSON.parse(body);
 
               if (
@@ -70,17 +85,30 @@ export async function sendDocumentMessage(
                 res.statusCode >= 200 &&
                 res.statusCode < 300
               ) {
+                console.log("[WHATSAPP] Upload exitoso, media ID:", data.id);
                 resolve(data);
               } else {
+                console.error("[WHATSAPP] Error en respuesta:", data);
                 reject(
-                  new Error(data.error?.message || `HTTP ${res.statusCode}`)
+                  new Error(
+                    data.error?.message || `HTTP ${res.statusCode}: ${body}`
+                  )
                 );
               }
-            } catch (parseError) {
-              reject(parseError);
+            } catch (parseError: any) {
+              console.error("[WHATSAPP] Error parseando JSON:", parseError);
+              const bodyText = Buffer.concat(chunks).toString();
+              console.error("[WHATSAPP] Body recibido:", bodyText);
+              reject(
+                new Error(`Error parseando respuesta: ${parseError.message}`)
+              );
             }
           });
-          res.on("error", reject);
+
+          res.on("error", (error) => {
+            console.error("[WHATSAPP] Error en stream:", error);
+            reject(error);
+          });
         }
       );
     });
