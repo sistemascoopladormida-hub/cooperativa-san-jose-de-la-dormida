@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import OpenAI from "openai";
 import { supabase } from "@/lib/supabase";
+import { detectInvoiceRequest } from "@/lib/invoice-detector";
+import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
+import { sendDocumentMessage } from "@/lib/whatsapp";
 
 // Configuración para Next.js 15
 export const runtime = "nodejs";
@@ -115,6 +118,18 @@ ASOCIARSE:
 RECLAMOS:
 - Los reclamos se pueden presentar a través de la sección "Reclamos" en la página web o contactando directamente
 
+ENVÍO DE FACTURAS:
+- Los usuarios pueden solicitar sus facturas proporcionando su número de cuenta
+- El número de cuenta es un número de 3 a 6 dígitos que aparece en la factura
+- Los usuarios pueden especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025")
+- Si no especifican mes/año, se buscará en el mes actual o más reciente disponible
+- Los usuarios pueden solicitar facturas de servicios o electricidad específicamente
+- Ejemplos de solicitudes:
+  * "Quiero mi factura, mi número de cuenta es 6370"
+  * "Necesito la factura 239 de noviembre"
+  * "Factura de electricidad número 1234"
+  * "Boleta de servicios cuenta 5678 de diciembre 2025"
+
 INSTRUCCIONES PARA EL ASISTENTE:
 - Responde de forma amigable, profesional y humana
 - Usa un tono cercano y empático
@@ -128,6 +143,7 @@ INSTRUCCIONES PARA EL ASISTENTE:
   * FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA: ya están disponibles, fueron enviadas por correo electrónico (período noviembre), primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre
 - Si preguntan específicamente por un tipo de factura (servicios o electricidad), proporciona solo la información de ese tipo
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
+- Cuando un usuario solicite su factura proporcionando su número de cuenta, confirma que buscarás y enviarás la factura. El sistema automáticamente buscará la factura en Google Drive y la enviará por WhatsApp. Si no se encuentra, informa al usuario amablemente y sugiere que verifique el número de cuenta o contacte con la oficina.
 `;
 
 const WHATSAPP_API_VERSION = "v22.0";
@@ -417,31 +433,150 @@ export async function POST(request: NextRequest) {
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
 
-                // Obtener respuesta del chatbot (igual que /api/chat)
-                const chatbotResponse = await getChatbotResponse(
-                  from,
-                  text,
-                  whatsappMessageId
-                );
+                // Detectar si es una solicitud de factura
+                const invoiceRequest = detectInvoiceRequest(text);
 
-                // Enviar respuesta a WhatsApp
-                const sendResult = await sendTextMessage(from, chatbotResponse);
-
-                // Guardar el mensaje de respuesta con su messageId
-                if (sendResult.success && sendResult.messageId) {
+                if (invoiceRequest.accountNumber) {
+                  // Es una solicitud de factura
                   try {
-                    const conversationId = await getOrCreateConversation(from);
-                    await saveMessage(
-                      conversationId,
-                      "assistant",
-                      chatbotResponse,
-                      sendResult.messageId
+                    // Buscar la factura en Google Drive
+                    const invoice = await findInvoiceInDrive(
+                      invoiceRequest.accountNumber,
+                      invoiceRequest.month,
+                      invoiceRequest.year
                     );
-                  } catch (dbError) {
-                    console.error(
-                      "Error guardando mensaje de respuesta:",
-                      dbError
-                    );
+
+                    if (invoice) {
+                      // Descargar el PDF
+                      const pdfBuffer = await downloadPDFFromDrive(
+                        invoice.fileId
+                      );
+
+                      // Enviar el PDF por WhatsApp
+                      const typeLabel =
+                        invoice.type === "servicios"
+                          ? "servicios"
+                          : "energía eléctrica";
+                      const caption = `Tu factura de ${typeLabel} - ${invoice.fileName}`;
+
+                      const docResult = await sendDocumentMessage(
+                        from,
+                        pdfBuffer,
+                        invoice.fileName,
+                        caption
+                      );
+
+                      // Enviar mensaje de confirmación
+                      let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.`;
+                      if (invoiceRequest.month) {
+                        confirmationMessage += `\n\n📅 Período: ${invoiceRequest.month}${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
+                      }
+                      confirmationMessage += `\n\n📄 Archivo: ${invoice.fileName}`;
+
+                      await sendTextMessage(from, confirmationMessage);
+
+                      // Guardar en historial
+                      try {
+                        const conversationId =
+                          await getOrCreateConversation(from);
+                        await saveMessage(
+                          conversationId,
+                          "user",
+                          text,
+                          whatsappMessageId
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "assistant",
+                          confirmationMessage
+                        );
+                      } catch (dbError) {
+                        console.error("Error guardando en BD:", dbError);
+                      }
+                    } else {
+                      // No se encontró la factura
+                      const notFoundMessage =
+                        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.` +
+                        `\n\nPor favor verifica que el número de cuenta sea correcto.` +
+                        `\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
+
+                      await sendTextMessage(from, notFoundMessage);
+
+                      // Guardar en historial
+                      try {
+                        const conversationId =
+                          await getOrCreateConversation(from);
+                        await saveMessage(
+                          conversationId,
+                          "user",
+                          text,
+                          whatsappMessageId
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "assistant",
+                          notFoundMessage
+                        );
+                      } catch (dbError) {
+                        console.error("Error guardando en BD:", dbError);
+                      }
+                    }
+                  } catch (error: any) {
+                    console.error("Error procesando solicitud de factura:", error);
+                    const errorMessage =
+                      `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330.`;
+
+                    await sendTextMessage(from, errorMessage);
+
+                    // Guardar en historial
+                    try {
+                      const conversationId = await getOrCreateConversation(from);
+                      await saveMessage(
+                        conversationId,
+                        "user",
+                        text,
+                        whatsappMessageId
+                      );
+                      await saveMessage(
+                        conversationId,
+                        "assistant",
+                        errorMessage
+                      );
+                    } catch (dbError) {
+                      console.error("Error guardando en BD:", dbError);
+                    }
+                  }
+                } else {
+                  // No es solicitud de factura, procesar normalmente
+                  // Obtener respuesta del chatbot (igual que /api/chat)
+                  const chatbotResponse = await getChatbotResponse(
+                    from,
+                    text,
+                    whatsappMessageId
+                  );
+
+                  // Enviar respuesta a WhatsApp
+                  const sendResult = await sendTextMessage(
+                    from,
+                    chatbotResponse
+                  );
+
+                  // Guardar el mensaje de respuesta con su messageId
+                  if (sendResult.success && sendResult.messageId) {
+                    try {
+                      const conversationId = await getOrCreateConversation(from);
+                      await saveMessage(
+                        conversationId,
+                        "assistant",
+                        chatbotResponse,
+                        sendResult.messageId
+                      );
+                    } catch (dbError) {
+                      console.error(
+                        "Error guardando mensaje de respuesta:",
+                        dbError
+                      );
+                    }
                   }
                 }
               }
