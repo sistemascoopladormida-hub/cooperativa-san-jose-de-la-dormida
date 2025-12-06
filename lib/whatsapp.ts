@@ -1,4 +1,5 @@
 import FormData from "form-data";
+import https from "https";
 
 const WHATSAPP_API_VERSION = "v22.0";
 
@@ -19,40 +20,70 @@ export async function sendDocumentMessage(
   }
 
   try {
-    // Paso 1: Subir el archivo a WhatsApp Media API
-    const mediaUrl = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/media`;
-
+    // Paso 1: Subir el archivo a WhatsApp Media API usando form-data con https.request
     const formData = new FormData();
-    // Asegurarse de agregar messaging_product primero
+
+    // IMPORTANTE: Agregar campos en el orden correcto
     formData.append("messaging_product", "whatsapp");
     formData.append("type", "document");
-    // Agregar el archivo usando Buffer directamente
     formData.append("file", fileBuffer, {
       filename: filename,
       contentType: "application/pdf",
     });
 
-    // Obtener los headers de FormData (incluye Content-Type con boundary)
-    const formHeaders = formData.getHeaders ? formData.getHeaders() : {};
+    // Obtener los headers de FormData
+    const formHeaders = formData.getHeaders();
+    formHeaders["Authorization"] = `Bearer ${token}`;
 
-    const uploadResponse = await fetch(mediaUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...formHeaders,
-      },
-      body: formData as any,
+    console.log(
+      "[WHATSAPP] Enviando archivo:",
+      filename,
+      "Tamaño:",
+      fileBuffer.length
+    );
+
+    // Usar form-data.submit() que es más compatible
+    const uploadData = await new Promise<any>((resolve, reject) => {
+      const chunks: Buffer[] = [];
+
+      formData.submit(
+        {
+          host: "graph.facebook.com",
+          path: `/${WHATSAPP_API_VERSION}/${phoneId}/media`,
+          method: "POST",
+          headers: formHeaders,
+        },
+        (err, res) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          res.on("data", (chunk) => chunks.push(chunk));
+          res.on("end", () => {
+            try {
+              const body = Buffer.concat(chunks).toString();
+              const data = JSON.parse(body);
+
+              if (
+                res.statusCode &&
+                res.statusCode >= 200 &&
+                res.statusCode < 300
+              ) {
+                resolve(data);
+              } else {
+                reject(
+                  new Error(data.error?.message || `HTTP ${res.statusCode}`)
+                );
+              }
+            } catch (parseError) {
+              reject(parseError);
+            }
+          });
+          res.on("error", reject);
+        }
+      );
     });
-
-    const uploadData = await uploadResponse.json();
-
-    if (!uploadResponse.ok) {
-      console.error("Error subiendo archivo:", uploadData);
-      return {
-        success: false,
-        error: uploadData.error?.message || "Error subiendo archivo",
-      };
-    }
 
     const mediaId = uploadData.id;
 
@@ -96,4 +127,3 @@ export async function sendDocumentMessage(
     return { success: false, error: error.message };
   }
 }
-
