@@ -151,9 +151,7 @@ const WHATSAPP_API_VERSION = "v22.0";
 /**
  * Obtiene o crea una conversación en Supabase
  */
-async function getOrCreateConversation(
-  phoneNumber: string
-): Promise<number> {
+async function getOrCreateConversation(phoneNumber: string): Promise<number> {
   // Buscar conversación existente
   const { data: existing } = await supabase
     .from("conversations")
@@ -288,12 +286,7 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     // Guardar mensajes en Supabase
     try {
       const conversationId = await getOrCreateConversation(from);
-      await saveMessage(
-        conversationId,
-        "user",
-        userMessage,
-        whatsappMessageId
-      );
+      await saveMessage(conversationId, "user", userMessage, whatsappMessageId);
       // El messageId de la respuesta se guardará después de enviarla
     } catch (dbError) {
       console.error("Error guardando en base de datos:", dbError);
@@ -435,9 +428,21 @@ export async function POST(request: NextRequest) {
 
                 // Detectar si es una solicitud de factura
                 const invoiceRequest = detectInvoiceRequest(text);
+                console.log("[WEBHOOK] Mensaje recibido:", text);
+                console.log(
+                  "[WEBHOOK] Solicitud de factura detectada:",
+                  JSON.stringify(invoiceRequest)
+                );
 
                 if (invoiceRequest.accountNumber) {
                   // Es una solicitud de factura
+                  console.log(
+                    `[WEBHOOK] Buscando factura para cuenta: ${
+                      invoiceRequest.accountNumber
+                    }, mes: ${
+                      invoiceRequest.month || "no especificado"
+                    }, año: ${invoiceRequest.year || "no especificado"}`
+                  );
                   try {
                     // Buscar la factura en Google Drive
                     const invoice = await findInvoiceInDrive(
@@ -445,11 +450,23 @@ export async function POST(request: NextRequest) {
                       invoiceRequest.month,
                       invoiceRequest.year
                     );
+                    console.log(
+                      "[WEBHOOK] Resultado de búsqueda en Drive:",
+                      invoice
+                        ? `Encontrada: ${invoice.fileName} (${invoice.type})`
+                        : "No encontrada"
+                    );
 
                     if (invoice) {
+                      console.log(
+                        `[WEBHOOK] ✅ Factura encontrada, descargando PDF...`
+                      );
                       // Descargar el PDF
                       const pdfBuffer = await downloadPDFFromDrive(
                         invoice.fileId
+                      );
+                      console.log(
+                        `[WEBHOOK] PDF descargado, tamaño: ${pdfBuffer.length} bytes`
                       );
 
                       // Enviar el PDF por WhatsApp
@@ -459,17 +476,30 @@ export async function POST(request: NextRequest) {
                           : "energía eléctrica";
                       const caption = `Tu factura de ${typeLabel} - ${invoice.fileName}`;
 
+                      console.log(
+                        `[WEBHOOK] Enviando documento por WhatsApp...`
+                      );
                       const docResult = await sendDocumentMessage(
                         from,
                         pdfBuffer,
                         invoice.fileName,
                         caption
                       );
+                      console.log(
+                        `[WEBHOOK] Resultado envío documento:`,
+                        docResult.success
+                          ? "✅ Éxito"
+                          : `❌ Error: ${docResult.error}`
+                      );
 
                       // Enviar mensaje de confirmación
                       let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.`;
                       if (invoiceRequest.month) {
-                        confirmationMessage += `\n\n📅 Período: ${invoiceRequest.month}${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
+                        confirmationMessage += `\n\n📅 Período: ${
+                          invoiceRequest.month
+                        }${
+                          invoiceRequest.year ? " " + invoiceRequest.year : ""
+                        }`;
                       }
                       confirmationMessage += `\n\n📄 Archivo: ${invoice.fileName}`;
 
@@ -477,8 +507,9 @@ export async function POST(request: NextRequest) {
 
                       // Guardar en historial
                       try {
-                        const conversationId =
-                          await getOrCreateConversation(from);
+                        const conversationId = await getOrCreateConversation(
+                          from
+                        );
                         await saveMessage(
                           conversationId,
                           "user",
@@ -495,6 +526,9 @@ export async function POST(request: NextRequest) {
                       }
                     } else {
                       // No se encontró la factura
+                      console.log(
+                        `[WEBHOOK] ❌ Factura no encontrada para cuenta ${invoiceRequest.accountNumber}`
+                      );
                       const notFoundMessage =
                         `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.` +
                         `\n\nPor favor verifica que el número de cuenta sea correcto.` +
@@ -504,8 +538,9 @@ export async function POST(request: NextRequest) {
 
                       // Guardar en historial
                       try {
-                        const conversationId =
-                          await getOrCreateConversation(from);
+                        const conversationId = await getOrCreateConversation(
+                          from
+                        );
                         await saveMessage(
                           conversationId,
                           "user",
@@ -522,15 +557,26 @@ export async function POST(request: NextRequest) {
                       }
                     }
                   } catch (error: any) {
-                    console.error("Error procesando solicitud de factura:", error);
-                    const errorMessage =
-                      `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330.`;
+                    console.error(
+                      "[WEBHOOK] ❌ Error procesando solicitud de factura:",
+                      error
+                    );
+                    if (error instanceof Error) {
+                      console.error(
+                        "[WEBHOOK] Error details:",
+                        error.message,
+                        error.stack
+                      );
+                    }
+                    const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330.`;
 
                     await sendTextMessage(from, errorMessage);
 
                     // Guardar en historial
                     try {
-                      const conversationId = await getOrCreateConversation(from);
+                      const conversationId = await getOrCreateConversation(
+                        from
+                      );
                       await saveMessage(
                         conversationId,
                         "user",
@@ -564,7 +610,9 @@ export async function POST(request: NextRequest) {
                   // Guardar el mensaje de respuesta con su messageId
                   if (sendResult.success && sendResult.messageId) {
                     try {
-                      const conversationId = await getOrCreateConversation(from);
+                      const conversationId = await getOrCreateConversation(
+                        from
+                      );
                       await saveMessage(
                         conversationId,
                         "assistant",
