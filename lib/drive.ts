@@ -1,12 +1,13 @@
 import { google } from "googleapis";
-import { JWT } from "google-auth-library";
+import type { JWT } from "google-auth-library";
 import fs from "fs";
 import path from "path";
 
 // Inicializar Google Drive API
 let driveClient: any = null;
+let jwtModule: any = null;
 
-function getDriveClient() {
+async function getDriveClient() {
   if (driveClient) {
     return driveClient;
   }
@@ -16,6 +17,12 @@ function getDriveClient() {
     const credentialsPath = path.join(process.cwd(), "keyapidrive.json");
     const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
 
+    // Importar JWT dinámicamente para evitar problemas de build
+    if (!jwtModule) {
+      jwtModule = await import("google-auth-library");
+    }
+    const { JWT } = jwtModule;
+    
     const auth = new JWT({
       email: credentials.client_email,
       key: credentials.private_key,
@@ -80,7 +87,7 @@ function getFolderName(
  */
 async function findFolderByName(folderName: string): Promise<string | null> {
   try {
-    const drive = getDriveClient();
+    const drive = await getDriveClient();
     const response = await drive.files.list({
       q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
       fields: "files(id, name)",
@@ -105,7 +112,7 @@ async function searchPDFInFolder(
   accountNumber: string
 ): Promise<{ fileId: string; fileName: string } | null> {
   try {
-    const drive = getDriveClient();
+    const drive = await getDriveClient();
 
     // Listar todos los PDFs en la carpeta
     const response = await drive.files.list({
@@ -214,7 +221,7 @@ export async function downloadPDFFromDrive(
   fileId: string
 ): Promise<Buffer> {
   try {
-    const drive = getDriveClient();
+    const drive = await getDriveClient();
     const response = await drive.files.get(
       {
         fileId,
