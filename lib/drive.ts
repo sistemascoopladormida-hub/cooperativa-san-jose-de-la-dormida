@@ -13,16 +13,37 @@ async function getDriveClient() {
   }
 
   try {
-    // Leer credenciales desde el archivo JSON
-    const credentialsPath = path.join(process.cwd(), "keyapidrive.json");
-    const credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
+    let credentials: any;
+
+    // Intentar leer desde variables de entorno primero (producción)
+    if (
+      process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL &&
+      process.env.GOOGLE_DRIVE_PRIVATE_KEY &&
+      process.env.GOOGLE_DRIVE_PROJECT_ID
+    ) {
+      credentials = {
+        client_email: process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        project_id: process.env.GOOGLE_DRIVE_PROJECT_ID,
+      };
+    } else {
+      // Fallback: leer desde archivo JSON (desarrollo local)
+      try {
+        const credentialsPath = path.join(process.cwd(), "keyapidrive.json");
+        credentials = JSON.parse(fs.readFileSync(credentialsPath, "utf8"));
+      } catch (fileError) {
+        throw new Error(
+          "No se encontraron credenciales de Google Drive. Configura las variables de entorno GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL, GOOGLE_DRIVE_PRIVATE_KEY y GOOGLE_DRIVE_PROJECT_ID, o coloca el archivo keyapidrive.json en la raíz del proyecto."
+        );
+      }
+    }
 
     // Importar JWT dinámicamente para evitar problemas de build
     if (!jwtModule) {
       jwtModule = await import("google-auth-library");
     }
     const { JWT } = jwtModule;
-    
+
     const auth = new JWT({
       email: credentials.client_email,
       key: credentials.private_key,
@@ -217,9 +238,7 @@ export async function findInvoiceInDrive(
 /**
  * Descarga un PDF desde Google Drive
  */
-export async function downloadPDFFromDrive(
-  fileId: string
-): Promise<Buffer> {
+export async function downloadPDFFromDrive(fileId: string): Promise<Buffer> {
   try {
     const drive = await getDriveClient();
     const response = await drive.files.get(
@@ -301,4 +320,3 @@ export function extractMonthAndYear(
     year: yearMatch ? yearMatch[1] : undefined,
   };
 }
-
