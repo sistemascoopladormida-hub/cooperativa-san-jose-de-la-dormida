@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
-import OpenAI from 'openai'
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+import OpenAI from "openai";
 
 // Configuración para Next.js 15
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Inicializar OpenAI (exactamente igual que en /api/chat)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+});
 
 // Contexto de la Cooperativa La Dormida (igual que en /api/chat)
 const cooperativeContext = `
@@ -94,7 +94,12 @@ ESTADO DE FACTURAS Y BOLETAS:
     - IMPORTANTE: El pago mediante transferencia se encuentra INHABILITADO
 
 - FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA:
-  * Todavía no están disponibles
+  * Ya están disponibles
+  * Fueron enviadas a las bandejas de correo electrónico de los socios
+  * Período: Noviembre
+  * Vencimientos:
+    - Primer vencimiento: 12 de diciembre
+    - Segundo vencimiento: 22 de diciembre
 
 TURNERO DE FARMACIAS:
 - 6 de diciembre: Farmacia Carreño
@@ -119,155 +124,172 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Estás respondiendo por WhatsApp, así que sé breve pero completo
 - Cuando te pregunten por facturas o boletas, siempre aclara el estado específico:
   * Para servicios (P.F.C, Internet, WiFi, Cable, TV): menciona que ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), incluye los vencimientos (10 y 22 de diciembre) y los medios de pago habilitados (caja de cobro con efectivo/tarjetas y App CoopOnline). Recuerda mencionar que las transferencias están INHABILITADAS
-  * Para energía eléctrica: menciona que todavía no están disponibles
+  * Para energía eléctrica: menciona que ya están disponibles, fueron enviadas por correo electrónico (período noviembre) e incluye los vencimientos (primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre)
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
-`
+`;
 
 // Historial de conversación
-const conversationHistory = new Map<string, Array<{ role: 'user' | 'assistant'; content: string }>>()
+const conversationHistory = new Map<
+  string,
+  Array<{ role: "user" | "assistant"; content: string }>
+>();
 
-const WHATSAPP_API_VERSION = 'v22.0'
+const WHATSAPP_API_VERSION = "v22.0";
 
 /**
  * Obtiene respuesta del chatbot usando OpenAI (igual que /api/chat)
  */
-async function getChatbotResponse(from: string, userMessage: string): Promise<string> {
+async function getChatbotResponse(
+  from: string,
+  userMessage: string
+): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
-    return 'Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.'
+    return "Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.";
   }
 
   try {
-    const history = conversationHistory.get(from) || []
-    
+    const history = conversationHistory.get(from) || [];
+
     const systemMessage = {
-      role: 'system' as const,
+      role: "system" as const,
       content: `Eres un asistente virtual amigable y profesional de la Cooperativa La Dormida. Estás respondiendo por WhatsApp. Tu objetivo es ayudar a los usuarios con información sobre los servicios, horarios, contacto y más.
 
 ${cooperativeContext}
 
-Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`
-    }
+Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`,
+    };
 
     const messages = [
       systemMessage,
       ...history.slice(-10),
-      { role: 'user' as const, content: userMessage },
-    ]
+      { role: "user" as const, content: userMessage },
+    ];
 
     // Llamar a OpenAI exactamente igual que en /api/chat
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: messages,
       temperature: 0.7,
       max_tokens: 500,
-    })
+    });
 
-    const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
+    const response =
+      completion.choices[0]?.message?.content ||
+      "Lo siento, no pude generar una respuesta en este momento.";
 
     // Guardar en historial
     const updatedHistory = [
       ...history,
-      { role: 'user' as const, content: userMessage },
-      { role: 'assistant' as const, content: response },
-    ].slice(-20)
+      { role: "user" as const, content: userMessage },
+      { role: "assistant" as const, content: response },
+    ].slice(-20);
 
-    conversationHistory.set(from, updatedHistory)
+    conversationHistory.set(from, updatedHistory);
 
-    return response
+    return response;
   } catch (error: any) {
-    console.error('Error en chatbot:', error)
-    return 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.'
+    console.error("Error en chatbot:", error);
+    return "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.";
   }
 }
 
 /**
  * Envía un mensaje de texto a través de WhatsApp Cloud API
  */
-async function sendTextMessage(to: string, text: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  const token = process.env.WHATSAPP_TOKEN
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
+async function sendTextMessage(
+  to: string,
+  text: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!token || !phoneId) {
-    return { success: false, error: 'Configuración faltante' }
+    return { success: false, error: "Configuración faltante" };
   }
 
-  const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`
+  const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
 
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        messaging_product: 'whatsapp',
+        messaging_product: "whatsapp",
         to: to,
-        type: 'text',
+        type: "text",
         text: {
           body: text,
         },
       }),
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error('Error enviando mensaje:', data.error || data)
-      return { success: false, error: data.error?.message || 'Error desconocido' }
+      console.error("Error enviando mensaje:", data.error || data);
+      return {
+        success: false,
+        error: data.error?.message || "Error desconocido",
+      };
     }
 
     return {
       success: true,
       messageId: data.messages?.[0]?.id,
-    }
+    };
   } catch (error: any) {
-    console.error('Error enviando mensaje:', error)
-    return { success: false, error: error.message }
+    console.error("Error enviando mensaje:", error);
+    return { success: false, error: error.message };
   }
 }
 
 /**
  * Verifica la firma HMAC del webhook
  */
-function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
-  const secret = process.env.WHATSAPP_APP_SECRET
+function verifySignature(
+  rawBody: string,
+  signatureHeader: string | null
+): boolean {
+  const secret = process.env.WHATSAPP_APP_SECRET;
   if (!secret || !signatureHeader) {
-    return true
+    return true;
   }
 
-  const hash = signatureHeader.replace('sha256=', '')
+  const hash = signatureHeader.replace("sha256=", "");
   const expectedHash = crypto
-    .createHmac('sha256', secret)
+    .createHmac("sha256", secret)
     .update(rawBody)
-    .digest('hex')
+    .digest("hex");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(hash),
-    Buffer.from(expectedHash)
-  )
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
 }
 
 /**
  * Handler GET para verificación del webhook
  */
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const mode = searchParams.get('hub.mode')
-  const token = searchParams.get('hub.verify_token')
-  const challenge = searchParams.get('hub.challenge')
+  const searchParams = request.nextUrl.searchParams;
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
 
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
 
   if (!verifyToken) {
-    return NextResponse.json({ error: 'Configuración faltante' }, { status: 500 })
+    return NextResponse.json(
+      { error: "Configuración faltante" },
+      { status: 500 }
+    );
   }
 
-  if (mode === 'subscribe' && token === verifyToken) {
-    return new NextResponse(challenge, { status: 200 })
+  if (mode === "subscribe" && token === verifyToken) {
+    return new NextResponse(challenge, { status: 200 });
   }
 
-  return NextResponse.json({ error: 'Token inválido' }, { status: 403 })
+  return NextResponse.json({ error: "Token inválido" }, { status: 403 });
 }
 
 /**
@@ -275,32 +297,32 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const rawBody = await request.text()
-    const signatureHeader = request.headers.get('x-hub-signature-256')
+    const rawBody = await request.text();
+    const signatureHeader = request.headers.get("x-hub-signature-256");
 
     if (!verifySignature(rawBody, signatureHeader)) {
-      return NextResponse.json({ error: 'Firma inválida' }, { status: 403 })
+      return NextResponse.json({ error: "Firma inválida" }, { status: 403 });
     }
 
-    const body = JSON.parse(rawBody)
+    const body = JSON.parse(rawBody);
 
     // Procesar mensajes
     if (body.entry && Array.isArray(body.entry)) {
       for (const entry of body.entry) {
-        const changes = entry.changes || []
+        const changes = entry.changes || [];
         for (const change of changes) {
-          const value = change.value
+          const value = change.value;
           if (value.messages && Array.isArray(value.messages)) {
             for (const message of value.messages) {
-              if (message.type === 'text') {
-                const from = message.from
-                const text = message.text?.body || ''
-                
+              if (message.type === "text") {
+                const from = message.from;
+                const text = message.text?.body || "";
+
                 // Obtener respuesta del chatbot (igual que /api/chat)
-                const chatbotResponse = await getChatbotResponse(from, text)
-                
+                const chatbotResponse = await getChatbotResponse(from, text);
+
                 // Enviar respuesta a WhatsApp
-                await sendTextMessage(from, chatbotResponse)
+                await sendTextMessage(from, chatbotResponse);
               }
             }
           }
@@ -308,9 +330,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ status: 'received' })
+    return NextResponse.json({ status: "received" });
   } catch (error: any) {
-    console.error('Error en webhook:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    console.error("Error en webhook:", error);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

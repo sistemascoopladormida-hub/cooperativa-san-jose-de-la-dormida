@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+});
 
 // Información de contexto sobre la Cooperativa La Dormida
 const cooperativeContext = `
@@ -88,7 +88,12 @@ ESTADO DE FACTURAS Y BOLETAS:
     - IMPORTANTE: El pago mediante transferencia se encuentra INHABILITADO
 
 - FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA:
-  * Todavía no están disponibles
+  * Ya están disponibles
+  * Fueron enviadas a las bandejas de correo electrónico de los socios
+  * Período: Noviembre
+  * Vencimientos:
+    - Primer vencimiento: 12 de diciembre
+    - Segundo vencimiento: 22 de diciembre
 
 TURNERO DE FARMACIAS:
 - 6 de diciembre: Farmacia Carreño
@@ -112,56 +117,58 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Mantén las respuestas concisas pero completas
 - Cuando te pregunten por facturas o boletas, siempre aclara el estado específico:
   * Para servicios (P.F.C, Internet, WiFi, Cable, TV): menciona que ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), incluye los vencimientos (10 y 22 de diciembre) y los medios de pago habilitados (caja de cobro con efectivo/tarjetas y App CoopOnline). Recuerda mencionar que las transferencias están INHABILITADAS
-  * Para energía eléctrica: menciona que todavía no están disponibles
+  * Para energía eléctrica: menciona que ya están disponibles, fueron enviadas por correo electrónico (período noviembre) e incluye los vencimientos (primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre)
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
-`
+`;
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages } = await request.json()
+    const { messages } = await request.json();
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: 'OPENAI_API_KEY no está configurada' },
+        { error: "OPENAI_API_KEY no está configurada" },
         { status: 500 }
-      )
+      );
     }
 
     // Construir el sistema de mensajes con el contexto
     const systemMessage = {
-      role: 'system' as const,
+      role: "system" as const,
       content: `Eres un asistente virtual amigable y profesional de la Cooperativa La Dormida. Tu objetivo es ayudar a los usuarios con información sobre los servicios, horarios, contacto y más.
 
 ${cooperativeContext}
 
-Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`
-    }
+Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`,
+    };
 
     // Preparar los mensajes para OpenAI
     const conversationMessages = [
       systemMessage,
       ...messages.map((msg: { text: string; sender: string }) => ({
-        role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
+        role:
+          msg.sender === "user" ? ("user" as const) : ("assistant" as const),
         content: msg.text,
       })),
-    ]
+    ];
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: conversationMessages,
       temperature: 0.7,
       max_tokens: 500,
-    })
+    });
 
-    const response = completion.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta en este momento.'
+    const response =
+      completion.choices[0]?.message?.content ||
+      "Lo siento, no pude generar una respuesta en este momento.";
 
-    return NextResponse.json({ response })
+    return NextResponse.json({ response });
   } catch (error: any) {
-    console.error('Error en la API de chat:', error)
+    console.error("Error en la API de chat:", error);
     return NextResponse.json(
-      { error: error.message || 'Error al procesar la solicitud' },
+      { error: error.message || "Error al procesar la solicitud" },
       { status: 500 }
-    )
+    );
   }
 }
-
