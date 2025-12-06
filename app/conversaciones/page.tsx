@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,6 +53,8 @@ export default function ConversacionesPage() {
     useState<ConversationDetail | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingConversations, setLoadingConversations] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Verificar autenticación al cargar
   useEffect(() => {
@@ -65,6 +67,15 @@ export default function ConversacionesPage() {
       loadConversations();
     }
   }, [authenticated]);
+
+  // Auto-scroll al final cuando se cargan mensajes
+  useEffect(() => {
+    if (selectedConversation?.messages && messagesEndRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [selectedConversation?.messages]);
 
   const checkAuth = async () => {
     try {
@@ -384,16 +395,20 @@ export default function ConversacionesPage() {
         </div>
       </motion.div>
 
-      <div className="container mx-auto px-4 py-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-140px)]">
-          {/* Lista de conversaciones */}
+      <div className="container mx-auto px-4 py-4 md:py-6 relative z-10">
+        {/* En móvil: mostrar solo lista o solo mensajes */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 min-h-0">
+          {/* Lista de conversaciones - oculta en móvil cuando hay conversación seleccionada */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className={`lg:col-span-1 ${
+              selectedConversation ? "hidden lg:block" : "block"
+            }`}
           >
-            <Card className="lg:col-span-1 flex flex-col shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b">
+            <Card className="flex flex-col shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm h-[calc(100vh-120px)] md:h-[calc(100vh-140px)]">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b flex-shrink-0">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
@@ -417,7 +432,7 @@ export default function ConversacionesPage() {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-0">
+              <CardContent className="flex-1 overflow-hidden p-0 min-h-0">
                 <ScrollArea className="h-full">
                   {loadingConversations ? (
                     <div className="p-8 text-center">
@@ -508,23 +523,37 @@ export default function ConversacionesPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
+            className={`lg:col-span-2 ${
+              selectedConversation ? "block" : "hidden lg:block"
+            }`}
           >
-            <Card className="lg:col-span-2 flex flex-col shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 border-b">
+            <Card className="flex flex-col shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm h-[calc(100vh-120px)] md:h-[calc(100vh-140px)]">
+              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 border-b flex-shrink-0">
                 {selectedConversation ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <CardTitle className="flex items-center gap-3 text-lg">
-                      <motion.div
-                        whileHover={{ rotate: [0, -10, 10, 0] }}
-                        transition={{ duration: 0.5 }}
+                    <div className="flex items-center gap-3 mb-2">
+                      {/* Botón volver en móvil */}
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setSelectedConversation(null)}
+                        className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        <Phone className="h-6 w-6 text-indigo-600" />
-                      </motion.div>
-                      <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                        {selectedConversation.conversation.phone_number}
-                      </span>
-                    </CardTitle>
-                    <div className="mt-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                        <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      </motion.button>
+                      <CardTitle className="flex items-center gap-3 text-lg flex-1">
+                        <motion.div
+                          whileHover={{ rotate: [0, -10, 10, 0] }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Phone className="h-6 w-6 text-indigo-600" />
+                        </motion.div>
+                        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent break-all">
+                          {selectedConversation.conversation.phone_number}
+                        </span>
+                      </CardTitle>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-600 dark:text-gray-300">
                       <Badge
                         variant="secondary"
                         className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
@@ -550,10 +579,10 @@ export default function ConversacionesPage() {
                   </CardTitle>
                 )}
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-0 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800">
+              <CardContent className="flex-1 overflow-hidden p-0 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800 min-h-0">
                 {selectedConversation ? (
-                  <ScrollArea className="h-full">
-                    <div className="p-6 space-y-4">
+                  <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
+                    <div className="p-4 md:p-6 space-y-4 pb-8">
                       <AnimatePresence>
                         {selectedConversation.messages.map((message, index) => (
                           <motion.div
@@ -574,13 +603,13 @@ export default function ConversacionesPage() {
                           >
                             <motion.div
                               whileHover={{ scale: 1.02 }}
-                              className={`max-w-[75%] rounded-2xl p-4 shadow-md ${
+                              className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-3 md:p-4 shadow-md ${
                                 message.role === "user"
                                   ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm"
                                   : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm border border-gray-200 dark:border-gray-600"
                               }`}
                             >
-                              <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                              <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed break-words">
                                 {message.content}
                               </div>
                               <div
@@ -590,16 +619,20 @@ export default function ConversacionesPage() {
                                     : "text-gray-500 dark:text-gray-400"
                                 }`}
                               >
-                                <Calendar className="h-3 w-3" />
-                                {format(
-                                  new Date(message.created_at),
-                                  "dd/MM/yyyy HH:mm:ss"
-                                )}
+                                <Calendar className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">
+                                  {format(
+                                    new Date(message.created_at),
+                                    "dd/MM/yyyy HH:mm:ss"
+                                  )}
+                                </span>
                               </div>
                             </motion.div>
                           </motion.div>
                         ))}
                       </AnimatePresence>
+                      {/* Elemento invisible para scroll automático */}
+                      <div ref={messagesEndRef} />
                     </div>
                   </ScrollArea>
                 ) : (
