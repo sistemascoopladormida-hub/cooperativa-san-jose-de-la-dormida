@@ -63,6 +63,96 @@ export async function sendDocumentMessage(
           console.log("[WHATSAPP] Status code:", res.statusCode);
           console.log("[WHATSAPP] Headers:", res.headers);
 
+          // Manejar redirecciones 301/302
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            const location = res.headers.location;
+            if (location) {
+              console.log("[WHATSAPP] Redirección detectada a:", location);
+              // Consumir la respuesta para liberar recursos
+              res.resume();
+
+              // Hacer nueva petición a la URL de redirección
+              const redirectFormData = new FormData();
+              redirectFormData.append("messaging_product", "whatsapp");
+              redirectFormData.append("type", "document");
+              redirectFormData.append("file", fileBuffer, {
+                filename: filename,
+                contentType: "application/pdf",
+              });
+
+              const redirectHeaders = redirectFormData.getHeaders();
+              redirectHeaders["Authorization"] = `Bearer ${token}`;
+
+              const urlObj = new URL(location);
+              redirectFormData.submit(
+                {
+                  host: urlObj.hostname,
+                  path: urlObj.pathname,
+                  method: "POST",
+                  headers: redirectHeaders,
+                },
+                (redirectErr, redirectRes) => {
+                  if (redirectErr) {
+                    reject(redirectErr);
+                    return;
+                  }
+
+                  const redirectChunks: Buffer[] = [];
+                  redirectRes.on("data", (chunk) => redirectChunks.push(chunk));
+                  redirectRes.on("end", () => {
+                    try {
+                      const redirectBody =
+                        Buffer.concat(redirectChunks).toString();
+                      console.log(
+                        "[WHATSAPP] Respuesta después de redirección:",
+                        redirectBody
+                      );
+
+                      if (!redirectBody || redirectBody.trim() === "") {
+                        reject(
+                          new Error("Respuesta vacía después de redirección")
+                        );
+                        return;
+                      }
+
+                      const redirectData = JSON.parse(redirectBody);
+
+                      if (
+                        redirectRes.statusCode &&
+                        redirectRes.statusCode >= 200 &&
+                        redirectRes.statusCode < 300
+                      ) {
+                        console.log(
+                          "[WHATSAPP] Upload exitoso, media ID:",
+                          redirectData.id
+                        );
+                        resolve(redirectData);
+                      } else {
+                        reject(
+                          new Error(
+                            redirectData.error?.message ||
+                              `HTTP ${redirectRes.statusCode}`
+                          )
+                        );
+                      }
+                    } catch (parseError: any) {
+                      reject(
+                        new Error(
+                          `Error parseando respuesta: ${parseError.message}`
+                        )
+                      );
+                    }
+                  });
+                  redirectRes.on("error", reject);
+                }
+              );
+              return;
+            } else {
+              reject(new Error("Redirección sin header location"));
+              return;
+            }
+          }
+
           res.on("data", (chunk) => {
             chunks.push(chunk);
           });
