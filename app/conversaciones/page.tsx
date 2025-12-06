@@ -24,7 +24,6 @@ import {
 interface Conversation {
   id: number;
   phone_number: string;
-  user_name?: string | null;
   created_at: string;
   updated_at: string;
   message_count: number;
@@ -521,17 +520,9 @@ export default function ConversacionesPage() {
                       >
                         <Phone className="h-6 w-6 text-indigo-600" />
                       </motion.div>
-                      <div className="flex flex-col">
-                        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                          {selectedConversation.conversation.user_name ||
-                            selectedConversation.conversation.phone_number}
-                        </span>
-                        {selectedConversation.conversation.user_name && (
-                          <span className="text-xs text-gray-500 font-normal">
-                            {selectedConversation.conversation.phone_number}
-                          </span>
-                        )}
-                      </div>
+                      <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        {selectedConversation.conversation.phone_number}
+                      </span>
                     </CardTitle>
                     <div className="mt-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                       <Badge

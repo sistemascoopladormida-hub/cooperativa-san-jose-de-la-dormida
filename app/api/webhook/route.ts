@@ -133,92 +133,26 @@ INSTRUCCIONES PARA EL ASISTENTE:
 const WHATSAPP_API_VERSION = "v22.0";
 
 /**
- * Obtiene el perfil del usuario desde WhatsApp API
- */
-async function getUserProfile(phoneNumber: string): Promise<string | null> {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-
-  if (!token || !phoneId) {
-    return null;
-  }
-
-  try {
-    // WhatsApp Cloud API endpoint para obtener perfil del contacto
-    // Formato del número: debe incluir código de país sin el +
-    const cleanPhone = phoneNumber.replace(/[^0-9]/g, "");
-    const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/contacts/${cleanPhone}`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      // El perfil puede venir en diferentes formatos según la API
-      return data.profile?.name || data.name || null;
-    } else {
-      // Si falla, intentar con el formato alternativo
-      const altUrl = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${cleanPhone}`;
-      const altResponse = await fetch(altUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (altResponse.ok) {
-        const altData = await altResponse.json();
-        return altData.profile?.name || altData.name || null;
-      }
-    }
-  } catch (error) {
-    console.error("Error obteniendo perfil de usuario:", error);
-  }
-
-  return null;
-}
-
-/**
  * Obtiene o crea una conversación en Supabase
  */
 async function getOrCreateConversation(
-  phoneNumber: string,
-  userName?: string | null
+  phoneNumber: string
 ): Promise<number> {
   // Buscar conversación existente
   const { data: existing } = await supabase
     .from("conversations")
-    .select("id, user_name")
+    .select("id")
     .eq("phone_number", phoneNumber)
     .single();
 
   if (existing) {
-    // Si tenemos un nombre nuevo y no existe en la BD, actualizarlo
-    if (userName && !existing.user_name) {
-      await supabase
-        .from("conversations")
-        .update({ user_name: userName })
-        .eq("id", existing.id);
-    }
     return existing.id;
-  }
-
-  // Obtener nombre del perfil si no se proporcionó
-  if (!userName) {
-    userName = await getUserProfile(phoneNumber);
   }
 
   // Crear nueva conversación
   const { data: newConversation, error } = await supabase
     .from("conversations")
-    .insert({
-      phone_number: phoneNumber,
-      user_name: userName,
-    })
+    .insert({ phone_number: phoneNumber })
     .select("id")
     .single();
 
@@ -338,7 +272,12 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     // Guardar mensajes en Supabase
     try {
       const conversationId = await getOrCreateConversation(from);
-      await saveMessage(conversationId, "user", userMessage, whatsappMessageId);
+      await saveMessage(
+        conversationId,
+        "user",
+        userMessage,
+        whatsappMessageId
+      );
       // El messageId de la respuesta se guardará después de enviarla
     } catch (dbError) {
       console.error("Error guardando en base de datos:", dbError);
@@ -478,29 +417,9 @@ export async function POST(request: NextRequest) {
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
 
-                // Obtener o crear conversación (esto también obtendrá el nombre del perfil)
-                let conversationId: number;
-                try {
-                  conversationId = await getOrCreateConversation(from);
-                } catch (dbError) {
-                  console.error(
-                    "Error obteniendo/creando conversación:",
-                    dbError
-                  );
-                  continue;
-                }
-
                 // Obtener respuesta del chatbot (igual que /api/chat)
                 const chatbotResponse = await getChatbotResponse(
                   from,
-                  text,
-                  whatsappMessageId
-                );
-
-                // Guardar mensaje del usuario
-                await saveMessage(
-                  conversationId,
-                  "user",
                   text,
                   whatsappMessageId
                 );
@@ -511,6 +430,7 @@ export async function POST(request: NextRequest) {
                 // Guardar el mensaje de respuesta con su messageId
                 if (sendResult.success && sendResult.messageId) {
                   try {
+                    const conversationId = await getOrCreateConversation(from);
                     await saveMessage(
                       conversationId,
                       "assistant",
