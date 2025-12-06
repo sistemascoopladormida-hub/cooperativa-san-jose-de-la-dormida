@@ -69,13 +69,14 @@ export function extractAccountNumber(filename: string): string | null {
     // Remover extensión .pdf
     const nameWithoutExt = filename.replace(/\.pdf$/i, "");
 
-    // Verificar que tenga al menos 5 caracteres
-    if (nameWithoutExt.length < 5) {
+    // Verificar que tenga al menos 6 caracteres (necesitamos hasta posición 5)
+    if (nameWithoutExt.length < 6) {
       return null;
     }
 
-    // Obtener caracteres de posición 2-5 (índices 1-4)
-    const accountPart = nameWithoutExt.substring(1, 5);
+    // Obtener caracteres de posición 2-5 (índices 2-5, 4 caracteres)
+    // Ejemplo: 0063700097001400008565 -> posición 2-5 = "6370"
+    const accountPart = nameWithoutExt.substring(2, 6);
 
     // Convertir a número para eliminar ceros a la izquierda, luego a string
     const accountNumber = parseInt(accountPart, 10).toString();
@@ -160,6 +161,12 @@ async function searchPDFInFolder(
       for (const file of pdfs) {
         totalChecked++;
         const extractedAccount = extractAccountNumber(file.name!);
+        
+        // Mostrar ejemplos de los primeros 5 PDFs para debugging
+        if (totalChecked <= 5) {
+          console.log(`[DRIVE] Ejemplo ${totalChecked}: ${file.name} -> cuenta extraída: "${extractedAccount}"`);
+        }
+        
         if (extractedAccount === accountNumber) {
           console.log(`[DRIVE] ✅ ENCONTRADO: ${file.name}`);
           return {
@@ -228,8 +235,9 @@ export async function findInvoiceInDrive(
           }
         }
       } else {
+        console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
         if (i < types.length - 1) {
-          console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe, continuando con ${types[i + 1]}...`);
+          console.log(`[DRIVE] Continuando con ${types[i + 1]}...`);
         }
       }
     }
@@ -265,8 +273,9 @@ export async function findInvoiceInDrive(
               }
             }
           } else {
+            console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
             if (j < types.length - 1) {
-              console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe, continuando con ${types[j + 1]}...`);
+              console.log(`[DRIVE] Continuando con ${types[j + 1]}...`);
             }
           }
         }
