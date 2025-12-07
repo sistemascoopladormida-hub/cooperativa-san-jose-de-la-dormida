@@ -511,6 +511,9 @@ export async function POST(request: NextRequest) {
                         }`;
                       }
                       confirmationMessage += `\n\n📄 Archivo: ${invoice.fileName}`;
+                      confirmationMessage += `\n\n💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
+                      confirmationMessage += `\nhttps://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login`;
+                      confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
                       await sendTextMessage(from, confirmationMessage);
 
