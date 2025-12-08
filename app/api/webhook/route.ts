@@ -209,6 +209,16 @@ async function saveMessage(
 }
 
 /**
+ * Obtiene el mes y año actual en formato para la consulta
+ */
+function getCurrentMonthYear(): { month: string; year: string } {
+  const now = new Date();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const year = now.getFullYear().toString();
+  return { month, year };
+}
+
+/**
  * Registra una solicitud de factura exitosa en Supabase
  */
 async function recordInvoiceRequest(
@@ -219,12 +229,17 @@ async function recordInvoiceRequest(
   year?: string
 ): Promise<void> {
   try {
+    // Si no se especifica mes/año, usar el mes actual
+    const { month: currentMonth, year: currentYear } = getCurrentMonthYear();
+    const requestMonth = month || currentMonth;
+    const requestYear = year || currentYear;
+
     const { error } = await supabase.from("invoice_requests").insert({
       phone_number: phoneNumber,
       account_number: accountNumber,
       file_name: fileName,
-      month: month || null,
-      year: year || null,
+      month: requestMonth,
+      year: requestYear,
       requested_at: new Date().toISOString(),
     });
 
@@ -232,7 +247,7 @@ async function recordInvoiceRequest(
       console.error("[WEBHOOK] Error registrando solicitud de factura:", error);
     } else {
       console.log(
-        `[WEBHOOK] ✅ Solicitud de factura registrada: ${phoneNumber} -> ${accountNumber}`
+        `[WEBHOOK] ✅ Solicitud de factura registrada: ${phoneNumber} -> ${accountNumber} (${requestMonth}/${requestYear})`
       );
     }
   } catch (error) {
@@ -241,14 +256,20 @@ async function recordInvoiceRequest(
 }
 
 /**
- * Obtiene el conteo de facturas enviadas a un número de teléfono
+ * Obtiene el conteo de facturas enviadas a un número de teléfono en el mes actual
  */
-async function getInvoiceRequestCount(phoneNumber: string): Promise<number> {
+async function getInvoiceRequestCountThisMonth(
+  phoneNumber: string
+): Promise<number> {
   try {
+    const { month, year } = getCurrentMonthYear();
+
     const { count, error } = await supabase
       .from("invoice_requests")
       .select("*", { count: "exact", head: true })
-      .eq("phone_number", phoneNumber);
+      .eq("phone_number", phoneNumber)
+      .eq("month", month)
+      .eq("year", year);
 
     if (error) {
       console.error(
@@ -260,7 +281,7 @@ async function getInvoiceRequestCount(phoneNumber: string): Promise<number> {
 
     return count || 0;
   } catch (error) {
-    console.error("[WEBHOOK] Error en getInvoiceRequestCount:", error);
+    console.error("[WEBHOOK] Error en getInvoiceRequestCountThisMonth:", error);
     return 0;
   }
 }
@@ -558,10 +579,10 @@ export async function POST(request: NextRequest) {
                           : `❌ Error: ${docResult.error}`
                       );
 
-                      // Obtener conteo de facturas enviadas ANTES de registrar esta nueva
-                      const invoiceCountBefore = await getInvoiceRequestCount(from);
+                      // Obtener conteo de facturas del mes actual ANTES de registrar esta nueva
+                      const invoiceCountBefore = await getInvoiceRequestCountThisMonth(from);
                       console.log(
-                        `[WEBHOOK] Total de facturas enviadas a ${from} (antes de esta): ${invoiceCountBefore}`
+                        `[WEBHOOK] Total de facturas enviadas a ${from} este mes (antes de esta): ${invoiceCountBefore}`
                       );
 
                       // Registrar la solicitud de factura solo si se envió exitosamente
@@ -591,12 +612,16 @@ export async function POST(request: NextRequest) {
                       confirmationMessage += `\n\n💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
                       confirmationMessage += `\nhttps://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login`;
 
-                      // Notificar si superó el límite de 5 facturas (después de esta solicitud)
-                      if (invoiceCountAfter > 5) {
-                        confirmationMessage += `\n\n⚠️ *Nota importante:* Has solicitado más de 5 facturas. Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 si necesitas más facturas.`;
-                        console.log(
-                          `[WEBHOOK] ⚠️ Usuario ${from} ha superado el límite de 5 facturas (total: ${invoiceCountAfter})`
-                        );
+                      // Notificar desde la segunda factura sobre el límite de 10 por mes
+                      if (invoiceCountAfter >= 2) {
+                        if (invoiceCountAfter <= 10) {
+                          confirmationMessage += `\n\n⚠️ *Recordatorio importante:* Hay un límite máximo de 10 facturas por mes por usuario. Esta es tu factura número ${invoiceCountAfter} de este mes. Por favor, usa esta herramienta con cuidado y no abuses de ella, ya que de lo contrario tu acceso será restringido.`;
+                        } else {
+                          confirmationMessage += `\n\n⚠️ *Nota importante:* Has superado el límite de 10 facturas por mes (solicitudes: ${invoiceCountAfter}). Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 si necesitas más facturas.`;
+                          console.log(
+                            `[WEBHOOK] ⚠️ Usuario ${from} ha superado el límite de 10 facturas por mes (total este mes: ${invoiceCountAfter})`
+                          );
+                        }
                       }
 
                       confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
