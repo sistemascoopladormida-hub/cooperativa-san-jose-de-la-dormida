@@ -209,6 +209,63 @@ async function saveMessage(
 }
 
 /**
+ * Registra una solicitud de factura exitosa en Supabase
+ */
+async function recordInvoiceRequest(
+  phoneNumber: string,
+  accountNumber: string,
+  fileName: string,
+  month?: string,
+  year?: string
+): Promise<void> {
+  try {
+    const { error } = await supabase.from("invoice_requests").insert({
+      phone_number: phoneNumber,
+      account_number: accountNumber,
+      file_name: fileName,
+      month: month || null,
+      year: year || null,
+      requested_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error("[WEBHOOK] Error registrando solicitud de factura:", error);
+    } else {
+      console.log(
+        `[WEBHOOK] ✅ Solicitud de factura registrada: ${phoneNumber} -> ${accountNumber}`
+      );
+    }
+  } catch (error) {
+    console.error("[WEBHOOK] Error en recordInvoiceRequest:", error);
+  }
+}
+
+/**
+ * Obtiene el conteo de facturas enviadas a un número de teléfono
+ */
+async function getInvoiceRequestCount(phoneNumber: string): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from("invoice_requests")
+      .select("*", { count: "exact", head: true })
+      .eq("phone_number", phoneNumber);
+
+    if (error) {
+      console.error(
+        "[WEBHOOK] Error obteniendo conteo de facturas:",
+        error
+      );
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error("[WEBHOOK] Error en getInvoiceRequestCount:", error);
+    return 0;
+  }
+}
+
+/**
  * Obtiene el historial de conversación desde Supabase
  */
 async function getConversationHistory(
@@ -501,6 +558,26 @@ export async function POST(request: NextRequest) {
                           : `❌ Error: ${docResult.error}`
                       );
 
+                      // Obtener conteo de facturas enviadas ANTES de registrar esta nueva
+                      const invoiceCountBefore = await getInvoiceRequestCount(from);
+                      console.log(
+                        `[WEBHOOK] Total de facturas enviadas a ${from} (antes de esta): ${invoiceCountBefore}`
+                      );
+
+                      // Registrar la solicitud de factura solo si se envió exitosamente
+                      if (docResult.success) {
+                        await recordInvoiceRequest(
+                          from,
+                          invoiceRequest.accountNumber,
+                          invoice.fileName,
+                          invoiceRequest.month,
+                          invoiceRequest.year
+                        );
+                      }
+
+                      // El conteo después de registrar será invoiceCountBefore + 1
+                      const invoiceCountAfter = invoiceCountBefore + (docResult.success ? 1 : 0);
+
                       // Enviar mensaje de confirmación
                       let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.`;
                       if (invoiceRequest.month) {
@@ -513,6 +590,15 @@ export async function POST(request: NextRequest) {
                       confirmationMessage += `\n\n📄 Archivo: ${invoice.fileName}`;
                       confirmationMessage += `\n\n💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
                       confirmationMessage += `\nhttps://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login`;
+
+                      // Notificar si superó el límite de 5 facturas (después de esta solicitud)
+                      if (invoiceCountAfter > 5) {
+                        confirmationMessage += `\n\n⚠️ *Nota importante:* Has solicitado más de 5 facturas. Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 si necesitas más facturas.`;
+                        console.log(
+                          `[WEBHOOK] ⚠️ Usuario ${from} ha superado el límite de 5 facturas (total: ${invoiceCountAfter})`
+                        );
+                      }
+
                       confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
                       await sendTextMessage(from, confirmationMessage);
