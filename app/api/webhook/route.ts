@@ -391,11 +391,12 @@ async function markDataUpdateImageAsSent(
 }
 
 /**
- * Obtiene la fecha del último mensaje de un usuario (excluyendo el mensaje actual)
+ * Obtiene la fecha del último mensaje de un usuario
+ * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
+ * por lo que el mensaje actual no está en la BD todavía
  */
 async function getLastMessageTime(
-  phoneNumber: string,
-  excludeMessageId?: string
+  phoneNumber: string
 ): Promise<Date | null> {
   try {
     const { data: conversation } = await supabase
@@ -405,28 +406,26 @@ async function getLastMessageTime(
       .single();
 
     if (!conversation) {
+      console.log(`[WEBHOOK] No se encontró conversación para ${phoneNumber}`);
       return null;
     }
 
-    let query = supabase
+    const { data: lastMessage, error } = await supabase
       .from("messages")
       .select("created_at")
       .eq("conversation_id", conversation.id)
       .order("created_at", { ascending: false })
-      .limit(1);
-
-    // Excluir el mensaje actual si se proporciona
-    if (excludeMessageId) {
-      query = query.neq("whatsapp_message_id", excludeMessageId);
-    }
-
-    const { data: lastMessage, error } = await query.single();
+      .limit(1)
+      .single();
 
     if (error || !lastMessage) {
+      console.log(`[WEBHOOK] No hay mensajes previos para ${phoneNumber}`);
       return null;
     }
 
-    return new Date(lastMessage.created_at);
+    const lastMessageTime = new Date(lastMessage.created_at);
+    console.log(`[WEBHOOK] Último mensaje para ${phoneNumber}: ${lastMessageTime.toISOString()}`);
+    return lastMessageTime;
   } catch (error) {
     console.error("Error obteniendo último mensaje:", error);
     return null;
@@ -434,32 +433,50 @@ async function getLastMessageTime(
 }
 
 /**
- * Verifica si han pasado 10 minutos desde el último mensaje
+ * Verifica si deben enviarse la imagen de actualización de datos
+ * Retorna true si: data_update_image_sent es false Y han pasado 10 minutos desde el último mensaje
+ * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
+ * por lo que el mensaje actual no está en la BD todavía
  */
 async function shouldSendDataUpdateImage(
-  phoneNumber: string,
-  excludeMessageId?: string
+  phoneNumber: string
 ): Promise<boolean> {
   try {
-    // Verificar si ya se envió
+    // PRIMERO: Verificar si ya se envió (si es true, no enviar)
     const alreadySent = await hasDataUpdateImageBeenSent(phoneNumber);
     if (alreadySent) {
+      console.log(`[WEBHOOK] Imagen de actualización ya fue enviada a ${phoneNumber}`);
       return false;
     }
 
-    // Obtener el tiempo del último mensaje (excluyendo el actual)
-    const lastMessageTime = await getLastMessageTime(phoneNumber, excludeMessageId);
+    // SEGUNDO: Obtener el tiempo del último mensaje
+    // Como esta función se llama ANTES de guardar el mensaje actual,
+    // el último mensaje es realmente el anterior
+    const lastMessageTime = await getLastMessageTime(phoneNumber);
+    
+    // Si no hay mensajes previos, no enviar (es la primera vez que habla)
     if (!lastMessageTime) {
-      return false; // No hay mensajes previos
+      console.log(`[WEBHOOK] No hay mensajes previos para ${phoneNumber}, no se envía imagen`);
+      return false;
     }
 
-    // Calcular la diferencia en milisegundos
+    // TERCERO: Calcular la diferencia en milisegundos
     const now = new Date();
     const diffInMs = now.getTime() - lastMessageTime.getTime();
     const diffInMinutes = diffInMs / (1000 * 60);
 
+    console.log(`[WEBHOOK] Verificando inactividad para ${phoneNumber}: ${diffInMinutes.toFixed(2)} minutos desde último mensaje`);
+
     // Verificar si han pasado 10 minutos
-    return diffInMinutes >= 10;
+    const shouldSend = diffInMinutes >= 10;
+    
+    if (shouldSend) {
+      console.log(`[WEBHOOK] ✅ Condiciones cumplidas: data_update_image_sent=false Y ${diffInMinutes.toFixed(2)} minutos de inactividad`);
+    } else {
+      console.log(`[WEBHOOK] ❌ No se cumplen condiciones: ${diffInMinutes.toFixed(2)} minutos < 10 minutos requeridos`);
+    }
+    
+    return shouldSend;
   } catch (error) {
     console.error("Error verificando si enviar imagen de actualización:", error);
     return false;
@@ -568,6 +585,8 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       "Lo siento, no pude generar una respuesta en este momento.";
 
     // Guardar mensajes en Supabase
+    // NOTA: El mensaje del usuario se guarda aquí, pero la verificación de inactividad
+    // se hace ANTES de llamar a esta función, por lo que el mensaje actual no afecta la verificación
     try {
       const conversationId = await getOrCreateConversation(from);
       await saveMessage(conversationId, "user", userMessage, whatsappMessageId);
@@ -709,6 +728,21 @@ export async function POST(request: NextRequest) {
                 const from = message.from;
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
+
+                // PRIMERO: Verificar si debemos enviar la imagen de actualización de datos
+                // Esto se hace ANTES de procesar el mensaje y ANTES de guardarlo en la BD
+                // para que el mensaje actual no interfiera con la verificación de inactividad
+                try {
+                  const shouldSendUpdate = await shouldSendDataUpdateImage(from);
+                  if (shouldSendUpdate) {
+                    console.log(`[WEBHOOK] 🎯 Enviando imagen de actualización de datos a ${from}`);
+                    await sendDataUpdateImage(from);
+                    // Continuar procesando el mensaje normalmente después de enviar la imagen
+                  }
+                } catch (error) {
+                  console.error("Error verificando/enviando imagen de actualización:", error);
+                  // Continuar con el procesamiento normal aunque falle
+                }
 
                 // Detectar si el usuario pregunta dónde está el número de cuenta
                 const accountNumberQuestionPattern =
@@ -960,18 +994,7 @@ export async function POST(request: NextRequest) {
                          console.error("Error guardando en BD:", dbError);
                        }
 
-                       // Verificar inactividad y enviar imagen de actualización si es necesario
-                       try {
-                         const shouldSend = await shouldSendDataUpdateImage(from, whatsappMessageId);
-                         if (shouldSend) {
-                           console.log(`[WEBHOOK] Detectada inactividad de 10 minutos para ${from}, enviando imagen de actualización`);
-                           sendDataUpdateImage(from).catch((error) => {
-                             console.error("Error enviando imagen de actualización:", error);
-                           });
-                         }
-                       } catch (error) {
-                         console.error("Error verificando inactividad:", error);
-                       }
+                       // La verificación de inactividad ya se hace al inicio, no es necesario repetirla aquí
                     } else {
                       // No se encontró la factura
                       console.log(
@@ -1075,21 +1098,7 @@ export async function POST(request: NextRequest) {
                      }
                    }
 
-                   // Verificar inactividad y enviar imagen de actualización si es necesario
-                   // Esto se hace después de responder para no interrumpir la conversación
-                   // Verificar ANTES de guardar el mensaje actual, para que no se cuente como último mensaje
-                   try {
-                     const shouldSend = await shouldSendDataUpdateImage(from, whatsappMessageId);
-                     if (shouldSend) {
-                       console.log(`[WEBHOOK] Detectada inactividad de 10 minutos para ${from}, enviando imagen de actualización`);
-                       // Enviar en segundo plano sin bloquear
-                       sendDataUpdateImage(from).catch((error) => {
-                         console.error("Error enviando imagen de actualización:", error);
-                       });
-                     }
-                   } catch (error) {
-                     console.error("Error verificando inactividad:", error);
-                   }
+                   // La verificación de inactividad ya se hace al inicio, no es necesario repetirla aquí
                  }
               }
             }

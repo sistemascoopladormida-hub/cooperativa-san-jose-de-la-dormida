@@ -53,13 +53,24 @@ export default function Chatbot() {
       return // Ya se envió, no hacer nada
     }
 
+    // Inicializar última actividad con el último mensaje o fecha actual
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      lastActivityRef.current = lastMessage.timestamp
+    } else {
+      lastActivityRef.current = new Date()
+    }
+
     // Función para verificar inactividad
     const checkInactivity = () => {
       const now = new Date()
       const diffInMs = now.getTime() - lastActivityRef.current.getTime()
       const diffInMinutes = diffInMs / (1000 * 60)
 
+      console.log(`[CHATBOT] Verificando inactividad: ${diffInMinutes.toFixed(2)} minutos desde última actividad`)
+
       if (diffInMinutes >= 10) {
+        console.log('[CHATBOT] ✅ Inactividad de 10 minutos detectada, enviando imagen de actualización')
         // Enviar imagen de actualización
         const updateImageMessage: Message = {
           id: Date.now().toString(),
@@ -79,22 +90,27 @@ export default function Chatbot() {
       }
     }
 
-    // Verificar cada minuto
-    inactivityCheckRef.current = setInterval(checkInactivity, 60000) // 1 minuto
+    // Verificar inmediatamente al abrir el chat
+    checkInactivity()
+
+    // Verificar cada 30 segundos para ser más preciso
+    inactivityCheckRef.current = setInterval(checkInactivity, 30000) // 30 segundos
 
     return () => {
       if (inactivityCheckRef.current) {
         clearInterval(inactivityCheckRef.current)
       }
     }
-  }, [isOpen])
+  }, [isOpen, messages])
 
   // Actualizar última actividad cuando se envía un mensaje
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1]
-      if (lastMessage.sender === "user" || lastMessage.sender === "bot") {
-        lastActivityRef.current = new Date()
+      // Actualizar solo cuando el usuario envía un mensaje (no cuando el bot responde)
+      if (lastMessage.sender === "user") {
+        lastActivityRef.current = lastMessage.timestamp
+        console.log('[CHATBOT] Última actividad actualizada:', lastActivityRef.current)
       }
     }
   }, [messages])
