@@ -561,11 +561,6 @@ export async function POST(request: NextRequest) {
                     );
 
                     if (imageResult.success) {
-                      // Enviar un mensaje adicional con más información
-                      const additionalMessage = `💡 *Consejos para encontrar tu número de cuenta:*\n\n• Busca en la parte superior de tu factura (física o PDF)\n• Busca la palabra "Cuenta:" seguida de un número\n• El número puede tener entre 3 y 6 dígitos\n• Aparece en todas las facturas (servicios y electricidad)\n\nUna vez que tengas tu número de cuenta, puedes solicitarme tu factura escribiendo algo como: "Quiero mi factura, mi número de cuenta es 2862" 😊`;
-
-                      await sendTextMessage(from, additionalMessage);
-
                       // Guardar en historial
                       try {
                         const conversationId = await getOrCreateConversation(
@@ -580,7 +575,7 @@ export async function POST(request: NextRequest) {
                         await saveMessage(
                           conversationId,
                           "assistant",
-                          imageCaption + "\n\n" + additionalMessage
+                          imageCaption
                         );
                       } catch (dbError) {
                         console.error("Error guardando en BD:", dbError);
