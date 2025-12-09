@@ -196,7 +196,10 @@ async function getOrCreateConversation(phoneNumber: string): Promise<number> {
   // Crear nueva conversación
   const { data: newConversation, error } = await supabase
     .from("conversations")
-    .insert({ phone_number: phoneNumber })
+    .insert({ 
+      phone_number: phoneNumber,
+      data_update_image_sent: false 
+    })
     .select("id")
     .single();
 
@@ -334,7 +337,7 @@ async function getConversationHistory(
     }
 
     return (
-      messages?.map((msg) => ({
+      messages?.map((msg: { role: "user" | "assistant"; content: string }) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
       })) || []
@@ -342,6 +345,182 @@ async function getConversationHistory(
   } catch (error) {
     console.error("Error en getConversationHistory:", error);
     return [];
+  }
+}
+
+/**
+ * Verifica si ya se envió la imagen de actualización de datos a este usuario
+ */
+async function hasDataUpdateImageBeenSent(
+  phoneNumber: string
+): Promise<boolean> {
+  try {
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("data_update_image_sent")
+      .eq("phone_number", phoneNumber)
+      .single();
+
+    return conversation?.data_update_image_sent || false;
+  } catch (error) {
+    console.error("Error verificando si se envió imagen de actualización:", error);
+    return false;
+  }
+}
+
+/**
+ * Marca que se envió la imagen de actualización de datos
+ */
+async function markDataUpdateImageAsSent(
+  phoneNumber: string
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from("conversations")
+      .update({ data_update_image_sent: true })
+      .eq("phone_number", phoneNumber);
+
+    if (error) {
+      console.error("Error marcando imagen como enviada:", error);
+    } else {
+      console.log(`[WEBHOOK] ✅ Imagen de actualización marcada como enviada para ${phoneNumber}`);
+    }
+  } catch (error) {
+    console.error("Error en markDataUpdateImageAsSent:", error);
+  }
+}
+
+/**
+ * Obtiene la fecha del último mensaje de un usuario (excluyendo el mensaje actual)
+ */
+async function getLastMessageTime(
+  phoneNumber: string,
+  excludeMessageId?: string
+): Promise<Date | null> {
+  try {
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("phone_number", phoneNumber)
+      .single();
+
+    if (!conversation) {
+      return null;
+    }
+
+    let query = supabase
+      .from("messages")
+      .select("created_at")
+      .eq("conversation_id", conversation.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    // Excluir el mensaje actual si se proporciona
+    if (excludeMessageId) {
+      query = query.neq("whatsapp_message_id", excludeMessageId);
+    }
+
+    const { data: lastMessage, error } = await query.single();
+
+    if (error || !lastMessage) {
+      return null;
+    }
+
+    return new Date(lastMessage.created_at);
+  } catch (error) {
+    console.error("Error obteniendo último mensaje:", error);
+    return null;
+  }
+}
+
+/**
+ * Verifica si han pasado 10 minutos desde el último mensaje
+ */
+async function shouldSendDataUpdateImage(
+  phoneNumber: string,
+  excludeMessageId?: string
+): Promise<boolean> {
+  try {
+    // Verificar si ya se envió
+    const alreadySent = await hasDataUpdateImageBeenSent(phoneNumber);
+    if (alreadySent) {
+      return false;
+    }
+
+    // Obtener el tiempo del último mensaje (excluyendo el actual)
+    const lastMessageTime = await getLastMessageTime(phoneNumber, excludeMessageId);
+    if (!lastMessageTime) {
+      return false; // No hay mensajes previos
+    }
+
+    // Calcular la diferencia en milisegundos
+    const now = new Date();
+    const diffInMs = now.getTime() - lastMessageTime.getTime();
+    const diffInMinutes = diffInMs / (1000 * 60);
+
+    // Verificar si han pasado 10 minutos
+    return diffInMinutes >= 10;
+  } catch (error) {
+    console.error("Error verificando si enviar imagen de actualización:", error);
+    return false;
+  }
+}
+
+/**
+ * Envía la imagen de actualización de datos
+ */
+async function sendDataUpdateImage(
+  phoneNumber: string
+): Promise<void> {
+  try {
+    console.log(`[WEBHOOK] Enviando imagen de actualización de datos a ${phoneNumber}`);
+    
+    // Leer la imagen desde public/images
+    const imagePath = join(
+      process.cwd(),
+      "public",
+      "images",
+      "actualizaciondedatos.jpeg"
+    );
+    const imageBuffer = await readFile(imagePath);
+
+    // Mensaje explicativo
+    const imageCaption = `📋 *Actualizá tus datos*\n\nPara mantenernos comunicados y poder enviarte las facturas correctamente, necesitamos que actualices tus datos:\n\n• Nombre completo\n• Teléfono (WhatsApp)\n• Correo electrónico\n\nEnvía tu mensaje al: 3521 539241`;
+
+    const imageResult = await sendImageMessage(
+      phoneNumber,
+      imageBuffer,
+      imageCaption
+    );
+
+    if (imageResult.success) {
+      // Marcar como enviada
+      await markDataUpdateImageAsSent(phoneNumber);
+      
+      // Guardar en historial
+      try {
+        const conversationId = await getOrCreateConversation(phoneNumber);
+        await saveMessage(
+          conversationId,
+          "assistant",
+          imageCaption
+        );
+      } catch (dbError) {
+        console.error("Error guardando mensaje de actualización:", dbError);
+      }
+      
+      console.log(`[WEBHOOK] ✅ Imagen de actualización enviada exitosamente a ${phoneNumber}`);
+    } else {
+      console.error(
+        "[WEBHOOK] Error enviando imagen de actualización:",
+        imageResult.error
+      );
+    }
+  } catch (error: any) {
+    console.error(
+      "[WEBHOOK] Error leyendo/enviando imagen de actualización:",
+      error
+    );
   }
 }
 
@@ -759,27 +938,40 @@ export async function POST(request: NextRequest) {
 
                       confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
-                      await sendTextMessage(from, confirmationMessage);
+                       await sendTextMessage(from, confirmationMessage);
 
-                      // Guardar en historial
-                      try {
-                        const conversationId = await getOrCreateConversation(
-                          from
-                        );
-                        await saveMessage(
-                          conversationId,
-                          "user",
-                          text,
-                          whatsappMessageId
-                        );
-                        await saveMessage(
-                          conversationId,
-                          "assistant",
-                          confirmationMessage
-                        );
-                      } catch (dbError) {
-                        console.error("Error guardando en BD:", dbError);
-                      }
+                       // Guardar en historial
+                       try {
+                         const conversationId = await getOrCreateConversation(
+                           from
+                         );
+                         await saveMessage(
+                           conversationId,
+                           "user",
+                           text,
+                           whatsappMessageId
+                         );
+                         await saveMessage(
+                           conversationId,
+                           "assistant",
+                           confirmationMessage
+                         );
+                       } catch (dbError) {
+                         console.error("Error guardando en BD:", dbError);
+                       }
+
+                       // Verificar inactividad y enviar imagen de actualización si es necesario
+                       try {
+                         const shouldSend = await shouldSendDataUpdateImage(from, whatsappMessageId);
+                         if (shouldSend) {
+                           console.log(`[WEBHOOK] Detectada inactividad de 10 minutos para ${from}, enviando imagen de actualización`);
+                           sendDataUpdateImage(from).catch((error) => {
+                             console.error("Error enviando imagen de actualización:", error);
+                           });
+                         }
+                       } catch (error) {
+                         console.error("Error verificando inactividad:", error);
+                       }
                     } else {
                       // No se encontró la factura
                       console.log(
@@ -848,41 +1040,57 @@ export async function POST(request: NextRequest) {
                       console.error("Error guardando en BD:", dbError);
                     }
                   }
-                } else {
-                  // No es solicitud de factura, procesar normalmente
-                  // Obtener respuesta del chatbot (igual que /api/chat)
-                  const chatbotResponse = await getChatbotResponse(
-                    from,
-                    text,
-                    whatsappMessageId
-                  );
+                 } else {
+                   // No es solicitud de factura, procesar normalmente
+                   // Obtener respuesta del chatbot (igual que /api/chat)
+                   const chatbotResponse = await getChatbotResponse(
+                     from,
+                     text,
+                     whatsappMessageId
+                   );
 
-                  // Enviar respuesta a WhatsApp
-                  const sendResult = await sendTextMessage(
-                    from,
-                    chatbotResponse
-                  );
+                   // Enviar respuesta a WhatsApp
+                   const sendResult = await sendTextMessage(
+                     from,
+                     chatbotResponse
+                   );
 
-                  // Guardar el mensaje de respuesta con su messageId
-                  if (sendResult.success && sendResult.messageId) {
-                    try {
-                      const conversationId = await getOrCreateConversation(
-                        from
-                      );
-                      await saveMessage(
-                        conversationId,
-                        "assistant",
-                        chatbotResponse,
-                        sendResult.messageId
-                      );
-                    } catch (dbError) {
-                      console.error(
-                        "Error guardando mensaje de respuesta:",
-                        dbError
-                      );
-                    }
-                  }
-                }
+                   // Guardar el mensaje de respuesta con su messageId
+                   if (sendResult.success && sendResult.messageId) {
+                     try {
+                       const conversationId = await getOrCreateConversation(
+                         from
+                       );
+                       await saveMessage(
+                         conversationId,
+                         "assistant",
+                         chatbotResponse,
+                         sendResult.messageId
+                       );
+                     } catch (dbError) {
+                       console.error(
+                         "Error guardando mensaje de respuesta:",
+                         dbError
+                       );
+                     }
+                   }
+
+                   // Verificar inactividad y enviar imagen de actualización si es necesario
+                   // Esto se hace después de responder para no interrumpir la conversación
+                   // Verificar ANTES de guardar el mensaje actual, para que no se cuente como último mensaje
+                   try {
+                     const shouldSend = await shouldSendDataUpdateImage(from, whatsappMessageId);
+                     if (shouldSend) {
+                       console.log(`[WEBHOOK] Detectada inactividad de 10 minutos para ${from}, enviando imagen de actualización`);
+                       // Enviar en segundo plano sin bloquear
+                       sendDataUpdateImage(from).catch((error) => {
+                         console.error("Error enviando imagen de actualización:", error);
+                       });
+                     }
+                   } catch (error) {
+                     console.error("Error verificando inactividad:", error);
+                   }
+                 }
               }
             }
           }

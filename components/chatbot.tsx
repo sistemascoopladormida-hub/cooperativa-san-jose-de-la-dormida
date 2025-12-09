@@ -32,6 +32,8 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const lastActivityRef = useRef<Date>(new Date())
+  const inactivityCheckRef = useRef<NodeJS.Timeout | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -41,11 +43,70 @@ export default function Chatbot() {
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Detectar inactividad y enviar imagen de actualización de datos
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Verificar si ya se envió la imagen
+    const imageSent = localStorage.getItem('dataUpdateImageSent') === 'true'
+    if (imageSent) {
+      return // Ya se envió, no hacer nada
+    }
+
+    // Función para verificar inactividad
+    const checkInactivity = () => {
+      const now = new Date()
+      const diffInMs = now.getTime() - lastActivityRef.current.getTime()
+      const diffInMinutes = diffInMs / (1000 * 60)
+
+      if (diffInMinutes >= 10) {
+        // Enviar imagen de actualización
+        const updateImageMessage: Message = {
+          id: Date.now().toString(),
+          text: "📋 Actualizá tus datos\n\nPara mantenernos comunicados y poder enviarte las facturas correctamente, necesitamos que actualices tus datos:\n\n• Nombre completo\n• Teléfono (WhatsApp)\n• Correo electrónico\n\nEnvía tu mensaje al: 3521 539241",
+          sender: "bot",
+          timestamp: new Date(),
+          image: "/images/actualizaciondedatos.jpeg",
+        }
+        
+        setMessages((prev) => [...prev, updateImageMessage])
+        localStorage.setItem('dataUpdateImageSent', 'true')
+        
+        // Limpiar el intervalo
+        if (inactivityCheckRef.current) {
+          clearInterval(inactivityCheckRef.current)
+        }
+      }
+    }
+
+    // Verificar cada minuto
+    inactivityCheckRef.current = setInterval(checkInactivity, 60000) // 1 minuto
+
+    return () => {
+      if (inactivityCheckRef.current) {
+        clearInterval(inactivityCheckRef.current)
+      }
+    }
+  }, [isOpen])
+
+  // Actualizar última actividad cuando se envía un mensaje
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      if (lastMessage.sender === "user" || lastMessage.sender === "bot") {
+        lastActivityRef.current = new Date()
+      }
+    }
+  }, [messages])
+
   // Removido el auto-focus para evitar que se abra el teclado en móviles
   // El usuario puede hacer click en el input cuando quiera escribir
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
+
+    // Actualizar última actividad
+    lastActivityRef.current = new Date()
 
     const userMessage: Message = {
       id: Date.now().toString(),
