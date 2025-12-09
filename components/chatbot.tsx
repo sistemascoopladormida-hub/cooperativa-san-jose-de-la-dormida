@@ -15,6 +15,7 @@ interface Message {
   text: string
   sender: "user" | "bot"
   timestamp: Date
+  image?: string
 }
 
 export default function Chatbot() {
@@ -83,6 +84,7 @@ export default function Chatbot() {
         text: data.response || "Lo siento, no pude procesar tu consulta en este momento. Por favor, intenta de nuevo o contacta directamente con nuestra oficina.",
         sender: "bot",
         timestamp: new Date(),
+        image: data.showImage ? `/images/${encodeURIComponent(data.showImage)}.jpeg` : undefined,
       }
       
       setMessages((prev) => [...prev, botResponse])
@@ -311,6 +313,15 @@ export default function Chatbot() {
                         >
                           {message.text}
                         </ReactMarkdown>
+                        {message.image && (
+                          <div className="mt-3 rounded-lg overflow-hidden border border-gray-200">
+                            <img 
+                              src={message.image} 
+                              alt="Ubicación del número de cuenta en la boleta"
+                              className="w-full h-auto max-w-full object-contain"
+                            />
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>

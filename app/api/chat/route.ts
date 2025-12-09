@@ -188,7 +188,34 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       completion.choices[0]?.message?.content ||
       "Lo siento, no pude generar una respuesta en este momento.";
 
-    return NextResponse.json({ response });
+    // Detectar si el usuario pregunta sobre la ubicación del número de cuenta
+    const lastUserMessage = messages[messages.length - 1]?.text?.toLowerCase() || "";
+    const shouldShowImage = 
+      lastUserMessage.includes("número de cuenta") ||
+      lastUserMessage.includes("numero de cuenta") ||
+      lastUserMessage.includes("número de socio") ||
+      lastUserMessage.includes("numero de socio") ||
+      lastUserMessage.includes("donde está") ||
+      lastUserMessage.includes("donde esta") ||
+      lastUserMessage.includes("dónde está") ||
+      lastUserMessage.includes("dónde esta") ||
+      lastUserMessage.includes("donde encontrar") ||
+      lastUserMessage.includes("dónde encontrar") ||
+      lastUserMessage.includes("no sé dónde") ||
+      lastUserMessage.includes("no se donde") ||
+      lastUserMessage.includes("no encuentro") ||
+      lastUserMessage.includes("no lo encuentro") ||
+      lastUserMessage.includes("ubicación") ||
+      lastUserMessage.includes("ubicacion") ||
+      lastUserMessage.includes("en la boleta") ||
+      lastUserMessage.includes("en la factura") ||
+      lastUserMessage.includes("en mi boleta") ||
+      lastUserMessage.includes("en mi factura");
+
+    return NextResponse.json({ 
+      response,
+      showImage: shouldShowImage ? "ubicacion de numero de cuenta" : undefined
+    });
   } catch (error: any) {
     console.error("Error en la API de chat:", error);
     return NextResponse.json(
