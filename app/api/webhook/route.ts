@@ -787,7 +787,7 @@ export async function POST(request: NextRequest) {
                       );
                       const notFoundMessage =
                         `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.` +
-                        `\n\nPor favor verifica que el número de cuenta sea correcto.` +
+                        `\n\nPor favor verifica que el número de cuenta sea correcto. No lo encontre en mi memoria.` +
                         `\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
 
                       await sendTextMessage(from, notFoundMessage);
