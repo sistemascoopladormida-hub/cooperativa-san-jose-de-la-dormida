@@ -79,13 +79,25 @@ export default function Chatbot() {
 
       const data = await response.json()
       
+      // Log para debugging
+      console.log("Respuesta de la API:", data);
+      console.log("showImage:", data.showImage);
+      
+      const imagePath = data.showImage 
+        ? `/images/${encodeURIComponent(data.showImage)}.jpeg` 
+        : undefined;
+      
+      console.log("Ruta de imagen:", imagePath);
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: data.response || "Lo siento, no pude procesar tu consulta en este momento. Por favor, intenta de nuevo o contacta directamente con nuestra oficina.",
         sender: "bot",
         timestamp: new Date(),
-        image: data.showImage ? `/images/${encodeURIComponent(data.showImage)}.jpeg` : undefined,
+        image: imagePath,
       }
+      
+      console.log("Mensaje del bot creado:", botResponse);
       
       setMessages((prev) => [...prev, botResponse])
     } catch (error) {
@@ -314,11 +326,18 @@ export default function Chatbot() {
                           {message.text}
                         </ReactMarkdown>
                         {message.image && (
-                          <div className="mt-3 rounded-lg overflow-hidden border border-gray-200">
+                          <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                             <img 
                               src={message.image} 
                               alt="Ubicación del número de cuenta en la boleta"
                               className="w-full h-auto max-w-full object-contain"
+                              onError={(e) => {
+                                console.error("Error al cargar la imagen:", message.image);
+                                console.error("Evento de error:", e);
+                              }}
+                              onLoad={() => {
+                                console.log("Imagen cargada correctamente:", message.image);
+                              }}
                             />
                           </div>
                         )}

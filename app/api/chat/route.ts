@@ -189,28 +189,51 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       "Lo siento, no pude generar una respuesta en este momento.";
 
     // Detectar si el usuario pregunta sobre la ubicación del número de cuenta
+    // Revisar el último mensaje del usuario y también el contexto completo de la conversación
     const lastUserMessage = messages[messages.length - 1]?.text?.toLowerCase() || "";
-    const shouldShowImage = 
-      lastUserMessage.includes("número de cuenta") ||
-      lastUserMessage.includes("numero de cuenta") ||
-      lastUserMessage.includes("número de socio") ||
-      lastUserMessage.includes("numero de socio") ||
-      lastUserMessage.includes("donde está") ||
-      lastUserMessage.includes("donde esta") ||
-      lastUserMessage.includes("dónde está") ||
-      lastUserMessage.includes("dónde esta") ||
-      lastUserMessage.includes("donde encontrar") ||
-      lastUserMessage.includes("dónde encontrar") ||
-      lastUserMessage.includes("no sé dónde") ||
-      lastUserMessage.includes("no se donde") ||
+    
+    // Obtener todo el contexto de la conversación (últimos 5 mensajes)
+    const recentMessages = messages.slice(-5);
+    const allMessagesText = recentMessages
+      .map((msg: { text: string }) => msg.text.toLowerCase())
+      .join(" ");
+    
+    // Detectar si menciona número de cuenta o número de socio en cualquier parte de la conversación
+    const mencionaCuenta = 
+      allMessagesText.includes("número de cuenta") ||
+      allMessagesText.includes("numero de cuenta") ||
+      allMessagesText.includes("número de socio") ||
+      allMessagesText.includes("numero de socio") ||
+      allMessagesText.includes("nro de cuenta") ||
+      allMessagesText.includes("nro cuenta") ||
+      (allMessagesText.includes("cuenta") && (allMessagesText.includes("numero") || allMessagesText.includes("factura")));
+    
+    // Detectar si pregunta por ubicación o dice que no encuentra
+    const preguntaUbicacion = 
+      lastUserMessage.includes("donde") ||
+      lastUserMessage.includes("dónde") ||
       lastUserMessage.includes("no encuentro") ||
       lastUserMessage.includes("no lo encuentro") ||
+      lastUserMessage.includes("sigo sin encontrar") ||
       lastUserMessage.includes("ubicación") ||
       lastUserMessage.includes("ubicacion") ||
       lastUserMessage.includes("en la boleta") ||
       lastUserMessage.includes("en la factura") ||
       lastUserMessage.includes("en mi boleta") ||
       lastUserMessage.includes("en mi factura");
+    
+    // Mostrar imagen si:
+    // 1. Menciona cuenta en el contexto Y pregunta por ubicación, O
+    // 2. Dice que no encuentra algo Y hay contexto de cuenta
+    const shouldShowImage = mencionaCuenta && preguntaUbicacion;
+    
+    // Log para debugging
+    console.log("=== Detección de imagen de número de cuenta ===");
+    console.log("Último mensaje del usuario:", lastUserMessage);
+    console.log("Menciona cuenta en contexto:", mencionaCuenta);
+    console.log("Pregunta por ubicación:", preguntaUbicacion);
+    console.log("Mostrar imagen:", shouldShowImage);
+    console.log("Contexto completo (últimos 5 mensajes):", allMessagesText.substring(0, 200));
 
     return NextResponse.json({ 
       response,
