@@ -547,7 +547,7 @@ export async function POST(request: NextRequest) {
                       process.cwd(),
                       "public",
                       "images",
-                      "ubicacion de numero de cuenta.png"
+                      "ubicacion de numero de cuenta.jpeg"
                     );
                     const imageBuffer = await readFile(imagePath);
 

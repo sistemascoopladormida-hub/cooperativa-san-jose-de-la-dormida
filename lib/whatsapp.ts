@@ -104,9 +104,9 @@ export async function sendImageMessage(
     const uploadData = await makeHttpsRequest(
       `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/media`,
       imageBuffer,
-      "ubicacion-numero-cuenta.png",
+      "ubicacion-numero-cuenta.jpeg",
       { Authorization: `Bearer ${token}` },
-      "image/png",
+      "image/jpeg",
       "image"
     );
 
