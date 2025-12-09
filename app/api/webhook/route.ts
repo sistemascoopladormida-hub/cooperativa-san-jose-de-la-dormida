@@ -391,50 +391,61 @@ async function markDataUpdateImageAsSent(
 }
 
 /**
- * Obtiene la fecha del último mensaje de un usuario
+ * Obtiene la fecha de referencia para calcular inactividad
+ * - Si hay mensajes: retorna la fecha del último mensaje
+ * - Si NO hay mensajes: retorna la fecha de creación de la conversación
  * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
  * por lo que el mensaje actual no está en la BD todavía
  */
-async function getLastMessageTime(
+async function getLastActivityTime(
   phoneNumber: string
 ): Promise<Date | null> {
   try {
-    const { data: conversation } = await supabase
+    const { data: conversation, error: convError } = await supabase
       .from("conversations")
-      .select("id")
+      .select("id, created_at")
       .eq("phone_number", phoneNumber)
       .single();
 
-    if (!conversation) {
+    if (convError || !conversation) {
       console.log(`[WEBHOOK] No se encontró conversación para ${phoneNumber}`);
       return null;
     }
 
-    const { data: lastMessage, error } = await supabase
+    // Buscar el último mensaje
+    const { data: messages, error: msgError } = await supabase
       .from("messages")
       .select("created_at")
       .eq("conversation_id", conversation.id)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1);
 
-    if (error || !lastMessage) {
-      console.log(`[WEBHOOK] No hay mensajes previos para ${phoneNumber}`);
-      return null;
+    // Si hay mensajes, usar la fecha del último mensaje
+    if (!msgError && messages && messages.length > 0) {
+      const lastMessageTime = new Date(messages[0].created_at);
+      console.log(`[WEBHOOK] Último mensaje para ${phoneNumber}: ${lastMessageTime.toISOString()}`);
+      return lastMessageTime;
     }
 
-    const lastMessageTime = new Date(lastMessage.created_at);
-    console.log(`[WEBHOOK] Último mensaje para ${phoneNumber}: ${lastMessageTime.toISOString()}`);
-    return lastMessageTime;
+    // Si NO hay mensajes, usar la fecha de creación de la conversación
+    const conversationTime = new Date(conversation.created_at);
+    console.log(`[WEBHOOK] No hay mensajes para ${phoneNumber}, usando fecha de creación de conversación: ${conversationTime.toISOString()}`);
+    return conversationTime;
   } catch (error) {
-    console.error("Error obteniendo último mensaje:", error);
+    console.error("Error obteniendo tiempo de actividad:", error);
     return null;
   }
 }
 
 /**
  * Verifica si deben enviarse la imagen de actualización de datos
- * Retorna true si: data_update_image_sent es false Y han pasado 10 minutos desde el último mensaje
+ * Retorna true SOLO si:
+ * 1. data_update_image_sent es false (aún no se ha enviado)
+ * 2. Han pasado 10 minutos o más desde la última actividad (último mensaje o creación de conversación)
+ * 
+ * IMPORTANTE: Todos los usuarios deben recibir la imagen UNA VEZ, 
+ * independientemente de si han iniciado conversación o no.
+ * 
  * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
  * por lo que el mensaje actual no está en la BD todavía
  */
@@ -445,33 +456,33 @@ async function shouldSendDataUpdateImage(
     // PRIMERO: Verificar si ya se envió (si es true, no enviar)
     const alreadySent = await hasDataUpdateImageBeenSent(phoneNumber);
     if (alreadySent) {
-      console.log(`[WEBHOOK] Imagen de actualización ya fue enviada a ${phoneNumber}`);
+      console.log(`[WEBHOOK] Imagen de actualización ya fue enviada a ${phoneNumber} (data_update_image_sent=true)`);
       return false;
     }
 
-    // SEGUNDO: Obtener el tiempo del último mensaje
-    // Como esta función se llama ANTES de guardar el mensaje actual,
-    // el último mensaje es realmente el anterior
-    const lastMessageTime = await getLastMessageTime(phoneNumber);
+    // SEGUNDO: Obtener el tiempo de última actividad
+    // - Si hay mensajes: usa la fecha del último mensaje
+    // - Si NO hay mensajes: usa la fecha de creación de la conversación
+    const lastActivityTime = await getLastActivityTime(phoneNumber);
     
-    // Si no hay mensajes previos, no enviar (es la primera vez que habla)
-    if (!lastMessageTime) {
-      console.log(`[WEBHOOK] No hay mensajes previos para ${phoneNumber}, no se envía imagen`);
+    // Si no hay conversación, no podemos enviar
+    if (!lastActivityTime) {
+      console.log(`[WEBHOOK] No se encontró conversación para ${phoneNumber}`);
       return false;
     }
 
     // TERCERO: Calcular la diferencia en milisegundos
     const now = new Date();
-    const diffInMs = now.getTime() - lastMessageTime.getTime();
+    const diffInMs = now.getTime() - lastActivityTime.getTime();
     const diffInMinutes = diffInMs / (1000 * 60);
 
-    console.log(`[WEBHOOK] Verificando inactividad para ${phoneNumber}: ${diffInMinutes.toFixed(2)} minutos desde último mensaje`);
+    console.log(`[WEBHOOK] Verificando inactividad para ${phoneNumber}: ${diffInMinutes.toFixed(2)} minutos desde última actividad`);
 
-    // Verificar si han pasado 10 minutos
+    // Verificar si han pasado 10 minutos o más
     const shouldSend = diffInMinutes >= 10;
     
     if (shouldSend) {
-      console.log(`[WEBHOOK] ✅ Condiciones cumplidas: data_update_image_sent=false Y ${diffInMinutes.toFixed(2)} minutos de inactividad`);
+      console.log(`[WEBHOOK] ✅ Condiciones cumplidas: data_update_image_sent=false Y ${diffInMinutes.toFixed(2)} minutos de inactividad (>= 10)`);
     } else {
       console.log(`[WEBHOOK] ❌ No se cumplen condiciones: ${diffInMinutes.toFixed(2)} minutos < 10 minutos requeridos`);
     }
@@ -730,14 +741,22 @@ export async function POST(request: NextRequest) {
                 const whatsappMessageId = message.id;
 
                 // PRIMERO: Verificar si debemos enviar la imagen de actualización de datos
+                // IMPORTANTE: Todos los usuarios deben recibir la imagen UNA VEZ
+                // Solo se envía si:
+                // 1. data_update_image_sent es false (aún no se ha enviado)
+                // 2. Han pasado 10 minutos o más desde la última actividad
+                //    - Si hay mensajes: desde el último mensaje
+                //    - Si NO hay mensajes: desde la creación de la conversación
                 // Esto se hace ANTES de procesar el mensaje y ANTES de guardarlo en la BD
                 // para que el mensaje actual no interfiera con la verificación de inactividad
                 try {
                   const shouldSendUpdate = await shouldSendDataUpdateImage(from);
                   if (shouldSendUpdate) {
-                    console.log(`[WEBHOOK] 🎯 Enviando imagen de actualización de datos a ${from}`);
+                    console.log(`[WEBHOOK] 🎯 Enviando imagen de actualización de datos a ${from} (data_update_image_sent=false y 10+ minutos de inactividad)`);
                     await sendDataUpdateImage(from);
                     // Continuar procesando el mensaje normalmente después de enviar la imagen
+                  } else {
+                    console.log(`[WEBHOOK] ⏭️ No se cumplen condiciones para enviar imagen de actualización a ${from}`);
                   }
                 } catch (error) {
                   console.error("Error verificando/enviando imagen de actualización:", error);
