@@ -196,10 +196,7 @@ async function getOrCreateConversation(phoneNumber: string): Promise<number> {
   // Crear nueva conversación
   const { data: newConversation, error } = await supabase
     .from("conversations")
-    .insert({ 
-      phone_number: phoneNumber,
-      data_update_image_sent: false 
-    })
+    .insert({ phone_number: phoneNumber })
     .select("id")
     .single();
 
@@ -349,210 +346,6 @@ async function getConversationHistory(
 }
 
 /**
- * Verifica si ya se envió la imagen de actualización de datos a este usuario
- */
-async function hasDataUpdateImageBeenSent(
-  phoneNumber: string
-): Promise<boolean> {
-  try {
-    const { data: conversation } = await supabase
-      .from("conversations")
-      .select("data_update_image_sent")
-      .eq("phone_number", phoneNumber)
-      .single();
-
-    return conversation?.data_update_image_sent || false;
-  } catch (error) {
-    console.error("Error verificando si se envió imagen de actualización:", error);
-    return false;
-  }
-}
-
-/**
- * Marca que se envió la imagen de actualización de datos
- */
-async function markDataUpdateImageAsSent(
-  phoneNumber: string
-): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from("conversations")
-      .update({ data_update_image_sent: true })
-      .eq("phone_number", phoneNumber);
-
-    if (error) {
-      console.error("Error marcando imagen como enviada:", error);
-    } else {
-      console.log(`[WEBHOOK] ✅ Imagen de actualización marcada como enviada para ${phoneNumber}`);
-    }
-  } catch (error) {
-    console.error("Error en markDataUpdateImageAsSent:", error);
-  }
-}
-
-/**
- * Obtiene la fecha de referencia para calcular inactividad
- * - Si hay mensajes: retorna la fecha del último mensaje
- * - Si NO hay mensajes: retorna la fecha de creación de la conversación
- * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
- * por lo que el mensaje actual no está en la BD todavía
- */
-async function getLastActivityTime(
-  phoneNumber: string
-): Promise<Date | null> {
-  try {
-    const { data: conversation, error: convError } = await supabase
-      .from("conversations")
-      .select("id, created_at")
-      .eq("phone_number", phoneNumber)
-      .single();
-
-    if (convError || !conversation) {
-      console.log(`[WEBHOOK] No se encontró conversación para ${phoneNumber}`);
-      return null;
-    }
-
-    // Buscar el último mensaje
-    const { data: messages, error: msgError } = await supabase
-      .from("messages")
-      .select("created_at")
-      .eq("conversation_id", conversation.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    // Si hay mensajes, usar la fecha del último mensaje
-    if (!msgError && messages && messages.length > 0) {
-      const lastMessageTime = new Date(messages[0].created_at);
-      console.log(`[WEBHOOK] Último mensaje para ${phoneNumber}: ${lastMessageTime.toISOString()}`);
-      return lastMessageTime;
-    }
-
-    // Si NO hay mensajes, usar la fecha de creación de la conversación
-    const conversationTime = new Date(conversation.created_at);
-    console.log(`[WEBHOOK] No hay mensajes para ${phoneNumber}, usando fecha de creación de conversación: ${conversationTime.toISOString()}`);
-    return conversationTime;
-  } catch (error) {
-    console.error("Error obteniendo tiempo de actividad:", error);
-    return null;
-  }
-}
-
-/**
- * Verifica si deben enviarse la imagen de actualización de datos
- * Retorna true SOLO si:
- * 1. data_update_image_sent es false (aún no se ha enviado)
- * 2. Han pasado 10 minutos o más desde la última actividad (último mensaje o creación de conversación)
- * 
- * IMPORTANTE: Todos los usuarios deben recibir la imagen UNA VEZ, 
- * independientemente de si han iniciado conversación o no.
- * 
- * NOTA: Esta función se llama ANTES de guardar el mensaje actual, 
- * por lo que el mensaje actual no está en la BD todavía
- */
-async function shouldSendDataUpdateImage(
-  phoneNumber: string
-): Promise<boolean> {
-  try {
-    // PRIMERO: Verificar si ya se envió (si es true, no enviar)
-    const alreadySent = await hasDataUpdateImageBeenSent(phoneNumber);
-    if (alreadySent) {
-      console.log(`[WEBHOOK] Imagen de actualización ya fue enviada a ${phoneNumber} (data_update_image_sent=true)`);
-      return false;
-    }
-
-    // SEGUNDO: Obtener el tiempo de última actividad
-    // - Si hay mensajes: usa la fecha del último mensaje
-    // - Si NO hay mensajes: usa la fecha de creación de la conversación
-    const lastActivityTime = await getLastActivityTime(phoneNumber);
-    
-    // Si no hay conversación, no podemos enviar
-    if (!lastActivityTime) {
-      console.log(`[WEBHOOK] No se encontró conversación para ${phoneNumber}`);
-      return false;
-    }
-
-    // TERCERO: Calcular la diferencia en milisegundos
-    const now = new Date();
-    const diffInMs = now.getTime() - lastActivityTime.getTime();
-    const diffInMinutes = diffInMs / (1000 * 60);
-
-    console.log(`[WEBHOOK] Verificando inactividad para ${phoneNumber}: ${diffInMinutes.toFixed(2)} minutos desde última actividad`);
-
-    // Verificar si han pasado 10 minutos o más
-    const shouldSend = diffInMinutes >= 10;
-    
-    if (shouldSend) {
-      console.log(`[WEBHOOK] ✅ Condiciones cumplidas: data_update_image_sent=false Y ${diffInMinutes.toFixed(2)} minutos de inactividad (>= 10)`);
-    } else {
-      console.log(`[WEBHOOK] ❌ No se cumplen condiciones: ${diffInMinutes.toFixed(2)} minutos < 10 minutos requeridos`);
-    }
-    
-    return shouldSend;
-  } catch (error) {
-    console.error("Error verificando si enviar imagen de actualización:", error);
-    return false;
-  }
-}
-
-/**
- * Envía la imagen de actualización de datos
- */
-async function sendDataUpdateImage(
-  phoneNumber: string
-): Promise<void> {
-  try {
-    console.log(`[WEBHOOK] Enviando imagen de actualización de datos a ${phoneNumber}`);
-    
-    // Leer la imagen desde public/images
-    const imagePath = join(
-      process.cwd(),
-      "public",
-      "images",
-      "actualizaciondedatos.jpeg"
-    );
-    const imageBuffer = await readFile(imagePath);
-
-    // Mensaje explicativo
-    const imageCaption = `📋 *Actualizá tus datos*\n\nPara mantenernos comunicados y poder enviarte las facturas correctamente, necesitamos que actualices tus datos:\n\n• Nombre completo\n• Teléfono (WhatsApp)\n• Correo electrónico\n\nEnvía tu mensaje al: 3521 539241`;
-
-    const imageResult = await sendImageMessage(
-      phoneNumber,
-      imageBuffer,
-      imageCaption
-    );
-
-    if (imageResult.success) {
-      // Marcar como enviada
-      await markDataUpdateImageAsSent(phoneNumber);
-      
-      // Guardar en historial
-      try {
-        const conversationId = await getOrCreateConversation(phoneNumber);
-        await saveMessage(
-          conversationId,
-          "assistant",
-          imageCaption
-        );
-      } catch (dbError) {
-        console.error("Error guardando mensaje de actualización:", dbError);
-      }
-      
-      console.log(`[WEBHOOK] ✅ Imagen de actualización enviada exitosamente a ${phoneNumber}`);
-    } else {
-      console.error(
-        "[WEBHOOK] Error enviando imagen de actualización:",
-        imageResult.error
-      );
-    }
-  } catch (error: any) {
-    console.error(
-      "[WEBHOOK] Error leyendo/enviando imagen de actualización:",
-      error
-    );
-  }
-}
-
-/**
  * Obtiene respuesta del chatbot usando OpenAI (igual que /api/chat)
  */
 async function getChatbotResponse(
@@ -596,8 +389,6 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       "Lo siento, no pude generar una respuesta en este momento.";
 
     // Guardar mensajes en Supabase
-    // NOTA: El mensaje del usuario se guarda aquí, pero la verificación de inactividad
-    // se hace ANTES de llamar a esta función, por lo que el mensaje actual no afecta la verificación
     try {
       const conversationId = await getOrCreateConversation(from);
       await saveMessage(conversationId, "user", userMessage, whatsappMessageId);
@@ -739,29 +530,6 @@ export async function POST(request: NextRequest) {
                 const from = message.from;
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
-
-                // PRIMERO: Verificar si debemos enviar la imagen de actualización de datos
-                // IMPORTANTE: Todos los usuarios deben recibir la imagen UNA VEZ
-                // Solo se envía si:
-                // 1. data_update_image_sent es false (aún no se ha enviado)
-                // 2. Han pasado 10 minutos o más desde la última actividad
-                //    - Si hay mensajes: desde el último mensaje
-                //    - Si NO hay mensajes: desde la creación de la conversación
-                // Esto se hace ANTES de procesar el mensaje y ANTES de guardarlo en la BD
-                // para que el mensaje actual no interfiera con la verificación de inactividad
-                try {
-                  const shouldSendUpdate = await shouldSendDataUpdateImage(from);
-                  if (shouldSendUpdate) {
-                    console.log(`[WEBHOOK] 🎯 Enviando imagen de actualización de datos a ${from} (data_update_image_sent=false y 10+ minutos de inactividad)`);
-                    await sendDataUpdateImage(from);
-                    // Continuar procesando el mensaje normalmente después de enviar la imagen
-                  } else {
-                    console.log(`[WEBHOOK] ⏭️ No se cumplen condiciones para enviar imagen de actualización a ${from}`);
-                  }
-                } catch (error) {
-                  console.error("Error verificando/enviando imagen de actualización:", error);
-                  // Continuar con el procesamiento normal aunque falle
-                }
 
                 // Detectar si el usuario pregunta dónde está el número de cuenta
                 const accountNumberQuestionPattern =
@@ -991,29 +759,27 @@ export async function POST(request: NextRequest) {
 
                       confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
-                       await sendTextMessage(from, confirmationMessage);
+                      await sendTextMessage(from, confirmationMessage);
 
-                       // Guardar en historial
-                       try {
-                         const conversationId = await getOrCreateConversation(
-                           from
-                         );
-                         await saveMessage(
-                           conversationId,
-                           "user",
-                           text,
-                           whatsappMessageId
-                         );
-                         await saveMessage(
-                           conversationId,
-                           "assistant",
-                           confirmationMessage
-                         );
-                       } catch (dbError) {
-                         console.error("Error guardando en BD:", dbError);
-                       }
-
-                       // La verificación de inactividad ya se hace al inicio, no es necesario repetirla aquí
+                      // Guardar en historial
+                      try {
+                        const conversationId = await getOrCreateConversation(
+                          from
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "user",
+                          text,
+                          whatsappMessageId
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "assistant",
+                          confirmationMessage
+                        );
+                      } catch (dbError) {
+                        console.error("Error guardando en BD:", dbError);
+                      }
                     } else {
                       // No se encontró la factura
                       console.log(
@@ -1082,43 +848,41 @@ export async function POST(request: NextRequest) {
                       console.error("Error guardando en BD:", dbError);
                     }
                   }
-                 } else {
-                   // No es solicitud de factura, procesar normalmente
-                   // Obtener respuesta del chatbot (igual que /api/chat)
-                   const chatbotResponse = await getChatbotResponse(
-                     from,
-                     text,
-                     whatsappMessageId
-                   );
+                } else {
+                  // No es solicitud de factura, procesar normalmente
+                  // Obtener respuesta del chatbot (igual que /api/chat)
+                  const chatbotResponse = await getChatbotResponse(
+                    from,
+                    text,
+                    whatsappMessageId
+                  );
 
-                   // Enviar respuesta a WhatsApp
-                   const sendResult = await sendTextMessage(
-                     from,
-                     chatbotResponse
-                   );
+                  // Enviar respuesta a WhatsApp
+                  const sendResult = await sendTextMessage(
+                    from,
+                    chatbotResponse
+                  );
 
-                   // Guardar el mensaje de respuesta con su messageId
-                   if (sendResult.success && sendResult.messageId) {
-                     try {
-                       const conversationId = await getOrCreateConversation(
-                         from
-                       );
-                       await saveMessage(
-                         conversationId,
-                         "assistant",
-                         chatbotResponse,
-                         sendResult.messageId
-                       );
-                     } catch (dbError) {
-                       console.error(
-                         "Error guardando mensaje de respuesta:",
-                         dbError
-                       );
-                     }
-                   }
-
-                   // La verificación de inactividad ya se hace al inicio, no es necesario repetirla aquí
-                 }
+                  // Guardar el mensaje de respuesta con su messageId
+                  if (sendResult.success && sendResult.messageId) {
+                    try {
+                      const conversationId = await getOrCreateConversation(
+                        from
+                      );
+                      await saveMessage(
+                        conversationId,
+                        "assistant",
+                        chatbotResponse,
+                        sendResult.messageId
+                      );
+                    } catch (dbError) {
+                      console.error(
+                        "Error guardando mensaje de respuesta:",
+                        dbError
+                      );
+                    }
+                  }
+                }
               }
             }
           }
