@@ -4,7 +4,9 @@ import OpenAI from "openai";
 import { supabase } from "@/lib/supabase";
 import { detectInvoiceRequest } from "@/lib/invoice-detector";
 import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
-import { sendDocumentMessage } from "@/lib/whatsapp";
+import { sendDocumentMessage, sendImageMessage } from "@/lib/whatsapp";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 // Configuración para Next.js 15
 export const runtime = "nodejs";
@@ -121,6 +123,17 @@ RECLAMOS:
 ENVÍO DE FACTURAS:
 - Los usuarios pueden solicitar sus facturas proporcionando su número de cuenta
 - El número de cuenta es un número de 3 a 6 dígitos que aparece en la factura
+- UBICACIÓN DEL NÚMERO DE CUENTA EN LA FACTURA:
+  * El número de cuenta se encuentra en la parte superior de la factura, en la sección de información del cliente
+  * Aparece claramente identificado como "Cuenta: XXXX" (donde XXXX es el número de cuenta)
+  * Está ubicado justo después del nombre del cliente/titular del servicio
+  * Ejemplo: Si en la factura aparece "Cuenta: 2862", el número de cuenta es 2862
+  * También puede aparecer como "Cuenta: 6370" o "Cuenta: 239" (puede tener entre 3 y 6 dígitos)
+  * Si un usuario pregunta dónde está el número de cuenta o no sabe dónde encontrarlo, explícale que:
+    1. Debe buscar en la parte superior de su factura (ya sea física o PDF)
+    2. Buscar la palabra "Cuenta:" seguida de un número
+    3. Ese número es el que debe proporcionar para solicitar su factura
+    4. El número de cuenta aparece en todas las facturas (tanto de servicios como de electricidad)
 - FACTURAS DISPONIBLES: Las facturas están disponibles desde agosto 2025 en adelante (agosto, septiembre, octubre, noviembre, diciembre 2025, y meses siguientes)
 - Los usuarios pueden solicitar facturas de CUALQUIER mes desde agosto 2025 en adelante
 - Los usuarios pueden especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025", "factura de agosto 2025", "factura de septiembre 2025")
@@ -153,6 +166,14 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Si preguntan específicamente por un tipo de factura (servicios o electricidad), proporciona solo la información de ese tipo
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
 - Cuando un usuario solicite su factura proporcionando su número de cuenta, confirma que buscarás y enviarás la factura. El sistema automáticamente buscará la factura en Google Drive y la enviará por WhatsApp. Las facturas disponibles son desde agosto 2025 en adelante (incluyendo agosto, septiembre, octubre, noviembre, diciembre 2025 y meses siguientes). NUNCA digas que las facturas solo están disponibles desde noviembre 2025, porque están disponibles desde agosto 2025. Si un usuario solicita una factura de agosto, septiembre u octubre 2025, confirma que la buscarás y enviarás. Si no se encuentra, informa al usuario amablemente y sugiere que verifique el número de cuenta, el mes/año, o contacte con la oficina.
+- Si un usuario pregunta dónde está el número de cuenta, no sabe dónde encontrarlo, o dice que no lo encuentra, proporciona una explicación clara y detallada:
+  * "El número de cuenta se encuentra en la parte superior de tu factura, ya sea física o en PDF"
+  * "Busca la palabra 'Cuenta:' seguida de un número (por ejemplo: 'Cuenta: 2862' o 'Cuenta: 6370')"
+  * "Está ubicado justo después del nombre del cliente o titular del servicio"
+  * "El número de cuenta puede tener entre 3 y 6 dígitos"
+  * "Aparece en todas las facturas, tanto de servicios como de electricidad"
+  * "Si tienes una factura física, mírala en la parte superior. Si tienes el PDF, ábrelo y busca en la sección de información del cliente"
+  * Sé paciente y amable al explicar esto, ya que algunos usuarios pueden tener dificultades para encontrarlo
 `;
 
 const WHATSAPP_API_VERSION = "v22.0";
@@ -272,10 +293,7 @@ async function getInvoiceRequestCountThisMonth(
       .eq("year", year);
 
     if (error) {
-      console.error(
-        "[WEBHOOK] Error obteniendo conteo de facturas:",
-        error
-      );
+      console.error("[WEBHOOK] Error obteniendo conteo de facturas:", error);
       return 0;
     }
 
@@ -513,6 +531,124 @@ export async function POST(request: NextRequest) {
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
 
+                // Detectar si el usuario pregunta dónde está el número de cuenta
+                const accountNumberQuestionPattern =
+                  /(dónde|donde|donde está|dónde está|ubicación|ubicacion|encontrar|buscar|no encuentro|no lo encuentro|no sé|no se|no lo veo|no lo ve|dónde lo encuentro|donde lo encuentro|dónde lo busco|donde lo busco|dónde está el número|donde esta el numero|dónde está el numero|donde esta el número|número de cuenta|numero de cuenta|cuenta).*(número|numero|cuenta|factura)/i;
+                const isAccountNumberQuestion =
+                  accountNumberQuestionPattern.test(text);
+
+                if (isAccountNumberQuestion) {
+                  console.log(
+                    "[WEBHOOK] Usuario pregunta dónde está el número de cuenta"
+                  );
+                  try {
+                    // Leer la imagen desde public/images
+                    const imagePath = join(
+                      process.cwd(),
+                      "public",
+                      "images",
+                      "ubicacion de numero de cuenta.png"
+                    );
+                    const imageBuffer = await readFile(imagePath);
+
+                    // Enviar la imagen con un mensaje explicativo
+                    const imageCaption = `📋 Aquí puedes ver dónde está el número de cuenta en tu factura.\n\nEl número de cuenta aparece como "Cuenta: XXXX" en la parte superior de la factura, justo después del nombre del cliente.\n\nEjemplo: Si ves "Cuenta: 2862", ese es tu número de cuenta.`;
+
+                    const imageResult = await sendImageMessage(
+                      from,
+                      imageBuffer,
+                      imageCaption
+                    );
+
+                    if (imageResult.success) {
+                      // Enviar un mensaje adicional con más información
+                      const additionalMessage = `💡 *Consejos para encontrar tu número de cuenta:*\n\n• Busca en la parte superior de tu factura (física o PDF)\n• Busca la palabra "Cuenta:" seguida de un número\n• El número puede tener entre 3 y 6 dígitos\n• Aparece en todas las facturas (servicios y electricidad)\n\nUna vez que tengas tu número de cuenta, puedes solicitarme tu factura escribiendo algo como: "Quiero mi factura, mi número de cuenta es 2862" 😊`;
+
+                      await sendTextMessage(from, additionalMessage);
+
+                      // Guardar en historial
+                      try {
+                        const conversationId = await getOrCreateConversation(
+                          from
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "user",
+                          text,
+                          whatsappMessageId
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "assistant",
+                          imageCaption + "\n\n" + additionalMessage
+                        );
+                      } catch (dbError) {
+                        console.error("Error guardando en BD:", dbError);
+                      }
+
+                      continue; // Continuar con el siguiente mensaje
+                    } else {
+                      console.error(
+                        "[WEBHOOK] Error enviando imagen:",
+                        imageResult.error
+                      );
+                      // Si falla, enviar mensaje de texto como respaldo
+                      const fallbackMessage = `📋 El número de cuenta se encuentra en la parte superior de tu factura, identificado como "Cuenta: XXXX". Está ubicado justo después del nombre del cliente. Si tienes una factura física o PDF, búscalo en la sección de información del cliente.`;
+                      await sendTextMessage(from, fallbackMessage);
+
+                      try {
+                        const conversationId = await getOrCreateConversation(
+                          from
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "user",
+                          text,
+                          whatsappMessageId
+                        );
+                        await saveMessage(
+                          conversationId,
+                          "assistant",
+                          fallbackMessage
+                        );
+                      } catch (dbError) {
+                        console.error("Error guardando en BD:", dbError);
+                      }
+
+                      continue;
+                    }
+                  } catch (error: any) {
+                    console.error(
+                      "[WEBHOOK] Error leyendo/enviando imagen:",
+                      error
+                    );
+                    // Respuesta de texto como respaldo
+                    const fallbackMessage = `📋 El número de cuenta se encuentra en la parte superior de tu factura, identificado como "Cuenta: XXXX". Está ubicado justo después del nombre del cliente. Si tienes una factura física o PDF, búscalo en la sección de información del cliente.`;
+                    await sendTextMessage(from, fallbackMessage);
+
+                    try {
+                      const conversationId = await getOrCreateConversation(
+                        from
+                      );
+                      await saveMessage(
+                        conversationId,
+                        "user",
+                        text,
+                        whatsappMessageId
+                      );
+                      await saveMessage(
+                        conversationId,
+                        "assistant",
+                        fallbackMessage
+                      );
+                    } catch (dbError) {
+                      console.error("Error guardando en BD:", dbError);
+                    }
+
+                    continue;
+                  }
+                }
+
                 // Detectar si es una solicitud de factura
                 const invoiceRequest = detectInvoiceRequest(text);
                 console.log("[WEBHOOK] Mensaje recibido:", text);
@@ -580,7 +716,8 @@ export async function POST(request: NextRequest) {
                       );
 
                       // Obtener conteo de facturas del mes actual ANTES de registrar esta nueva
-                      const invoiceCountBefore = await getInvoiceRequestCountThisMonth(from);
+                      const invoiceCountBefore =
+                        await getInvoiceRequestCountThisMonth(from);
                       console.log(
                         `[WEBHOOK] Total de facturas enviadas a ${from} este mes (antes de esta): ${invoiceCountBefore}`
                       );
@@ -597,7 +734,8 @@ export async function POST(request: NextRequest) {
                       }
 
                       // El conteo después de registrar será invoiceCountBefore + 1
-                      const invoiceCountAfter = invoiceCountBefore + (docResult.success ? 1 : 0);
+                      const invoiceCountAfter =
+                        invoiceCountBefore + (docResult.success ? 1 : 0);
 
                       // Enviar mensaje de confirmación
                       let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.`;

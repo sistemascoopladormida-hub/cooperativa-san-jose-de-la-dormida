@@ -8,7 +8,9 @@ function makeHttpsRequest(
   url: string,
   fileBuffer: Buffer,
   filename: string,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  contentType: string = "application/pdf",
+  mediaType: string = "document"
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(url);
@@ -17,10 +19,10 @@ function makeHttpsRequest(
     // Crear FormData para esta petición
     const formData = new FormData();
     formData.append("messaging_product", "whatsapp");
-    formData.append("type", "document");
+    formData.append("type", mediaType);
     formData.append("file", fileBuffer, {
       filename: filename,
-      contentType: "application/pdf",
+      contentType: contentType,
     });
 
     const options = {
@@ -78,6 +80,78 @@ function makeHttpsRequest(
     req.on("error", reject);
     formData.pipe(req);
   });
+}
+
+/**
+ * Envía una imagen por WhatsApp Cloud API
+ */
+export async function sendImageMessage(
+  to: string,
+  imageBuffer: Buffer,
+  caption?: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!token || !phoneId) {
+    return { success: false, error: "Configuración faltante" };
+  }
+
+  try {
+    // Paso 1: Subir la imagen a WhatsApp Media API
+    console.log("[WHATSAPP] Enviando imagen, tamaño:", imageBuffer.length);
+
+    const uploadData = await makeHttpsRequest(
+      `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/media`,
+      imageBuffer,
+      "ubicacion-numero-cuenta.png",
+      { Authorization: `Bearer ${token}` },
+      "image/png",
+      "image"
+    );
+
+    console.log("[WHATSAPP] Upload exitoso, media ID:", uploadData.id);
+
+    const mediaId = uploadData.id;
+
+    // Paso 2: Enviar el mensaje con la imagen
+    const messageUrl = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
+
+    const messageResponse = await fetch(messageUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: to,
+        type: "image",
+        image: {
+          id: mediaId,
+          caption: caption || "",
+        },
+      }),
+    });
+
+    const messageData = await messageResponse.json();
+
+    if (!messageResponse.ok) {
+      console.error("Error enviando imagen:", messageData);
+      return {
+        success: false,
+        error: messageData.error?.message || "Error enviando imagen",
+      };
+    }
+
+    return {
+      success: true,
+      messageId: messageData.messages?.[0]?.id,
+    };
+  } catch (error: any) {
+    console.error("Error enviando imagen:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
