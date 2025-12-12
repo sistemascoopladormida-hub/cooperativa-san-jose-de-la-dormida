@@ -48,11 +48,10 @@ export async function GET(request: NextRequest) {
         messages: messages || [],
       });
     } else {
-      // Obtener todas las conversaciones con conteo de mensajes
+      // Obtener todas las conversaciones con conteo de mensajes y fecha del último mensaje
       const { data: conversations, error: convError } = await supabase
         .from("conversations")
-        .select("*")
-        .order("updated_at", { ascending: false });
+        .select("*");
 
       if (convError) {
         return NextResponse.json(
@@ -61,20 +60,38 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // Obtener conteo de mensajes para cada conversación
+      // Obtener conteo de mensajes y fecha del último mensaje para cada conversación
       const conversationsWithCount = await Promise.all(
         (conversations || []).map(async (conv) => {
+          // Obtener conteo de mensajes
           const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
             .eq("conversation_id", conv.id);
 
+          // Obtener la fecha del último mensaje
+          const { data: lastMessage } = await supabase
+            .from("messages")
+            .select("created_at")
+            .eq("conversation_id", conv.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+
           return {
             ...conv,
             message_count: count || 0,
+            last_message_at: lastMessage?.created_at || conv.updated_at || conv.created_at,
           };
         })
       );
+
+      // Ordenar por fecha del último mensaje (más reciente primero)
+      conversationsWithCount.sort((a, b) => {
+        const dateA = new Date(a.last_message_at).getTime();
+        const dateB = new Date(b.last_message_at).getTime();
+        return dateB - dateA; // Orden descendente (más reciente primero)
+      });
 
       return NextResponse.json({ conversations: conversationsWithCount });
     }

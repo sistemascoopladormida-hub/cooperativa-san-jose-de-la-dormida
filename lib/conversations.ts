@@ -33,7 +33,7 @@ export async function getOrCreateConversation(
 }
 
 /**
- * Guarda un mensaje en Supabase
+ * Guarda un mensaje en Supabase y actualiza la fecha de actualización de la conversación
  */
 export async function saveMessage(
   conversationId: number,
@@ -41,15 +41,27 @@ export async function saveMessage(
   content: string,
   whatsappMessageId?: string
 ): Promise<void> {
-  const { error } = await supabase.from("messages").insert({
+  const { error: messageError } = await supabase.from("messages").insert({
     conversation_id: conversationId,
     role,
     content,
     whatsapp_message_id: whatsappMessageId,
   });
 
-  if (error) {
-    console.error("Error guardando mensaje:", error);
+  if (messageError) {
+    console.error("Error guardando mensaje:", messageError);
+    return;
+  }
+
+  // Actualizar la fecha de actualización de la conversación
+  const { error: updateError } = await supabase
+    .from("conversations")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", conversationId);
+
+  if (updateError) {
+    console.error("Error actualizando conversación:", updateError);
+    // No lanzar error, el mensaje ya se guardó
   }
 }
 

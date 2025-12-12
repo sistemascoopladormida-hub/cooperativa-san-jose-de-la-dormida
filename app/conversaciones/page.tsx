@@ -27,6 +27,7 @@ interface Conversation {
   created_at: string;
   updated_at: string;
   message_count: number;
+  last_message_at?: string;
 }
 
 interface Message {
@@ -503,7 +504,7 @@ export default function ConversacionesPage() {
                               <Calendar className="h-3 w-3" />
                               <span>
                                 {format(
-                                  new Date(conv.updated_at),
+                                  new Date(conv.last_message_at || conv.updated_at),
                                   "dd/MM/yyyy HH:mm"
                                 )}
                               </span>
