@@ -78,27 +78,66 @@ export function detectInvoiceRequest(
       // Si el número está precedido por palabras comunes de direcciones, es probable que sea una dirección
       const addressKeywords = [
         "calle", "avenida", "av", "ruta", "km", "barrio", "los", "las", "el", "la",
-        "inmigrantes", "pajon", "valle", "dormida", "san", "jose", "jose", "número", "numero", "nro", "n°"
+        "inmigrantes", "pajon", "valle", "dormida", "san", "jose", "jose", "número", "numero", "nro", "n°",
+        "pasaje", "pas", "pje", "dpto", "depto", "departamento", "apto", "apartamento",
+        "casa", "villa", "manzana", "mza", "lote", "lt", "sector", "sect"
       ];
       
-      const filteredNumbers = nonYearNumbers.filter((num, index) => {
+      const filteredNumbers = nonYearNumbers.filter((num) => {
         // Obtener el contexto alrededor del número
-        const numIndex = message.indexOf(num);
+        const numIndex = message.toLowerCase().indexOf(num.toLowerCase());
         if (numIndex === -1) return true;
         
-        const beforeContext = message.substring(Math.max(0, numIndex - 30), numIndex).toLowerCase();
-        const afterContext = message.substring(numIndex + num.length, Math.min(message.length, numIndex + num.length + 30)).toLowerCase();
+        const beforeContext = message.substring(Math.max(0, numIndex - 40), numIndex).toLowerCase();
+        const afterContext = message.substring(numIndex + num.length, Math.min(message.length, numIndex + num.length + 40)).toLowerCase();
         const fullContext = beforeContext + " " + afterContext;
         
-        // Si el número es de 3 dígitos y está cerca de palabras de dirección, probablemente es una dirección
-        if (num.length === 3) {
-          const hasAddressKeyword = addressKeywords.some(keyword => 
-            fullContext.includes(keyword)
-          );
-          if (hasAddressKeyword) {
-            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`);
-            return false;
-          }
+        // Si el número está cerca de palabras de dirección, probablemente es una dirección
+        // Esto aplica para números de cualquier longitud (3-6 dígitos)
+        const hasAddressKeyword = addressKeywords.some(keyword => {
+          // Buscar la palabra clave cerca del número (dentro de 5 palabras antes o después)
+          const keywordIndex = fullContext.indexOf(keyword);
+          if (keywordIndex === -1) return false;
+          
+          // Verificar que la palabra clave esté cerca del número (dentro de 30 caracteres)
+          const keywordPos = keywordIndex < beforeContext.length 
+            ? keywordIndex 
+            : beforeContext.length + (keywordIndex - beforeContext.length);
+          const numPos = beforeContext.length;
+          const distance = Math.abs(keywordPos - numPos);
+          
+          return distance < 30;
+        });
+        
+        if (hasAddressKeyword) {
+          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`);
+          return false;
+        }
+        
+        // Verificar si el número está después de "dpto", "depto", "departamento" seguido de una letra
+        const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,6})/i;
+        const deptoMatch = message.match(deptoPattern);
+        if (deptoMatch && deptoMatch[1] === num) {
+          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de departamento`);
+          return false;
+        }
+        
+        // Verificar si hay un patrón de dirección: palabra (nombre de calle/pasaje) seguida de número
+        // Ejemplo: "pasaje toledo 515", "calle san martin 123"
+        const addressPattern = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,6})\b/i;
+        const addressMatch = message.match(addressPattern);
+        if (addressMatch && addressMatch[1] === num) {
+          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de dirección (patrón calle/pasaje)`);
+          return false;
+        }
+        
+        // Verificar si hay un nombre propio (palabra con mayúscula) seguido de número
+        // Esto captura casos como "Benítez Juan Daniel dpto B" donde el número podría ser parte de la dirección
+        const nameBeforeNumberPattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\s+(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,6})\b/i;
+        const nameBeforeNumberMatch = message.match(nameBeforeNumberPattern);
+        if (nameBeforeNumberMatch && nameBeforeNumberMatch[2] === num) {
+          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: aparece después de un nombre y dpto`);
+          return false;
         }
         
         return true;
@@ -151,8 +190,8 @@ export function detectInvoiceRequest(
 }
 
 /**
- * Detecta si el mensaje contiene información de dirección/nombre pero no un número de cuenta válido
- * Esto indica que el usuario está intentando solicitar una factura con datos incorrectos
+ * Detecta si el mensaje contiene una solicitud de factura pero con dirección/nombre
+ * en lugar de número de cuenta válido
  */
 export function detectAddressOrNameInsteadOfAccount(
   message: string
@@ -165,27 +204,29 @@ export function detectAddressOrNameInsteadOfAccount(
   // Palabras clave que indican solicitud de factura
   const invoiceKeywords = [
     "boleta", "factura", "recibo", "pasar", "enviar", "mandar",
-    "necesito", "quiero", "podrían", "podrian", "pueden", "me pueden"
+    "necesito", "quiero", "podrían", "podrian", "pueden", "me pueden",
+    "me podrían", "me podrian", "podrías", "podrias", "puedes", "me puedes"
   ];
   
-  // Palabras clave que indican dirección/nombre
+  // Palabras clave que indican dirección
   const addressKeywords = [
     "dpto", "depto", "departamento", "apartamento", "apto",
     "calle", "avenida", "av", "ruta", "km", "barrio",
     "domicilio", "dirección", "direccion", "dire", "vive", "vivo",
-    "los", "las", "el", "la", "san", "jose", "jose", "inmigrantes",
-    "pajon", "valle", "dormida"
+    "pasaje", "pas", "pje", "casa", "villa", "manzana", "mza", "lote", "lt",
+    "sector", "sect", "los", "las", "el", "la", "san", "jose",
+    "inmigrantes", "pajon", "valle", "dormida", "toledo"
   ];
   
-  // Patrones para detectar nombres (dos o más palabras que parecen nombres propios)
-  // Acepta nombres con o sin mayúsculas iniciales (por si el usuario escribe en minúsculas)
+  // Patrones para detectar nombres propios (dos o más palabras con mayúscula inicial)
   const namePattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\b/;
   
-  // También detectar nombres comunes en español (apellidos comunes)
+  // Apellidos comunes en español
   const commonSurnames = [
     "benitez", "benítez", "gonzalez", "gonzález", "rodriguez", "rodríguez",
     "fernandez", "fernández", "lopez", "lópez", "martinez", "martínez",
-    "garcia", "garcía", "perez", "pérez", "sanchez", "sánchez", "ramirez", "ramírez"
+    "garcia", "garcía", "perez", "pérez", "sanchez", "sánchez", "ramirez", "ramírez",
+    "torres", "flores", "rivera", "gomez", "gómez", "diaz", "díaz", "reyes", "cruz"
   ];
   
   // Verificar si hay solicitud de factura
@@ -211,8 +252,7 @@ export function detectAddressOrNameInsteadOfAccount(
     lowerMessage.includes(surname)
   );
   
-  // Verificar si hay secuencias de palabras que parecen nombres (al menos 2 palabras consecutivas)
-  // Esto captura casos como "Benítez Juan Daniel" incluso si están en minúsculas
+  // Verificar si hay secuencias de palabras que parecen nombres
   const words = message.split(/\s+/);
   let consecutiveNameWords = 0;
   for (let i = 0; i < words.length; i++) {
@@ -231,14 +271,15 @@ export function detectAddressOrNameInsteadOfAccount(
   const hasName = hasNamePattern || hasCommonSurname || hasNameLikeSequence;
   
   // Verificar si hay "dpto", "depto" o "departamento" seguido de una letra o número
-  const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z0-9]/i;
+  const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]/i;
   const hasDepto = deptoPattern.test(message);
   
-  // Si hay solicitud de factura Y (dirección O nombre O depto) pero NO hay número de cuenta válido
+  // Verificar si hay un número de cuenta válido (con confianza alta o media)
   const invoiceRequest = detectInvoiceRequest(message);
   const hasValidAccountNumber = invoiceRequest.accountNumber !== null && 
-                                 invoiceRequest.confidence !== "low";
+                                 (invoiceRequest.confidence === "high" || invoiceRequest.confidence === "medium");
   
+  // Si hay solicitud de factura Y (dirección O nombre O depto) pero NO hay número de cuenta válido
   const isAddressOrName = hasInvoiceRequest && 
                           !hasValidAccountNumber && 
                           (hasAddressKeyword || hasName || hasDepto);
