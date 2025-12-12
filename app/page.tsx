@@ -134,7 +134,7 @@ function ServicesCarousel({ services }: { services: Service[] }) {
 
       <motion.div
         ref={scrollRef}
-        className="flex gap-6 lg:gap-8 overflow-x-auto pb-4 scrollbar-horizontal scroll-smooth cursor-grab active:cursor-grabbing"
+        className="flex gap-6 lg:gap-8 overflow-x-auto py-4 scrollbar-horizontal scroll-smooth cursor-grab active:cursor-grabbing"
         style={{
           WebkitOverflowScrolling: 'touch',
         }}

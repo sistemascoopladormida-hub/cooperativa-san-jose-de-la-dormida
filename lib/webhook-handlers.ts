@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { detectInvoiceRequest } from "@/lib/invoice-detector";
+import { detectInvoiceRequest, detectAddressOrNameInsteadOfAccount } from "@/lib/invoice-detector";
 import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
 import { sendDocumentMessage, sendImageMessage } from "@/lib/whatsapp";
 import { sendTextMessage } from "./whatsapp-messages";
@@ -97,6 +97,67 @@ async function handleAccountNumberQuestion(
 }
 
 /**
+ * Envía la imagen que muestra dónde encontrar el número de cuenta
+ */
+async function sendAccountNumberImage(
+  from: string,
+  text: string,
+  whatsappMessageId: string,
+  message?: string
+): Promise<void> {
+  try {
+    const imagePath = join(
+      process.cwd(),
+      "public",
+      "images",
+      "ubicacion de numero de cuenta.jpeg"
+    );
+    const imageBuffer = await readFile(imagePath);
+
+    const imageCaption = message || `📋 Para poder enviarte tu factura, necesito que me indiques tu número de cuenta.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"`;
+
+    const imageResult = await sendImageMessage(from, imageBuffer, imageCaption);
+
+    if (imageResult.success) {
+      // Guardar en historial
+      try {
+        const conversationId = await getOrCreateConversation(from);
+        await saveMessage(conversationId, "user", text, whatsappMessageId);
+        await saveMessage(conversationId, "assistant", imageCaption);
+      } catch (dbError) {
+        console.error("Error guardando en BD:", dbError);
+      }
+    } else {
+      console.error("[WEBHOOK] Error enviando imagen:", imageResult.error);
+      // Si falla, enviar mensaje de texto como respaldo
+      const fallbackMessage = `📋 Para poder enviarte tu factura, necesito que me indiques tu número de cuenta.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXXX".\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"`;
+      await sendTextMessage(from, fallbackMessage);
+
+      try {
+        const conversationId = await getOrCreateConversation(from);
+        await saveMessage(conversationId, "user", text, whatsappMessageId);
+        await saveMessage(conversationId, "assistant", fallbackMessage);
+      } catch (dbError) {
+        console.error("Error guardando en BD:", dbError);
+      }
+    }
+  } catch (error: any) {
+    console.error("[WEBHOOK] Error leyendo/enviando imagen:", error);
+    // Respuesta de texto como respaldo
+    const fallbackMessage = `📋 Para poder enviarte tu factura, necesito que me indiques tu número de cuenta.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXXX".\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"`;
+    await sendTextMessage(from, fallbackMessage);
+
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(conversationId, "assistant", fallbackMessage);
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+  }
+}
+
+/**
  * Maneja una solicitud de factura
  */
 async function handleInvoiceRequest(
@@ -104,6 +165,22 @@ async function handleInvoiceRequest(
   text: string,
   whatsappMessageId: string
 ): Promise<boolean> {
+  // Primero verificar si el usuario está enviando dirección/nombre en lugar de número de cuenta
+  const addressOrNameCheck = detectAddressOrNameInsteadOfAccount(text);
+  
+  if (addressOrNameCheck.isAddressOrName) {
+    console.log(
+      `[WEBHOOK] ⚠️ Usuario envió dirección/nombre en lugar de número de cuenta. Enviando imagen de ayuda.`
+    );
+    await sendAccountNumberImage(
+      from,
+      text,
+      whatsappMessageId,
+      `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXXX".\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\nSi no tienes el número de cuenta, puedes encontrarlo en cualquier factura anterior que tengas.`
+    );
+    return true;
+  }
+  
   const invoiceRequest = detectInvoiceRequest(text);
   console.log("[WEBHOOK] Mensaje recibido:", text);
   console.log(
@@ -115,13 +192,27 @@ async function handleInvoiceRequest(
     return false;
   }
 
+  // Si la confianza es baja, enviar la imagen en lugar de buscar la factura
+  if (invoiceRequest.confidence === "low") {
+    console.log(
+      `[WEBHOOK] ⚠️ Confianza baja en la detección del número de cuenta: ${invoiceRequest.accountNumber}. Enviando imagen de ayuda.`
+    );
+    await sendAccountNumberImage(
+      from,
+      text,
+      whatsappMessageId,
+      `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"`
+    );
+    return true;
+  }
+
   // Es una solicitud de factura
   console.log(
     `[WEBHOOK] Buscando factura para cuenta: ${
       invoiceRequest.accountNumber
     }, mes: ${invoiceRequest.month || "no especificado"}, año: ${
       invoiceRequest.year || "no especificado"
-    }`
+    }, confianza: ${invoiceRequest.confidence}`
   );
 
   try {
@@ -221,25 +312,18 @@ async function handleInvoiceRequest(
         console.error("Error guardando en BD:", dbError);
       }
     } else {
-      // No se encontró la factura
+      // No se encontró la factura - enviar imagen de ayuda
       console.log(
         `[WEBHOOK] ❌ Factura no encontrada para cuenta ${invoiceRequest.accountNumber}`
       );
-      const notFoundMessage =
-        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.` +
-        `\n\nPor favor verifica que el número de cuenta sea correcto. No lo encontre en mi memoria. Corrobora que el servicio no este dado de baja` +
-        `\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
-
-      await sendTextMessage(from, notFoundMessage);
-
-      // Guardar en historial
-      try {
-        const conversationId = await getOrCreateConversation(from);
-        await saveMessage(conversationId, "user", text, whatsappMessageId);
-        await saveMessage(conversationId, "assistant", notFoundMessage);
-      } catch (dbError) {
-        console.error("Error guardando en BD:", dbError);
-      }
+      
+      // Enviar imagen mostrando dónde encontrar el número de cuenta
+      await sendAccountNumberImage(
+        from,
+        text,
+        whatsappMessageId,
+        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`
+      );
     }
     return true;
   } catch (error: any) {
