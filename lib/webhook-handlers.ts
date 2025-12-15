@@ -292,7 +292,7 @@ async function handleInvoiceRequest(
         if (invoiceCountAfter <= 10) {
           confirmationMessage += `\n\n⚠️ *Recordatorio importante:* Hay un límite máximo de 10 facturas por mes por usuario. Esta es tu factura número ${invoiceCountAfter} de este mes. Por favor, usa esta herramienta con cuidado y no abuses de ella, ya que de lo contrario tu acceso será restringido.`;
         } else {
-          confirmationMessage += `\n\n⚠️ *Nota importante:* Has superado el límite de 10 facturas por mes (solicitudes: ${invoiceCountAfter}). Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 si necesitas más facturas.`;
+          confirmationMessage += `\n\n⚠️ *Nota importante:* Has superado el límite de 10 facturas por mes (solicitudes: ${invoiceCountAfter}). Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387 si necesitas más facturas.`;
           console.log(
             `[WEBHOOK] ⚠️ Usuario ${from} ha superado el límite de 10 facturas por mes (total este mes: ${invoiceCountAfter})`
           );
@@ -322,7 +322,7 @@ async function handleInvoiceRequest(
         from,
         text,
         whatsappMessageId,
-        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`
+        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`
       );
     }
     return true;
@@ -338,7 +338,7 @@ async function handleInvoiceRequest(
         error.stack
       );
     }
-    const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330.`;
+    const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`;
 
     await sendTextMessage(from, errorMessage);
 

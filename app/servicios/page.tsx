@@ -108,8 +108,8 @@ export default function ServiciosPage() {
       phoneHref: "+54352140130",
     },
     "Programa PFC": {
-      label: "Urgencias Ambulancia PFC",
-      phoneDisplay: "3521 406183",
+      label: "Ambulancia PFC / Consultorios médicos (turnos)",
+      phoneDisplay: "3521 406183 / 401387",
       phoneHref: "+543521406183",
     },
   }
@@ -335,9 +335,17 @@ export default function ServiciosPage() {
                 <Clock className="w-5 h-5" />
                 <span>Atención: Lunes a Viernes de 7:00 a 12:00</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5" />
-                <a href="tel:+543521401330" className="hover:underline">3521-401330</a>
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center space-x-3">
+                  <Phone className="w-5 h-5" />
+                  <a href="tel:+543521401330" className="hover:underline">3521-401330</a>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <Phone className="w-4 h-4 opacity-80" />
+                  <a href="tel:+5493521401387" className="hover:underline">
+                    Consultorios médicos PFC (turnos): 3521 401387
+                  </a>
+                </div>
               </div>
             </div>
             <div className="text-center lg:text-right">

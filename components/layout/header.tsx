@@ -40,7 +40,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/servicios", label: "Servicios", icon: Zap },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
     { href: "/autoridades", label: "Autoridades", icon: Users },
-    { href: "/contacto", label: "Contacto", icon: Phone },
+    { href: "/reclamos", label: "Reclamos", icon: Phone },
     { href: "/asociarse", label: "Asociarse", icon: UserPlus },
 
   ]

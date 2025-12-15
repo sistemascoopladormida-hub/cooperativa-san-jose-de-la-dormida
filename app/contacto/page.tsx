@@ -23,17 +23,38 @@ export default function ContactoPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setSubmitted(false)
     setIsSubmitting(true)
 
-    // Simulación de envío
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const response = await fetch("/api/reclamos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "No se pudo registrar el reclamo. Intenta nuevamente.")
+        return
+      }
+
       setSubmitted(true)
       setFormData({ nombre: "", email: "", telefono: "", asunto: "", mensaje: "" })
-    }, 2000)
+    } catch (err) {
+      console.error(err)
+      setError("Ocurrió un error inesperado al registrar tu reclamo. Intenta nuevamente en unos minutos.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const contactInfo = [
@@ -46,7 +67,7 @@ export default function ContactoPage() {
     {
       icon: Phone,
       title: "Teléfono",
-      details: ["3521-401330"],
+      details: ["3521-401330", "Consultorios médicos PFC (turnos): 3521 401387"],
       color: "text-green-600",
     },
     {
@@ -71,9 +92,9 @@ export default function ContactoPage() {
       <section className="bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Contacto</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Reclamos</h1>
             <p className="text-xl text-green-100">
-              Estamos aquí para ayudarte. Contáctanos por cualquier consulta o sugerencia.
+              Canal exclusivo para ingresar tus reclamos y problemas con los servicios de la cooperativa.
             </p>
           </div>
         </div>
@@ -85,21 +106,26 @@ export default function ContactoPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">Envíanos un mensaje</CardTitle>
+                <CardTitle className="text-2xl">Ingresá tu reclamo</CardTitle>
                 <CardDescription>
-                  Completa el formulario y nos pondremos en contacto contigo a la brevedad.
+                  Completá el formulario con el mayor detalle posible para que podamos ayudarte más rápido.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {submitted ? (
-                  <Alert className="border-green-200 bg-green-50">
+                {submitted && (
+                  <Alert className="mb-4 border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800">
-                      ¡Mensaje enviado correctamente! Te responderemos dentro de las próximas 24 horas.
+                      ¡Reclamo registrado correctamente! Nos pondremos en contacto contigo a la brevedad.
                     </AlertDescription>
                   </Alert>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                )}
+                {error && (
+                  <Alert className="mb-4 border-red-200 bg-red-50" variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="nombre">Nombre completo *</Label>
@@ -132,7 +158,7 @@ export default function ContactoPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="asunto">Asunto *</Label>
+                      <Label htmlFor="asunto">Tipo de reclamo *</Label>
                         <Input
                           id="asunto"
                           value={formData.asunto}
@@ -143,13 +169,13 @@ export default function ContactoPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="mensaje">Mensaje *</Label>
+                      <Label htmlFor="mensaje">Detalle del reclamo *</Label>
                       <Textarea
                         id="mensaje"
                         rows={6}
                         value={formData.mensaje}
                         onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
-                        placeholder="Describe tu consulta o sugerencia..."
+                        placeholder="Ejemplo: Corte de luz en mi domicilio desde las 22 hs. Zona, referencia, número de cliente, etc."
                         required
                       />
                     </div>
@@ -164,12 +190,11 @@ export default function ContactoPage() {
                       ) : (
                         <>
                           <Send className="mr-2 w-4 h-4" />
-                          Enviar Mensaje
+                          Enviar reclamo
                         </>
                       )}
                     </Button>
                   </form>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -231,6 +256,15 @@ export default function ContactoPage() {
                   <p className="text-red-700 font-semibold text-sm mb-1">Sepelio</p>
                   <a href="tel:+543521406189" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
                     3521 406189
+                  </a>
+                </div>
+                <div>
+                  <p className="text-red-700 font-semibold text-sm mb-1">Consultorios médicos PFC (turnos)</p>
+                  <a
+                    href="tel:+5493521401387"
+                    className="text-red-600 hover:text-red-800 transition-colors text-base font-medium"
+                  >
+                    3521 401387
                   </a>
                 </div>
                 <p className="text-red-600 text-xs mt-3 pt-3 border-t border-red-200">Disponibles las 24 horas, los 7 días de la semana</p>

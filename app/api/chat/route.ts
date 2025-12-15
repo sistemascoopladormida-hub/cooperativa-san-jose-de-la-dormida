@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
           `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
           `Por favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n` +
           `"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\n` +
-          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
+          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`;
 
         await logWebMessages(lastUserMessage, response);
 

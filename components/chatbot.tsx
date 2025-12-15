@@ -139,7 +139,7 @@ export default function Chatbot() {
       console.error('Error al enviar mensaje:', error)
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Lo siento, hubo un error al procesar tu consulta. Por favor, intenta de nuevo o contacta directamente con nuestra oficina al 3521-401330.",
+        text: "Lo siento, hubo un error al procesar tu consulta. Por favor, intenta de nuevo o contacta directamente con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.",
         sender: "bot",
         timestamp: new Date(),
       }

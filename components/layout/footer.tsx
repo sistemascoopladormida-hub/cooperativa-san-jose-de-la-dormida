@@ -126,15 +126,6 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/contacto" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
-                  Contacto
-                </Link>
-              </li>
-              <li>
-                <Link 
                   href="/reclamos" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
@@ -183,8 +174,14 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Teléfono</p>
-                  <a href="tel:+543521401330" className="text-green-100 text-sm hover:text-coop-orange transition-colors">
+                  <a href="tel:+543521401330" className="text-green-100 text-sm hover:text-coop-orange transition-colors block">
                     3521-401330
+                  </a>
+                  <a
+                    href="tel:+5493521401387"
+                    className="text-green-100 text-xs hover:text-coop-orange transition-colors block mt-1"
+                  >
+                    Consultorios médicos PFC (turnos): 3521 401387
                   </a>
                 </div>
               </div>
@@ -213,12 +210,12 @@ export default function Footer() {
 
           {/* Teléfonos de Guardia - Enhanced */}
           <div className="lg:col-span-4 mt-8 lg:mt-0">
-            <div className="bg-red-500/20 backdrop-blur-sm rounded-xl p-6 border-2 border-red-400/30">
+              <div className="bg-red-500/20 backdrop-blur-sm rounded-xl p-6 border-2 border-red-400/30">
               <div className="flex items-center justify-center gap-2 mb-8">
                 <AlertCircle className="w-5 h-5 text-red-300" />
                 <h4 className="font-bold text-lg text-white">Teléfonos de Guardia 24/7</h4>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
                 <a 
                   href="tel:+543521406183" 
                   className="flex items-center gap-2 text-green-50 hover:text-red-300 transition-colors text-sm group"
@@ -227,6 +224,16 @@ export default function Footer() {
                   <div>
                     <p className="font-semibold">Farmacia social</p>
                     <p className="text-xs text-green-100">3521 526358</p>
+                  </div>
+                </a>
+                <a 
+                  href="tel:+5493521401387" 
+                  className="flex items-center gap-2 text-green-50 hover:text-emerald-300 transition-colors text-sm group"
+                >
+                  <PhoneCall className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-semibold">Consultorios PFC</p>
+                    <p className="text-xs text-green-100">3521 401387</p>
                   </div>
                 </a>
                 <a 

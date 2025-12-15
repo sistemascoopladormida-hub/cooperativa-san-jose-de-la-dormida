@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
 
 type Service = {
@@ -1092,10 +1092,10 @@ export default function HomePage() {
                 <CardHeader className="text-center pb-3">
                   <div className="mb-4 flex justify-center">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-red-100 to-red-200 group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300">
-                      <Heart className="w-8 h-8 text-red-600" />
+                      <Truck className="w-8 h-8 text-red-600" />
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Traslado Social Comunitario</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Traslado Social</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 
@@ -1224,6 +1224,41 @@ export default function HomePage() {
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
                     3521 406189
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Consultorios Médicos PFC (turnos) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.6 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="group sm:col-span-2 lg:col-span-1"
+            >
+              <Card className="h-full border-2 border-emerald-200 bg-white hover:border-emerald-400 hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <div className="mb-4 flex justify-center">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-200 group-hover:from-emerald-200 group-hover:to-emerald-300 transition-all duration-300">
+                      <PhoneCall className="w-8 h-8 text-emerald-700" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">
+                    Consultorios Médicos PFC
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center pt-0">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Turnos para consultorios médicos del servicio PFC
+                  </p>
+                  <a
+                    href="tel:+5493521401387"
+                    className="text-2xl font-bold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-2 group/link"
+                  >
+                    <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
+                    3521 401387
                   </a>
                 </CardContent>
               </Card>

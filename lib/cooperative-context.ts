@@ -19,6 +19,9 @@ TELÉFONOS DE GUARDIA 24/7:
 - Administración: 3521 40130
 - Sepelio: 3521 406189
 
+CONSULTORIOS MÉDICOS PFC (TURNOS):
+- Consultorios médicos PFC: 3521 401387
+
 SERVICIOS OFRECIDOS:
 1. Electricidad:
    - Suministro eléctrico confiable las 24 horas del día

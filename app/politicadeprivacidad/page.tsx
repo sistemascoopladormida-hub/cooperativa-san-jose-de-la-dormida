@@ -62,6 +62,7 @@ export default function PoliticaPrivacidadPage() {
                 <p className="text-gray-700"><strong>Razón Social:</strong> Cooperativa La Dormida</p>
                 <p className="text-gray-700"><strong>Domicilio:</strong> Av. Perón 557 - CP 5244, San José de la Dormida, Córdoba, Argentina</p>
                 <p className="text-gray-700"><strong>Teléfono:</strong> 3521-401330</p>
+                <p className="text-gray-700 text-sm mt-1"><strong>Consultorios médicos PFC (turnos):</strong> 3521 401387</p>
                 <p className="text-gray-700"><strong>Email:</strong> sistemascoopladormida@gmail.com</p>
                 <p className="text-gray-700"><strong>Horario de atención:</strong> Lunes a Viernes de 7:00 a 12:00</p>
               </div>
@@ -391,7 +392,8 @@ export default function PoliticaPrivacidadPage() {
                   <div>
                     <p className="font-semibold text-gray-800">Teléfono</p>
                     <p className="text-sm text-gray-700">3521-401330</p>
-                    <p className="text-sm text-gray-500">Lun-Vie: 7:00 - 12:00</p>
+                    <p className="text-xs text-gray-600 mt-1">Consultorios médicos PFC (turnos): 3521 401387</p>
+                    <p className="text-sm text-gray-500 mt-1">Lun-Vie: 7:00 - 12:00</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">

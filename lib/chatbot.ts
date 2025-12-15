@@ -20,7 +20,7 @@ export async function getChatbotResponse(
   whatsappMessageId?: string
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
-    return "Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330.";
+    return "Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.";
   }
 
   try {
@@ -67,7 +67,7 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     return response;
   } catch (error: any) {
     console.error("Error en chatbot:", error);
-    return "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330.";
+    return "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.";
   }
 }
 
