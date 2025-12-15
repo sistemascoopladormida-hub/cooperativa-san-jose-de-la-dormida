@@ -14,6 +14,31 @@ export const metadata: Metadata = {
     "Sitio oficial de la Cooperativa Eléctrica Ltda. de San José de la Dormida. Información institucional, servicios de energía eléctrica, internet, televisión y servicios sociales, canales de contacto y noticias para la comunidad.",
   keywords:
     "cooperativa eléctrica, San José de la Dormida, Córdoba, energía eléctrica, internet, televisión, servicios sociales, comunidad, socios",
+
+  // 👇 Esto controla el favicon en navegadores (según la doc de Next.js)
+  // Debes tener `app/favicon.ico`
+  icons: {
+    icon: "/favicon.ico",
+  },
+
+  // 👇 IMPORTANTE: las previsualizaciones de WhatsApp/redes NO usan el favicon,
+  // usan la imagen Open Graph. Aquí defines qué imagen se muestra al compartir el link.
+  openGraph: {
+    title: "Cooperativa Eléctrica Ltda. de San José de la Dormida",
+    description:
+      "Servicios que conectan, comunidad que crece. Información sobre energía eléctrica, internet, TV y servicios sociales.",
+    url: "https://cooperativaladormida.com/", // cámbialo por tu dominio real
+    siteName: "Cooperativa Eléctrica San José de la Dormida",
+    images: [
+      {
+        url: "/images/logocoopnuevo.png", // una imagen cuadrada o 1200x630 aprox
+        width: 800,
+        height: 800,
+        alt: "Logo de la Cooperativa Eléctrica San José de la Dormida",
+      },
+    ],
+    type: "website",
+  },
 }
 
 export default function RootLayout({
