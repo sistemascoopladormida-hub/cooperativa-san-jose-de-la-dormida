@@ -6,6 +6,10 @@ import {
   detectAddressOrNameInsteadOfAccount,
 } from "@/lib/invoice-detector";
 import { findInvoiceInDrive } from "@/lib/drive";
+import {
+  getOrCreateConversation,
+  saveMessage,
+} from "@/lib/conversations";
 
 export const runtime = "nodejs";
 
@@ -15,7 +19,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages } = await request.json();
+    const { messages, sessionId } = await request.json();
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
@@ -27,6 +31,19 @@ export async function POST(request: NextRequest) {
     const lastUserMessageRaw =
       messages[messages.length - 1]?.text || "";
     const lastUserMessage = lastUserMessageRaw.trim();
+
+    // Helper para registrar conversaciones del chatbot web en Supabase
+    const logWebMessages = async (userText: string, botText: string) => {
+      try {
+        if (!sessionId) return;
+        const conversationKey = `WEB-${sessionId}`;
+        const conversationId = await getOrCreateConversation(conversationKey);
+        await saveMessage(conversationId, "user", userText);
+        await saveMessage(conversationId, "assistant", botText);
+      } catch (error) {
+        console.error("[CHAT] Error guardando conversación web:", error);
+      }
+    };
 
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
     // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
@@ -41,6 +58,8 @@ export async function POST(request: NextRequest) {
         `Por favor, envíame tu solicitud con el formato:\n` +
         `"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\n` +
         `Si no tienes el número de cuenta, puedes encontrarlo en cualquier factura anterior que tengas.`;
+
+      await logWebMessages(lastUserMessage, response);
 
       return NextResponse.json({
         response,
@@ -60,6 +79,8 @@ export async function POST(request: NextRequest) {
           `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
           `Por favor, envíame tu solicitud con el formato:\n` +
           `"Me puede pasar boleta de luz, número de cuenta: XXXX"`;
+
+        await logWebMessages(lastUserMessage, response);
 
         return NextResponse.json({
           response,
@@ -96,6 +117,8 @@ export async function POST(request: NextRequest) {
           `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
           `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
+        await logWebMessages(lastUserMessage, confirmationMessage);
+
         return NextResponse.json({
           response: confirmationMessage,
           invoice: {
@@ -113,6 +136,8 @@ export async function POST(request: NextRequest) {
           `Por favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n` +
           `"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\n` +
           `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
+
+        await logWebMessages(lastUserMessage, response);
 
         return NextResponse.json({
           response,
@@ -162,6 +187,8 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       /(número de cuenta|numero de cuenta|nro de cuenta|nro cuenta|cuenta)/i.test(
         lowerLast
       );
+
+    await logWebMessages(lastUserMessage, response);
 
     return NextResponse.json({
       response,

@@ -19,6 +19,7 @@ import {
   Lock,
   Sparkles,
   ArrowLeft,
+  Bot,
 } from "lucide-react";
 
 interface Conversation {
@@ -372,7 +373,7 @@ export default function ConversacionesPage() {
               </motion.div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Conversaciones WhatsApp
+                  Conversaciones WhatsApp y Web
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
@@ -426,7 +427,7 @@ export default function ConversacionesPage() {
                 <div className="relative mt-4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Buscar por número..."
+                    placeholder="Buscar por número o tipo..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
@@ -460,57 +461,80 @@ export default function ConversacionesPage() {
                   ) : (
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">
                       <AnimatePresence>
-                        {filteredConversations.map((conv, index) => (
-                          <motion.button
-                            key={conv.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() =>
-                              loadConversationDetail(conv.phone_number)
-                            }
-                            className={`w-full text-left p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition-all duration-300 ${
-                              selectedConversation?.conversation.id === conv.id
-                                ? "bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-l-4 border-blue-500 shadow-sm"
-                                : ""
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {filteredConversations.map((conv, index) => {
+                          const isWebConversation =
+                            conv.phone_number.startsWith("WEB-");
+                          const displayName = isWebConversation
+                            ? `Chat Web (${conv.phone_number.replace(
+                                /^WEB-/,
+                                ""
+                              )})`
+                            : conv.phone_number;
+
+                          return (
+                            <motion.button
+                              key={conv.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ delay: index * 0.05 }}
+                              onClick={() =>
+                                loadConversationDetail(conv.phone_number)
+                              }
+                              className={`w-full text-left p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition-all duration-300 ${
+                                selectedConversation?.conversation.id === conv.id
+                                  ? "bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-l-4 border-blue-500 shadow-sm"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <motion.div
+                                    whileHover={{ scale: 1.2, rotate: 15 }}
+                                    className="flex-shrink-0"
+                                  >
+                                    {isWebConversation ? (
+                                      <Bot className="h-5 w-5 text-emerald-600" />
+                                    ) : (
+                                      <Phone className="h-5 w-5 text-blue-600" />
+                                    )}
+                                  </motion.div>
+                                  <span className="font-semibold text-sm truncate">
+                                    {displayName}
+                                  </span>
+                                </div>
                                 <motion.div
-                                  whileHover={{ scale: 1.2, rotate: 15 }}
-                                  className="flex-shrink-0"
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
                                 >
-                                  <Phone className="h-5 w-5 text-blue-600" />
+                                  <Badge
+                                    variant="secondary"
+                                    className={
+                                      "ml-2 " +
+                                      (isWebConversation
+                                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300")
+                                    }
+                                  >
+                                    {isWebConversation ? "Web" : "WA"} ·{" "}
+                                    {conv.message_count}
+                                  </Badge>
                                 </motion.div>
-                                <span className="font-semibold text-sm truncate">
-                                  {conv.phone_number}
+                              </div>
+                              <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                <span>
+                                  {format(
+                                    new Date(
+                                      conv.last_message_at || conv.updated_at
+                                    ),
+                                    "dd/MM/yyyy HH:mm"
+                                  )}
                                 </span>
                               </div>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <Badge
-                                  variant="secondary"
-                                  className="ml-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                >
-                                  {conv.message_count}
-                                </Badge>
-                              </motion.div>
-                            </div>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                              <Calendar className="h-3 w-3" />
-                              <span>
-                                {format(
-                                  new Date(conv.last_message_at || conv.updated_at),
-                                  "dd/MM/yyyy HH:mm"
-                                )}
-                              </span>
-                            </div>
-                          </motion.button>
-                        ))}
+                            </motion.button>
+                          );
+                        })}
                       </AnimatePresence>
                     </div>
                   )}
@@ -547,7 +571,13 @@ export default function ConversacionesPage() {
                           whileHover={{ rotate: [0, -10, 10, 0] }}
                           transition={{ duration: 0.5 }}
                         >
-                          <Phone className="h-6 w-6 text-indigo-600" />
+                          {selectedConversation.conversation.phone_number.startsWith(
+                            "WEB-"
+                          ) ? (
+                            <Bot className="h-6 w-6 text-emerald-600" />
+                          ) : (
+                            <Phone className="h-6 w-6 text-indigo-600" />
+                          )}
                         </motion.div>
                         <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent break-all">
                           {selectedConversation.conversation.phone_number}

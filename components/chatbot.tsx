@@ -37,6 +37,21 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+
+  // Obtener o crear un ID de sesión persistente para el chatbot web
+  const getOrCreateSessionId = (): string => {
+    if (typeof window === "undefined") return "web-server";
+    const STORAGE_KEY = "chatbot_web_session_id"
+    let existing = window.localStorage.getItem(STORAGE_KEY)
+    if (!existing) {
+      existing = `web-${Date.now().toString(36)}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+      window.localStorage.setItem(STORAGE_KEY, existing)
+    }
+    return existing
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -46,11 +61,23 @@ export default function Chatbot() {
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Inicializar sesión en el cliente
+  useEffect(() => {
+    const id = getOrCreateSessionId()
+    setSessionId(id)
+  }, [])
+
   // Removido el auto-focus para evitar que se abra el teclado en móviles
   // El usuario puede hacer click en el input cuando quiera escribir
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
+
+    // Asegurar que tenemos un sessionId antes de enviar
+    const currentSessionId = sessionId ?? getOrCreateSessionId()
+    if (!sessionId) {
+      setSessionId(currentSessionId)
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -75,7 +102,7 @@ export default function Chatbot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: messagesToSend }),
+        body: JSON.stringify({ messages: messagesToSend, sessionId: currentSessionId }),
       })
 
       if (!response.ok) {
