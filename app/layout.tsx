@@ -9,10 +9,11 @@ import Chatbot from "@/components/chatbot"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Cooperativa La Dormida - Blog informativo",
+  title: "Cooperativa Eléctrica Ltda. de San José de la Dormida",
   description:
-    "Página web informativa de la Cooperativa Eléctrica La Dormida.",
-  keywords: "cooperativa, electricidad, internet, television, farmacia, La Dormida",
+    "Sitio oficial de la Cooperativa Eléctrica Ltda. de San José de la Dormida. Información institucional, servicios de energía eléctrica, internet, televisión y servicios sociales, canales de contacto y noticias para la comunidad.",
+  keywords:
+    "cooperativa eléctrica, San José de la Dormida, Córdoba, energía eléctrica, internet, televisión, servicios sociales, comunidad, socios",
 }
 
 export default function RootLayout({
