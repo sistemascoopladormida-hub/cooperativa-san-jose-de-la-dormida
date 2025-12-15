@@ -30,21 +30,17 @@ import {
 
 export default function AsociarsePage() {
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
-    dni: "",
+    nombreCompleto: "",
     email: "",
     telefono: "",
-    direccion: "",
-    ciudad: "",
-    codigoPostal: "",
     ocupacion: "",
-    motivacion: "",
+    direccion: "",
     serviciosInteres: [] as string[],
     aceptaTerminos: false,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const benefits = [
     {
@@ -103,13 +99,42 @@ export default function AsociarsePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setSubmitted(false)
     setIsSubmitting(true)
 
-    // Simulación de envío
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const response = await fetch("/api/asociarse", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "No se pudo registrar la solicitud. Intenta nuevamente.")
+        return
+      }
+
       setSubmitted(true)
-    }, 2000)
+      setFormData({
+        nombreCompleto: "",
+        email: "",
+        telefono: "",
+        ocupacion: "",
+        direccion: "",
+        serviciosInteres: [],
+        aceptaTerminos: false,
+      })
+    } catch (err) {
+      console.error(err)
+      setError("Ocurrió un error inesperado al registrar tu solicitud. Intenta nuevamente en unos minutos.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -164,44 +189,31 @@ export default function AsociarsePage() {
               <CardDescription>Completa todos los campos para procesar tu solicitud de membresía.</CardDescription>
             </CardHeader>
             <CardContent>
-              {submitted ? (
-                <Alert className="border-green-200 bg-green-50">
+              {submitted && (
+                <Alert className="mb-4 border-green-200 bg-green-50">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-800">
                     ¡Solicitud enviada correctamente! Nos pondremos en contacto contigo dentro de los próximos 5 días
                     hábiles para continuar con el proceso de asociación.
                   </AlertDescription>
                 </Alert>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-8">
+              )}
+              {error && (
+                <Alert className="mb-4 border-red-200 bg-red-50" variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <form onSubmit={handleSubmit} className="space-y-8">
                   {/* Personal Information */}
                   <div>
                     <h3 className="text-lg font-semibold mb-4">Información Personal</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="nombre">Nombre *</Label>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="nombreCompleto">Nombre completo *</Label>
                         <Input
-                          id="nombre"
-                          value={formData.nombre}
-                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="apellido">Apellido *</Label>
-                        <Input
-                          id="apellido"
-                          value={formData.apellido}
-                          onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="dni">DNI *</Label>
-                        <Input
-                          id="dni"
-                          value={formData.dni}
-                          onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+                          id="nombreCompleto"
+                          value={formData.nombreCompleto}
+                          onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
                           required
                         />
                       </div>
@@ -238,31 +250,14 @@ export default function AsociarsePage() {
                   {/* Address Information */}
                   <div>
                     <h3 className="text-lg font-semibold mb-4">Dirección</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2 md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                      <div className="space-y-2">
                         <Label htmlFor="direccion">Dirección completa *</Label>
                         <Input
                           id="direccion"
                           value={formData.direccion}
                           onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                           required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="ciudad">Ciudad *</Label>
-                        <Input
-                          id="ciudad"
-                          value={formData.ciudad}
-                          onChange={(e) => setFormData({ ...formData, ciudad: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="codigoPostal">Código Postal</Label>
-                        <Input
-                          id="codigoPostal"
-                          value={formData.codigoPostal}
-                          onChange={(e) => setFormData({ ...formData, codigoPostal: e.target.value })}
                         />
                       </div>
                     </div>
@@ -285,21 +280,6 @@ export default function AsociarsePage() {
                           </Label>
                         </div>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Motivation */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Motivación</h3>
-                    <div className="space-y-2">
-                      <Label htmlFor="motivacion">¿Por qué quieres asociarte a nuestra cooperativa?</Label>
-                      <Textarea
-                        id="motivacion"
-                        rows={4}
-                        value={formData.motivacion}
-                        onChange={(e) => setFormData({ ...formData, motivacion: e.target.value })}
-                        placeholder="Cuéntanos qué te motiva a formar parte de nuestra comunidad cooperativa..."
-                      />
                     </div>
                   </div>
 
@@ -337,7 +317,6 @@ export default function AsociarsePage() {
                     )}
                   </Button>
                 </form>
-              )}
             </CardContent>
           </Card>
         </div>
