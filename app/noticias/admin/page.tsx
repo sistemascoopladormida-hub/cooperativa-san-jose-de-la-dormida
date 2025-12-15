@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, FormEvent } from "react"
+import Image from "next/image"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,11 +10,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Lock, Newspaper } from "lucide-react"
+import { Loader2, Lock, Newspaper, Sparkles } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 const ADMIN_PASSWORD = "Ingresonoticias2026."
 
-export default function NoticiasAdminPage(): JSX.Element {
+export default function NoticiasAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [passwordInput, setPasswordInput] = useState("")
   const [authError, setAuthError] = useState<string | null>(null)
@@ -101,6 +103,127 @@ export default function NoticiasAdminPage(): JSX.Element {
     }
   }
 
+  // Pantalla de login estilo /conversaciones
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 relative overflow-hidden">
+        {/* Logo de fondo */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+          <Image
+            src="/images/logocoopnuevo.png"
+            alt="Logo fondo"
+            width={600}
+            height={600}
+            className="object-contain"
+          />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardHeader className="text-center pb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="flex justify-center mb-4"
+              >
+                <div className="relative">
+                  <motion.div
+                    animate={{
+                      rotate: [0, 10, -10, 10, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                    }}
+                  >
+                    <Image
+                      src="/images/logocoopnuevo.png"
+                      alt="Cooperativa La Dormida"
+                      width={80}
+                      height={80}
+                      className="mx-auto"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="absolute -top-2 -right-2"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    <Sparkles className="h-6 w-6 text-yellow-400" />
+                  </motion.div>
+                </div>
+              </motion.div>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center justify-center gap-2">
+                <Newspaper className="w-6 h-6" />
+                Panel de Noticias
+              </CardTitle>
+              <p className="text-sm text-gray-500 mt-2">
+                Ingreso exclusivo para crear y publicar noticias en el sitio.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAuth} className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="admin-password"
+                      type="password"
+                      placeholder="Ingresa la contraseña"
+                      value={passwordInput}
+                      onChange={(e) => setPasswordInput(e.target.value)}
+                      className="w-full pl-10 h-12 text-lg"
+                      required
+                    />
+                  </div>
+                </motion.div>
+                <AnimatePresence>
+                  {authError && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-sm text-red-500 text-center bg-red-50 p-2 rounded"
+                    >
+                      {authError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    Ingresar
+                  </Button>
+                </motion.div>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Panel ya autenticado con formulario de noticia
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -112,53 +235,16 @@ export default function NoticiasAdminPage(): JSX.Element {
             Panel administrativo de noticias
           </h1>
           <p className="text-gray-600 mt-2">
-            Acceso exclusivo para cargar y publicar noticias en el sitio.
+            Cargá nuevas noticias para que se muestren en la web de la cooperativa.
           </p>
         </div>
 
-        {/* Bloque de autenticación simple por contraseña */}
-        {!isAuthenticated && (
-          <Card className="mb-10 border-2 border-dashed border-coop-green/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="w-5 h-5 text-coop-green" />
-                Ingreso restringido
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleAuth} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="admin-password">Contraseña de administración</Label>
-                  <Input
-                    id="admin-password"
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="Ingresa la contraseña para acceder"
-                    required
-                  />
-                </div>
-                {authError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{authError}</AlertDescription>
-                  </Alert>
-                )}
-                <Button type="submit" className="bg-coop-green hover:bg-coop-green/90">
-                  Ingresar
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Formulario principal de carga de noticias */}
-        {isAuthenticated && (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Cargar nueva noticia</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Cargar nueva noticia</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Título *</Label>
@@ -286,12 +372,9 @@ export default function NoticiasAdminPage(): JSX.Element {
               </form>
             </CardContent>
           </Card>
-        )}
       </main>
 
       <Footer />
     </div>
   )
 }
-
-
