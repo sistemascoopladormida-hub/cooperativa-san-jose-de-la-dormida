@@ -294,7 +294,7 @@ export default function Chatbot() {
                       layout: { duration: 0.2 }
                     }}
                     className={cn(
-                      "flex items-start space-x-3",
+                      "flex w-full items-start space-x-3",
                       message.sender === "user" && "flex-row-reverse space-x-reverse"
                     )}
                   >
@@ -314,7 +314,7 @@ export default function Chatbot() {
                   </div>
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm break-words overflow-hidden",
+                      "max-w-[280px] sm:max-w-[320px] md:max-w-[360px] rounded-2xl px-4 py-3 shadow-sm break-words overflow-hidden",
                       message.sender === "user"
                         ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
                         : "bg-white text-gray-800 border border-gray-200"
