@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
-import { MessageCircle, X, Send, Bot, User, Clock, Zap, Phone, HelpCircle } from "lucide-react"
+import { MessageCircle, X, Send, Bot, User, Clock, Zap, Phone, HelpCircle, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
@@ -16,6 +16,11 @@ interface Message {
   sender: "user" | "bot"
   timestamp: Date
   image?: string
+  invoice?: {
+    downloadUrl: string
+    fileName: string
+    type: string
+  }
 }
 
 export default function Chatbot() {
@@ -78,23 +83,26 @@ export default function Chatbot() {
       }
 
       const data = await response.json()
-      
-      // Log para debugging
-      console.log("Respuesta de la API:", data);
-      console.log("showImage:", data.showImage);
-      
-      const imagePath = data.showImage 
-        ? `/images/${encodeURIComponent(data.showImage)}.jpeg` 
-        : undefined;
-      
-      console.log("Ruta de imagen:", imagePath);
-      
+
+      const imagePath = data.showImage
+        ? `/images/${encodeURIComponent(data.showImage)}.jpeg`
+        : undefined
+
+      const invoiceData = data.invoice
+        ? {
+            downloadUrl: data.invoice.downloadUrl as string,
+            fileName: data.invoice.fileName as string,
+            type: data.invoice.type as string,
+          }
+        : undefined
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: data.response || "Lo siento, no pude procesar tu consulta en este momento. Por favor, intenta de nuevo o contacta directamente con nuestra oficina.",
         sender: "bot",
         timestamp: new Date(),
         image: imagePath,
+        invoice: invoiceData,
       }
       
       console.log("Mensaje del bot creado:", botResponse);
@@ -125,7 +133,7 @@ export default function Chatbot() {
     { text: "¿Qué servicios ofrecen?", icon: Zap },
     { text: "¿Cuáles son los horarios?", icon: Clock },
     { text: "¿Cómo me contacto?", icon: Phone },
-    { text: "¿Cómo me asocio?", icon: HelpCircle },
+    { text: "Quiero descargar mi factura", icon: FileText },
   ]
 
   const handleQuickAction = (actionText: string) => {
@@ -325,6 +333,28 @@ export default function Chatbot() {
                         >
                           {message.text}
                         </ReactMarkdown>
+                        {message.invoice && (
+                          <div className="mt-3 border border-coop-green/30 bg-green-50/60 rounded-lg p-3 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-sm font-medium text-coop-green">
+                              <FileText className="w-4 h-4" />
+                              <span>Factura de {message.invoice.type}</span>
+                            </div>
+                            <p className="text-xs text-gray-700 break-all">
+                              Archivo: {message.invoice.fileName}
+                            </p>
+                            <div className="flex justify-start">
+                              <a
+                                href={message.invoice.downloadUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-coop-blue to-coop-green text-white shadow hover:shadow-md hover:from-coop-blue/90 hover:to-coop-green/90 transition-all"
+                              >
+                                <FileText className="w-4 h-4" />
+                                Descargar factura
+                              </a>
+                            </div>
+                          </div>
+                        )}
                         {message.image && (
                           <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                             <img 

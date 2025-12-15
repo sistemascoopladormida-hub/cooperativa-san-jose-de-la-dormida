@@ -92,14 +92,17 @@ export async function POST(request: NextRequest) {
 
         confirmationMessage += `📄 Archivo: ${invoice.fileName}\n\n`;
         confirmationMessage +=
-          `⬇️ **Descargar factura:** [${invoice.fileName}](${downloadUrl})\n\n`;
-        confirmationMessage +=
           `💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:\n` +
           `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
           `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
         return NextResponse.json({
           response: confirmationMessage,
+          invoice: {
+            downloadUrl,
+            fileName: invoice.fileName,
+            type: typeLabel,
+          },
         });
       } else {
         // No se encontró la factura → mismo comportamiento que WhatsApp: mostrar imagen
