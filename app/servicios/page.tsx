@@ -57,11 +57,11 @@ export default function ServiciosPage() {
       description: "Cobertura integral de salud y acompañamiento para toda la familia",
       features: [
         "Traslados social comunitario",
-        "Servicio de sepelio completo",
+        "Servicio funebre y de cocheria",
         "Análisis clínicos y estudios de laboratorio",
-        "Servicio óptico (un par por año)",
-        "Elementos ortopédicos",
-        "Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, psicología y diabetología",
+        "Servicio óptico cobertura 100%, 50% y 25%",
+        "Prestación de elementos ortopedicos",
+        "Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, podologa, psicología y diabetología",
         "Taller interdisciplinario (fonoaudiología, psicopedagogía, psicología y maestra integradora) para niños y adultos mayores con dificultades de aprendizaje, TEA y otras condiciones",
       ],
       price: "A partir de $10,000/mes",
@@ -76,7 +76,7 @@ export default function ServiciosPage() {
       description: "Medicamentos y perfumería con beneficios exclusivos para socios",
       features: [
         "3 cuotas sin interés con tarjetas bancarizadas",
-        "10% de descuento en compra de contado en medicamentos o perfumería",
+        "10% de descuento en compra de contado en medicamentos (sin suscripción medica) o perfumería",
         "Aceptamos obras sociales: PAMI, APROSS, UNIMED",
         "Bono solidario aceptado",
       ],
@@ -122,7 +122,7 @@ export default function ServiciosPage() {
     },
     {
       title: "Eventos Sociales",
-      description: "Actividades para toda la familia",
+      description: "camping Pisco Huasi",
       icon: Users,
     },
     {

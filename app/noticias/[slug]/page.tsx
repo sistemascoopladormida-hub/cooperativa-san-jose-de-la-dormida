@@ -46,6 +46,15 @@ function mapDbToNewsPost(post: DbNewsPost): NewsPost {
   }
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "")
+}
+
 async function getPostBySlug(slug: string): Promise<NewsPost | undefined> {
   try {
     const { data, error } = await supabase
@@ -62,6 +71,22 @@ async function getPostBySlug(slug: string): Promise<NewsPost | undefined> {
 
     if (data) {
       return mapDbToNewsPost(data as DbNewsPost)
+    }
+
+    // Fallback: buscar por slug generado desde el título, por si la columna slug está vacía o mal cargada
+    const { data: allPosts } = await supabase
+      .from("news_posts")
+      .select(
+        "id, slug, title, excerpt, content, date, author, category, image_url, read_time, tags"
+      )
+      .order("date", { ascending: false })
+      .limit(100)
+
+    if (allPosts && Array.isArray(allPosts)) {
+      const matched = (allPosts as DbNewsPost[]).find((p) => slugify(p.title) === slug)
+      if (matched) {
+        return mapDbToNewsPost(matched)
+      }
     }
   } catch (error) {
     console.error("Error inesperado obteniendo noticia:", error)

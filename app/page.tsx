@@ -1095,7 +1095,7 @@ export default function HomePage() {
                       <Heart className="w-8 h-8 text-red-600" />
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Ambulancia</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Traslado Social Comunitario</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 
@@ -1215,7 +1215,7 @@ export default function HomePage() {
                       <FileText className="w-8 h-8 text-gray-600" />
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Sepelio</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Servicios Funebres</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 

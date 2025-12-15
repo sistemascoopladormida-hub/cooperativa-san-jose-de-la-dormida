@@ -29,7 +29,7 @@ export default function Footer() {
               <h3 className="text-xl font-bold">Cooperativa La Dormida</h3>
             </div>
             <p className="text-base text-green-50 leading-relaxed">
-              Brindando servicios de calidad a nuestra comunidad desde hace más de 50 años con compromiso y excelencia.
+              Brindando servicios de calidad a nuestra comunidad desde hace más de 60 años con compromiso y excelencia.
             </p>
             {/* Social Media - Enhanced */}
             <div className="flex space-x-4 pt-2">
@@ -225,8 +225,8 @@ export default function Footer() {
                 >
                   <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   <div>
-                    <p className="font-semibold">Ambulancia</p>
-                    <p className="text-xs text-green-100">3521 406183</p>
+                    <p className="font-semibold">Farmacia social</p>
+                    <p className="text-xs text-green-100">3521 526358</p>
                   </div>
                 </a>
                 <a 
