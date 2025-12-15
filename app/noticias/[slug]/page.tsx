@@ -54,14 +54,14 @@ async function getPostBySlug(slug: string): Promise<NewsPost | undefined> {
         "id, slug, title, excerpt, content, date, author, category, image_url, read_time, tags"
       )
       .eq("slug", slug)
-      .single()
+      .maybeSingle()
 
-    if (!error && data) {
-      return mapDbToNewsPost(data as DbNewsPost)
+    if (error && error.code !== "PGRST116") {
+      console.error("Error obteniendo noticia desde Supabase:", error)
     }
 
-    if (error) {
-      console.error("Error obteniendo noticia desde Supabase:", error)
+    if (data) {
+      return mapDbToNewsPost(data as DbNewsPost)
     }
   } catch (error) {
     console.error("Error inesperado obteniendo noticia:", error)
