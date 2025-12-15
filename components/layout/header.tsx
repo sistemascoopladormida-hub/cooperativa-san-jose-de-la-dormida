@@ -29,7 +29,7 @@ import { motion, AnimatePresence } from "framer-motion"
 interface HeaderProps {
   isLoggedIn?: boolean
   userName?: string
-  isPFC?: boolean // Indicates if the user is a PFC (Programa de Fortalecimiento Comunitario) member
+  isPFC?: boolean // Indicates if the user is a PFC (Plan de financiamiento Colectivo) member
 }
 
 export default function Header({ isLoggedIn = false, userName, isPFC = false }: HeaderProps) {

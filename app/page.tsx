@@ -845,7 +845,8 @@ export default function HomePage() {
                   <span className="text-sm font-medium text-coop-green">Programa Especial</span>
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
-                  Programa de Fortalecimiento Comunitario
+                
+                  Plan de financiamiento Colectivo
                   <span className="block text-coop-green mt-2">(PFC)</span>
                 </h2>
                 <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8">

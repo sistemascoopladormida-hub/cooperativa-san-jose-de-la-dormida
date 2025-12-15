@@ -53,7 +53,7 @@ export default function ServiciosPage() {
     },
     {
       icon: ShieldCheck,
-      title: "Programa PFC",
+      title: "Plan de financiamiento Colectivo (PFC)",
       description: "Cobertura integral de salud y acompañamiento para toda la familia",
       features: [
         "Traslados en ambulancia para urgencias",
