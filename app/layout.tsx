@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/logocoopnuevo.png", // una imagen cuadrada o 1200x630 aprox
-        width: 800,
-        height: 800,
+        width: 400,
+        height: 400,
         alt: "Logo de la Cooperativa Eléctrica San José de la Dormida",
       },
     ],
