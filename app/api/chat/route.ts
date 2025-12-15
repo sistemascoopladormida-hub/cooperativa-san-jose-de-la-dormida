@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { cooperativeContext } from "@/lib/cooperative-context";
+import {
+  detectInvoiceRequest,
+  detectAddressOrNameInsteadOfAccount,
+} from "@/lib/invoice-detector";
+import { findInvoiceInDrive } from "@/lib/drive";
+
+export const runtime = "nodejs";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -17,7 +24,101 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Construir el sistema de mensajes con el contexto
+    const lastUserMessageRaw =
+      messages[messages.length - 1]?.text || "";
+    const lastUserMessage = lastUserMessageRaw.trim();
+
+    // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
+    // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
+    const addressOrNameCheck =
+      detectAddressOrNameInsteadOfAccount(lastUserMessage);
+
+    if (addressOrNameCheck.isAddressOrName) {
+      const response =
+        `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\n` +
+        `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
+        `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXXX".\n\n` +
+        `Por favor, envíame tu solicitud con el formato:\n` +
+        `"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\n` +
+        `Si no tienes el número de cuenta, puedes encontrarlo en cualquier factura anterior que tengas.`;
+
+      return NextResponse.json({
+        response,
+        showImage: "ubicacion de numero de cuenta",
+      });
+    }
+
+    // 1.b) Detección de solicitud de factura
+    const invoiceRequest = detectInvoiceRequest(lastUserMessage);
+
+    if (invoiceRequest.accountNumber) {
+      // Si la confianza es baja, enviar imagen explicativa
+      if (invoiceRequest.confidence === "low") {
+        const response =
+          `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n` +
+          `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
+          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
+          `Por favor, envíame tu solicitud con el formato:\n` +
+          `"Me puede pasar boleta de luz, número de cuenta: XXXX"`;
+
+        return NextResponse.json({
+          response,
+          showImage: "ubicacion de numero de cuenta",
+        });
+      }
+
+      // Buscar la factura en Google Drive (igual que en WhatsApp)
+      const invoice = await findInvoiceInDrive(
+        invoiceRequest.accountNumber,
+        invoiceRequest.month,
+        invoiceRequest.year
+      );
+
+      if (invoice) {
+        const typeLabel =
+          invoice.type === "servicios" ? "servicios" : "energía eléctrica";
+
+        const downloadUrl = `/api/chat/invoice?fileId=${encodeURIComponent(
+          invoice.fileId
+        )}&fileName=${encodeURIComponent(invoice.fileName)}`;
+
+        let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.\n\n`;
+
+        if (invoiceRequest.month) {
+          confirmationMessage += `📅 Período: ${
+            invoiceRequest.month
+          }${invoiceRequest.year ? " " + invoiceRequest.year : ""}\n\n`;
+        }
+
+        confirmationMessage += `📄 Archivo: ${invoice.fileName}\n\n`;
+        confirmationMessage +=
+          `⬇️ **Descargar factura:** [${invoice.fileName}](${downloadUrl})\n\n`;
+        confirmationMessage +=
+          `💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:\n` +
+          `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
+          `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
+
+        return NextResponse.json({
+          response: confirmationMessage,
+        });
+      } else {
+        // No se encontró la factura → mismo comportamiento que WhatsApp: mostrar imagen
+        const response =
+          `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n` +
+          `📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\n` +
+          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
+          `Por favor, verifica que el número de cuenta sea correcto y envíame tu solicitud nuevamente con el formato:\n` +
+          `"Me puede pasar boleta de luz, número de cuenta: XXXX"\n\n` +
+          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
+
+        return NextResponse.json({
+          response,
+          showImage: "ubicacion de numero de cuenta",
+        });
+      }
+    }
+
+    // 2) Si no es un caso de factura, usar OpenAI como antes
     const systemMessage = {
       role: "system" as const,
       content: `Eres un asistente virtual amigable y profesional de la Cooperativa La Dormida. Tu objetivo es ayudar a los usuarios con información sobre los servicios, horarios, contacto y más.
@@ -48,56 +149,22 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       completion.choices[0]?.message?.content ||
       "Lo siento, no pude generar una respuesta en este momento.";
 
-    // Detectar si el usuario pregunta sobre la ubicación del número de cuenta
-    // Revisar el último mensaje del usuario y también el contexto completo de la conversación
-    const lastUserMessage = messages[messages.length - 1]?.text?.toLowerCase() || "";
-    
-    // Obtener todo el contexto de la conversación (últimos 5 mensajes)
-    const recentMessages = messages.slice(-5);
-    const allMessagesText = recentMessages
-      .map((msg: { text: string }) => msg.text.toLowerCase())
-      .join(" ");
-    
-    // Detectar si menciona número de cuenta o número de socio en cualquier parte de la conversación
-    const mencionaCuenta = 
-      allMessagesText.includes("número de cuenta") ||
-      allMessagesText.includes("numero de cuenta") ||
-      allMessagesText.includes("número de socio") ||
-      allMessagesText.includes("numero de socio") ||
-      allMessagesText.includes("nro de cuenta") ||
-      allMessagesText.includes("nro cuenta") ||
-      (allMessagesText.includes("cuenta") && (allMessagesText.includes("numero") || allMessagesText.includes("factura")));
-    
-    // Detectar si pregunta por ubicación o dice que no encuentra
-    const preguntaUbicacion = 
-      lastUserMessage.includes("donde") ||
-      lastUserMessage.includes("dónde") ||
-      lastUserMessage.includes("no encuentro") ||
-      lastUserMessage.includes("no lo encuentro") ||
-      lastUserMessage.includes("sigo sin encontrar") ||
-      lastUserMessage.includes("ubicación") ||
-      lastUserMessage.includes("ubicacion") ||
-      lastUserMessage.includes("en la boleta") ||
-      lastUserMessage.includes("en la factura") ||
-      lastUserMessage.includes("en mi boleta") ||
-      lastUserMessage.includes("en mi factura");
-    
-    // Mostrar imagen si:
-    // 1. Menciona cuenta en el contexto Y pregunta por ubicación, O
-    // 2. Dice que no encuentra algo Y hay contexto de cuenta
-    const shouldShowImage = mencionaCuenta && preguntaUbicacion;
-    
-    // Log para debugging
-    console.log("=== Detección de imagen de número de cuenta ===");
-    console.log("Último mensaje del usuario:", lastUserMessage);
-    console.log("Menciona cuenta en contexto:", mencionaCuenta);
-    console.log("Pregunta por ubicación:", preguntaUbicacion);
-    console.log("Mostrar imagen:", shouldShowImage);
-    console.log("Contexto completo (últimos 5 mensajes):", allMessagesText.substring(0, 200));
+    // Además, si el usuario pregunta explícitamente dónde está el número de cuenta,
+    // mostramos la misma imagen que en WhatsApp.
+    const lowerLast = lastUserMessage.toLowerCase();
+    const isAccountLocationQuestion =
+      /(dónde|donde|donde está|dónde está|ubicación|ubicacion|no encuentro|no lo encuentro|sigo sin encontrar)/i.test(
+        lowerLast
+      ) &&
+      /(número de cuenta|numero de cuenta|nro de cuenta|nro cuenta|cuenta)/i.test(
+        lowerLast
+      );
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       response,
-      showImage: shouldShowImage ? "ubicacion de numero de cuenta" : undefined
+      showImage: isAccountLocationQuestion
+        ? "ubicacion de numero de cuenta"
+        : undefined,
     });
   } catch (error: any) {
     console.error("Error en la API de chat:", error);
