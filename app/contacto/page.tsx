@@ -247,14 +247,17 @@ export default function ContactoPage() {
               <CardDescription>Visítanos en nuestras oficinas centrales</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-200 h-64 lg:h-96 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <MapPin className="w-12 h-12 mx-auto mb-2" />
-                  <p className="text-lg font-medium">Mapa Interactivo</p>
-                  <p className="text-sm">Av. Perón 557 - CP 5244</p>
-                  <p className="text-sm">Córdoba, San José de la Dormida</p>
-                  <p className="text-xs mt-2">(Aquí se integraría Google Maps o similar)</p>
-                </div>
+              <div className="h-64 lg:h-96 rounded-lg overflow-hidden w-full">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4083.952033554102!2d-63.95051042443432!3d-30.35400197476918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x943221a8da44c6a3%3A0x182c8f6bd4ec1f8a!2sCooperativa%20El%C3%A9ctrica%20de%20San%20Jos%C3%A9%20de%20La%20Dormida!5e1!3m2!1ses!2sar!4v1765809953275!5m2!1ses!2sar"
+                  className="w-full h-full"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
             </CardContent>
           </Card>

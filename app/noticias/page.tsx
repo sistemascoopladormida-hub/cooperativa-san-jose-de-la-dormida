@@ -6,39 +6,87 @@ import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { Calendar, Clock, User, ArrowRight, Megaphone, AlertTriangle, Info } from "lucide-react"
-import { news, featuredNews } from "./posts"
+import { supabase } from "@/lib/supabase"
+import { news as staticNews, featuredNews as staticFeaturedNews, type NewsPost } from "./posts"
 
-export default function NoticiasPage() {
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "Importante":
-        return <AlertTriangle className="w-4 h-4" />
-      case "Mantenimiento":
-        return <Info className="w-4 h-4" />
-      case "Promociones":
-        return <Megaphone className="w-4 h-4" />
-      default:
-        return <Info className="w-4 h-4" />
-    }
+type DbNewsPost = {
+  id: number
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  date: string
+  author: string
+  category: string
+  image_url: string | null
+  read_time: string | null
+  tags: string[] | null
+}
+
+function mapDbToNewsPost(dbPost: DbNewsPost): NewsPost {
+  return {
+    id: dbPost.id,
+    slug: dbPost.slug,
+    title: dbPost.title,
+    excerpt: dbPost.excerpt,
+    content: dbPost.content,
+    date: dbPost.date,
+    author: dbPost.author,
+    category: dbPost.category,
+    image: dbPost.image_url ?? undefined,
+    readTime: dbPost.read_time ?? undefined,
+    tags: dbPost.tags ?? undefined,
   }
+}
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "Importante":
-        return "bg-red-100 text-red-800"
-      case "Mantenimiento":
-        return "bg-orange-100 text-orange-800"
-      case "Promociones":
-        return "bg-green-100 text-green-800"
-      case "Eventos":
-        return "bg-blue-100 text-blue-800"
-      case "Infraestructura":
-        return "bg-purple-100 text-purple-800"
-      case "Beneficios":
-        return "bg-yellow-100 text-yellow-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "Importante":
+      return <AlertTriangle className="w-4 h-4" />
+    case "Mantenimiento":
+      return <Info className="w-4 h-4" />
+    case "Promociones":
+      return <Megaphone className="w-4 h-4" />
+    default:
+      return <Info className="w-4 h-4" />
+  }
+}
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case "Importante":
+      return "bg-red-100 text-red-800"
+    case "Mantenimiento":
+      return "bg-orange-100 text-orange-800"
+    case "Promociones":
+      return "bg-green-100 text-green-800"
+    case "Eventos":
+      return "bg-blue-100 text-blue-800"
+    case "Infraestructura":
+      return "bg-purple-100 text-purple-800"
+    case "Beneficios":
+      return "bg-yellow-100 text-yellow-800"
+    default:
+      return "bg-gray-100 text-gray-800"
+  }
+}
+
+export const dynamic = "force-dynamic"
+
+export default async function NoticiasPage() {
+  // 1) Intentar leer desde Supabase
+  const { data: dbPosts, error } = await supabase
+    .from("news_posts")
+    .select("*")
+    .order("date", { ascending: false })
+
+  let featuredNews = staticFeaturedNews
+  let news: NewsPost[] = staticNews
+
+  if (!error && dbPosts && dbPosts.length > 0) {
+    const mapped = dbPosts.map(mapDbToNewsPost)
+    featuredNews = mapped[0]
+    news = mapped.slice(1)
   }
 
   return (
