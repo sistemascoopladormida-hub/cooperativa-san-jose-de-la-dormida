@@ -321,7 +321,7 @@ export default function Chatbot() {
                     )}
                   >
                     {message.sender === "bot" ? (
-                      <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                      <div className="text-sm leading-relaxed prose prose-sm max-w-none break-words">
                         <ReactMarkdown
                           components={{
                             p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -329,12 +329,22 @@ export default function Chatbot() {
                             li: ({ children }) => <li className="ml-2">{children}</li>,
                             strong: ({ children }) => <strong className="font-semibold text-coop-green">{children}</strong>,
                             em: ({ children }) => <em className="italic">{children}</em>,
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-coop-blue underline break-all"
+                              >
+                                {children}
+                              </a>
+                            ),
                           }}
                         >
                           {message.text}
                         </ReactMarkdown>
                         {message.invoice && (
-                          <div className="mt-3 border border-coop-green/30 bg-green-50/60 rounded-lg p-3 flex flex-col gap-2">
+                          <div className="mt-3 w-full border border-coop-green/30 bg-green-50/60 rounded-lg p-3 flex flex-col gap-2">
                             <div className="flex items-center gap-2 text-sm font-medium text-coop-green">
                               <FileText className="w-4 h-4" />
                               <span>Factura de {message.invoice.type}</span>
