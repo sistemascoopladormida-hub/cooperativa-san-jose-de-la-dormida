@@ -61,7 +61,7 @@ BENEFICIOS PARA SOCIOS:
 - Tarifas preferenciales para socios
 - Atención personalizada y cercana
 - Servicios sociales y beneficios especiales
-- Más de 50 años de experiencia
+- Más de 60 años de experiencia
 - Compromiso con la comunidad local
 - Tecnología moderna y confiable
 

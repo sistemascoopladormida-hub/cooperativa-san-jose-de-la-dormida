@@ -6,9 +6,66 @@ import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { Calendar, Clock, User, ArrowRight, Megaphone, AlertTriangle, Info } from "lucide-react"
-import { news, featuredNews } from "./posts"
+import { supabase } from "@/lib/supabase"
+import { news as staticNews, featuredNews as staticFeaturedNews, type NewsPost } from "./posts"
 
-export default function NoticiasPage() {
+type DbNewsPost = {
+  id: number
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  date: string
+  author: string
+  category: string
+  image_url: string | null
+  read_time: string | null
+  tags: string[] | null
+}
+
+export const revalidate = 60
+
+function mapDbToNewsPost(post: DbNewsPost): NewsPost {
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    content: post.content,
+    date: post.date,
+    author: post.author,
+    category: post.category,
+    image: post.image_url ?? undefined,
+    readTime: post.read_time ?? undefined,
+    tags: post.tags ?? undefined,
+  }
+}
+
+export default async function NoticiasPage() {
+  let dbPosts: NewsPost[] = []
+
+  try {
+    const { data, error } = await supabase
+      .from("news_posts")
+      .select(
+        "id, slug, title, excerpt, content, date, author, category, image_url, read_time, tags"
+      )
+      .order("date", { ascending: false })
+
+    if (!error && data) {
+      dbPosts = (data as DbNewsPost[]).map(mapDbToNewsPost)
+    } else if (error) {
+      console.error("Error cargando noticias desde Supabase:", error)
+    }
+  } catch (error) {
+    console.error("Error inesperado cargando noticias:", error)
+  }
+
+  const hasDbPosts = dbPosts.length > 0
+  const featuredNews = hasDbPosts ? dbPosts[0] : staticFeaturedNews
+  const allNews = hasDbPosts ? dbPosts : staticNews
+  const listNews = allNews.filter((article) => article.slug !== featuredNews.slug)
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "Importante":
@@ -104,7 +161,7 @@ export default function NoticiasPage() {
 
         {/* News Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {news.map((article) => (
+          {listNews.map((article) => (
             <Card key={article.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
