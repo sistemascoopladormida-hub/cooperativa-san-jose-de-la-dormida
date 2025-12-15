@@ -56,7 +56,7 @@ export default function ServiciosPage() {
       title: "Plan de financiamiento Colectivo (PFC)",
       description: "Cobertura integral de salud y acompañamiento para toda la familia",
       features: [
-        "Traslados en ambulancia para urgencias",
+        "Traslados social comunitario",
         "Servicio de sepelio completo",
         "Análisis clínicos y estudios de laboratorio",
         "Servicio óptico (un par por año)",
