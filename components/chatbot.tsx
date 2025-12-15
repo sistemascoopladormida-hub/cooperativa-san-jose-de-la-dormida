@@ -314,7 +314,7 @@ export default function Chatbot() {
                   </div>
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm",
+                      "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm break-words overflow-hidden",
                       message.sender === "user"
                         ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
                         : "bg-white text-gray-800 border border-gray-200"
