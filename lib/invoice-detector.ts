@@ -14,13 +14,21 @@ export function detectInvoiceRequest(
 } {
   const lowerMessage = message.toLowerCase();
 
+  // Rechazar formato antiguo de matrícula (XX-XXXX-X o similar con guiones)
+  const oldMatriculaPattern = /\b\d{1,2}[-–—]\d{3,4}[-–—]?[A-Z]?\b/i;
+  if (oldMatriculaPattern.test(message)) {
+    console.log(`[INVOICE-DETECTOR] Formato de matrícula antiguo detectado y rechazado. El formato XX-XXXX-X ya no es válido, se requiere número de cuenta de 3-4 dígitos.`);
+    // No retornar null aquí, continuar para poder dar un mensaje de error apropiado
+  }
+
   // Patrones para detectar solicitud de factura con alta confianza
   // Estos patrones requieren palabras clave relacionadas con facturas/cuentas
+  // Solo aceptamos números de 3-4 dígitos (número de cuenta actual)
   const highConfidencePatterns = [
-    /(?:número|numero|nro|cuenta)\s*(?:de\s*)?(?:cuenta|socio)?\s*:?\s*(\d{3,6})/i,
-    /(?:factura|boleta)\s*(?:de|del|número|numero|nro)?\s*:?\s*(\d{3,6})/i,
-    /(?:cuenta|socio)\s*:?\s*(\d{3,6})/i,
-    /(\d{3,6})\s*(?:es\s*)?(?:mi|el|la)\s*(?:número|numero|nro|cuenta|factura|boleta)/i,
+    /(?:número|numero|nro|cuenta)\s*(?:de\s*)?(?:cuenta|socio)?\s*:?\s*(\d{3,4})\b/i,
+    /(?:factura|boleta)\s*(?:de|del|número|numero|nro)?\s*:?\s*(\d{3,4})\b/i,
+    /(?:cuenta|socio)\s*:?\s*(\d{3,4})\b/i,
+    /(\d{3,4})\s*(?:es\s*)?(?:mi|el|la)\s*(?:número|numero|nro|cuenta|factura|boleta)/i,
   ];
 
   let accountNumber: string | null = null;
@@ -31,8 +39,8 @@ export function detectInvoiceRequest(
     const match = message.match(pattern);
     if (match && match[1]) {
       const number = match[1].trim();
-      // Validar que sea un número razonable (3-6 dígitos)
-      if (number.length >= 3 && number.length <= 6 && /^\d+$/.test(number)) {
+      // Validar que sea un número de cuenta válido (3-4 dígitos solamente)
+      if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
         accountNumber = number;
         confidence = "high";
         break;
@@ -43,18 +51,18 @@ export function detectInvoiceRequest(
   // Si no se encontró con patrones de alta confianza, buscar con patrones de confianza media
   if (!accountNumber) {
     const mediumConfidencePatterns = [
-      /(?:mi|el|la|número|numero|cuenta|factura|boleta).*?(\d{4,6})/i,
-      /(?:factura|boleta).*?(\d{4,6})/i,
-      /(?:cuenta|número|numero).*?(\d{4,6})/i,
-      /(\d{4,6}).*?(?:factura|boleta|cuenta)/i,
+      /(?:mi|el|la|número|numero|cuenta|factura|boleta).*?(\d{3,4})\b/i,
+      /(?:factura|boleta).*?(\d{3,4})\b/i,
+      /(?:cuenta|número|numero).*?(\d{3,4})\b/i,
+      /(\d{3,4})\b.*?(?:factura|boleta|cuenta)/i,
     ];
 
     for (const pattern of mediumConfidencePatterns) {
       const match = message.match(pattern);
       if (match && match[1]) {
         const number = match[1].trim();
-        // Solo aceptar números de 4-6 dígitos para confianza media
-        if (number.length >= 4 && number.length <= 6 && /^\d+$/.test(number)) {
+        // Solo aceptar números de 3-4 dígitos para confianza media (número de cuenta)
+        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
           accountNumber = number;
           confidence = "medium";
           break;
@@ -63,11 +71,11 @@ export function detectInvoiceRequest(
     }
   }
 
-  // Si no se encontró con patrones, buscar cualquier número de 4-6 dígitos
+  // Si no se encontró con patrones, buscar cualquier número de 3-4 dígitos
   // PERO excluir años (20XX) y números que parezcan ser parte de direcciones
   if (!accountNumber) {
-    // Buscar todos los números de 3-6 dígitos
-    const allNumbers = message.match(/\b(\d{3,6})\b/g);
+    // Buscar todos los números de 3-4 dígitos (número de cuenta válido)
+    const allNumbers = message.match(/\b(\d{3,4})\b/g);
     if (allNumbers) {
       // Filtrar años (20XX)
       const nonYearNumbers = allNumbers.filter(
@@ -115,7 +123,7 @@ export function detectInvoiceRequest(
         }
         
         // Verificar si el número está después de "dpto", "depto", "departamento" seguido de una letra
-        const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,6})/i;
+        const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
         const deptoMatch = message.match(deptoPattern);
         if (deptoMatch && deptoMatch[1] === num) {
           console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de departamento`);
@@ -124,7 +132,7 @@ export function detectInvoiceRequest(
         
         // Verificar si hay un patrón de dirección: palabra (nombre de calle/pasaje) seguida de número
         // Ejemplo: "pasaje toledo 515", "calle san martin 123"
-        const addressPattern = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,6})\b/i;
+        const addressPattern = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,4})\b/i;
         const addressMatch = message.match(addressPattern);
         if (addressMatch && addressMatch[1] === num) {
           console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de dirección (patrón calle/pasaje)`);
@@ -133,7 +141,7 @@ export function detectInvoiceRequest(
         
         // Verificar si hay un nombre propio (palabra con mayúscula) seguido de número
         // Esto captura casos como "Benítez Juan Daniel dpto B" donde el número podría ser parte de la dirección
-        const nameBeforeNumberPattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\s+(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,6})\b/i;
+        const nameBeforeNumberPattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\s+(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
         const nameBeforeNumberMatch = message.match(nameBeforeNumberPattern);
         if (nameBeforeNumberMatch && nameBeforeNumberMatch[2] === num) {
           console.log(`[INVOICE-DETECTOR] Número ${num} descartado: aparece después de un nombre y dpto`);
@@ -143,13 +151,13 @@ export function detectInvoiceRequest(
         return true;
       });
       
-      // Si hay números filtrados, usar el primero (pero con baja confianza si es de 3 dígitos)
+      // Si hay números filtrados, usar el primero (son todos de 3-4 dígitos, número de cuenta válido)
       if (filteredNumbers.length > 0) {
         accountNumber = filteredNumbers[0];
-        // Si el número es de 3 dígitos, es de baja confianza
-        confidence = accountNumber.length === 3 ? "low" : "medium";
+        // Todos los números son válidos (3-4 dígitos), usar confianza media
+        confidence = "medium";
       } else if (nonYearNumbers.length > 0) {
-        // Si todos fueron filtrados pero había números, usar el primero con muy baja confianza
+        // Si todos fueron filtrados pero había números, usar el primero con baja confianza
         accountNumber = nonYearNumbers[0];
         confidence = "low";
       }
@@ -274,15 +282,20 @@ export function detectAddressOrNameInsteadOfAccount(
   const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]/i;
   const hasDepto = deptoPattern.test(message);
   
-  // Verificar si hay un número de cuenta válido (con confianza alta o media)
+  // Verificar si hay un formato de matrícula antiguo (XX-XXXX-X) que debe ser rechazado
+  const oldMatriculaPattern = /\b\d{1,2}[-–—]\d{3,4}[-–—]?[A-Z]?\b/i;
+  const hasOldMatricula = oldMatriculaPattern.test(message);
+  
+  // Verificar si hay un número de cuenta válido (3-4 dígitos, con confianza alta o media)
   const invoiceRequest = detectInvoiceRequest(message);
   const hasValidAccountNumber = invoiceRequest.accountNumber !== null && 
-                                 (invoiceRequest.confidence === "high" || invoiceRequest.confidence === "medium");
+                                 (invoiceRequest.confidence === "high" || invoiceRequest.confidence === "medium") &&
+                                 !hasOldMatricula;
   
-  // Si hay solicitud de factura Y (dirección O nombre O depto) pero NO hay número de cuenta válido
+  // Si hay solicitud de factura Y (dirección O nombre O depto O matrícula antigua) pero NO hay número de cuenta válido
   const isAddressOrName = hasInvoiceRequest && 
                           !hasValidAccountNumber && 
-                          (hasAddressKeyword || hasName || hasDepto);
+                          (hasAddressKeyword || hasName || hasDepto || hasOldMatricula);
   
   console.log(`[INVOICE-DETECTOR] Detección de dirección/nombre:`);
   console.log(`  - Tiene solicitud de factura: ${hasInvoiceRequest}`);

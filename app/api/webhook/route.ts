@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { processTextMessage } from "@/lib/webhook-handlers";
+import { isMessageAlreadyProcessed } from "@/lib/conversations";
 
 // Configuración para Next.js 15
 export const runtime = "nodejs";
@@ -78,6 +79,15 @@ export async function POST(request: NextRequest) {
                 const from = message.from;
                 const text = message.text?.body || "";
                 const whatsappMessageId = message.id;
+
+                // Verificar si el mensaje ya fue procesado para evitar duplicados
+                if (whatsappMessageId) {
+                  const alreadyProcessed = await isMessageAlreadyProcessed(whatsappMessageId);
+                  if (alreadyProcessed) {
+                    console.log(`[WEBHOOK] Mensaje ${whatsappMessageId} ya fue procesado, ignorando duplicado`);
+                    continue;
+                  }
+                }
 
                 // Procesar el mensaje usando el handler modularizado
                 await processTextMessage(from, text, whatsappMessageId);

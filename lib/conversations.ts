@@ -66,6 +66,33 @@ export async function saveMessage(
 }
 
 /**
+ * Verifica si un mensaje de WhatsApp ya fue procesado
+ */
+export async function isMessageAlreadyProcessed(
+  whatsappMessageId: string
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("id")
+      .eq("whatsapp_message_id", whatsappMessageId)
+      .limit(1);
+
+    if (error) {
+      console.error("Error verificando mensaje duplicado:", error);
+      // En caso de error, retornar false para permitir el procesamiento
+      // (mejor procesar duplicado que perder mensajes)
+      return false;
+    }
+
+    return (data?.length || 0) > 0;
+  } catch (error) {
+    console.error("Error en isMessageAlreadyProcessed:", error);
+    return false;
+  }
+}
+
+/**
  * Obtiene el historial de conversación desde Supabase
  */
 export async function getConversationHistory(

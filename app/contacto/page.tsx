@@ -23,38 +23,17 @@ export default function ContactoPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setSubmitted(false)
     setIsSubmitting(true)
 
-    try {
-      const response = await fetch("/api/reclamos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || "No se pudo registrar el reclamo. Intenta nuevamente.")
-        return
-      }
-
+    // Simulación de envío
+    setTimeout(() => {
+      setIsSubmitting(false)
       setSubmitted(true)
       setFormData({ nombre: "", email: "", telefono: "", asunto: "", mensaje: "" })
-    } catch (err) {
-      console.error(err)
-      setError("Ocurrió un error inesperado al registrar tu reclamo. Intenta nuevamente en unos minutos.")
-    } finally {
-      setIsSubmitting(false)
-    }
+    }, 2000)
   }
 
   const contactInfo = [
@@ -112,20 +91,15 @@ export default function ContactoPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {submitted && (
-                  <Alert className="mb-4 border-green-200 bg-green-50">
+                {submitted ? (
+                  <Alert className="border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800">
-                      ¡Reclamo registrado correctamente! Nos pondremos en contacto contigo a la brevedad.
+                      ¡Mensaje enviado correctamente! Te responderemos dentro de las próximas 24 horas.
                     </AlertDescription>
                   </Alert>
-                )}
-                {error && (
-                  <Alert className="mb-4 border-red-200 bg-red-50" variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                <form onSubmit={handleSubmit} className="space-y-6">
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="nombre">Nombre completo *</Label>
@@ -190,11 +164,12 @@ export default function ContactoPage() {
                       ) : (
                         <>
                           <Send className="mr-2 w-4 h-4" />
-                          Enviar reclamo
+                          Enviar Mensaje
                         </>
                       )}
                     </Button>
                   </form>
+                )}
               </CardContent>
             </Card>
           </div>
