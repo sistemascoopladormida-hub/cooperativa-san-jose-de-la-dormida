@@ -112,12 +112,16 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Segundo vencimiento: 22 de diciembre
 
 TURNERO DE FARMACIAS:
-- 10 de diciembre: Farmacia Carreño
-- 11 de diciembre: Farmacia Robledo
-- 12 de diciembre: Farmacia Centro
-- 13 de diciembre: Farmacia Social
-- 14 de diciembre: Farmacia Carreño
-- 15 de diciembre: Farmacia Robledo
+- 16 de diciembre: Farmacia Centro
+- 17 de diciembre: Farmacia Social
+- 18 de diciembre: Farmacia Carreño
+- 19 de diciembre: Farmacia Robledo
+- 20 de diciembre: Farmacia Centro
+- 21 de diciembre: Farmacia Social
+- 22 de diciembre: Farmacia Carreño
+- 23 de diciembre: Farmacia Robledo
+- 24 de diciembre: Farmacia Centro
+- 25 de diciembre: Farmacia Social
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
