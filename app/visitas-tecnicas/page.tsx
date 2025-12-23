@@ -17,6 +17,10 @@ import {
   Phone,
   CheckCircle2,
   Loader2,
+  Search,
+  FileText,
+  AlertCircle,
+  X,
 } from "lucide-react";
 
 export default function VisitasTecnicasPage() {
@@ -343,61 +347,63 @@ export default function VisitasTecnicasPage() {
         />
       </div>
 
-      {/* Header personalizado */}
+      {/* Header personalizado - Mobile First */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-10 shadow-sm"
+        className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-10 shadow-sm"
       >
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                className="flex-shrink-0"
               >
                 <Image
                   src="/images/logocoopnuevo.png"
                   alt="Cooperativa La Dormida"
-                  width={48}
-                  height={48}
-                  className="rounded-lg shadow-md"
+                  width={40}
+                  height={40}
+                  className="sm:w-12 sm:h-12 rounded-lg shadow-md"
                 />
               </motion.div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Formulario de Visitas Técnicas
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent truncate">
+                  Visitas Técnicas
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <Wrench className="h-4 w-4" />
-                  Registro de visitas y envío de encuestas
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:flex items-center gap-1">
+                  <Wrench className="h-3 w-3" />
+                  Registro de visitas
                 </p>
               </div>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-shrink-0">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleLogout}
-                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-4"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Salir
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Salir</span>
               </Button>
             </motion.div>
           </div>
         </div>
       </motion.div>
 
-      <div className="container mx-auto px-4 py-6 md:py-8 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 relative z-10 pb-20 sm:pb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-2xl mx-auto space-y-4 sm:space-y-6"
         >
-          <Card className="shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b">
-              <CardTitle className="flex items-center gap-2 text-xl">
+          <Card className="shadow-xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{
@@ -408,83 +414,169 @@ export default function VisitasTecnicasPage() {
                 >
                   <Wrench className="h-5 w-5 text-blue-600" />
                 </motion.div>
-                Registro de Visita Técnica
+                <span className="hidden sm:inline">Registro de Visita Técnica</span>
+                <span className="sm:hidden">Nueva Visita</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className="p-4 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Número de cuenta */}
                 <div className="space-y-2">
-                  <Label htmlFor="numeroCuenta" className="text-base font-semibold">
+                  <Label htmlFor="numeroCuenta" className="text-sm sm:text-base font-semibold flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-600" />
                     Número de Cuenta *
                   </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="numeroCuenta"
-                      type="text"
-                      placeholder="Ingresa el número de cuenta"
-                      value={numeroCuenta}
-                      onChange={(e) => setNumeroCuenta(e.target.value)}
-                      className="flex-1 h-12 text-lg"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        id="numeroCuenta"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Ej: 1234"
+                        value={numeroCuenta}
+                        onChange={(e) => {
+                          setNumeroCuenta(e.target.value);
+                          setError("");
+                          setTitular("");
+                          setTelefono("");
+                        }}
+                        className="pl-10 h-12 sm:h-14 text-base sm:text-lg"
+                        autoComplete="off"
+                      />
+                    </div>
                     <Button
                       type="button"
                       onClick={handleBuscarCuenta}
                       disabled={loadingData || !numeroCuenta.trim()}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                      className="w-full sm:w-auto h-12 sm:h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       {loadingData ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                          <span className="hidden sm:inline">Buscando...</span>
+                          <span className="sm:hidden">Buscando</span>
+                        </>
                       ) : (
-                        "Buscar"
+                        <>
+                          <Search className="h-5 w-5 mr-2" />
+                          Buscar
+                        </>
                       )}
                     </Button>
                   </div>
                 </div>
 
-                {/* Información del titular (se llena automáticamente) */}
-                {(titular || telefono) && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
-                  >
-                    <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                      <User className="h-5 w-5" />
-                      <span className="font-semibold">Información del Titular</span>
-                    </div>
-                    {titular && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                          <strong>Titular:</strong> {titular}
-                        </span>
+                {/* Información del titular - Diseño mejorado */}
+                <AnimatePresence>
+                  {(titular || telefono) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-700 shadow-lg"
+                    >
+                      {/* Decoración de fondo */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 dark:bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200/20 dark:bg-indigo-500/10 rounded-full -ml-12 -mb-12 blur-2xl" />
+                      
+                      <div className="relative p-4 sm:p-5">
+                        {/* Header de la tarjeta */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ delay: 0.2, type: "spring" }}
+                              className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg"
+                            >
+                              <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+                            </motion.div>
+                            <div>
+                              <h3 className="text-sm sm:text-base font-bold text-blue-900 dark:text-blue-100">
+                                Usuario Encontrado
+                              </h3>
+                              <p className="text-xs text-blue-600 dark:text-blue-300">
+                                Cuenta: {numeroCuenta}
+                              </p>
+                            </div>
+                          </div>
+                          <motion.div
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <CheckCircle2 className="h-6 w-6 sm:h-7 sm:w-7 text-green-500" />
+                          </motion.div>
+                        </div>
+
+                        {/* Información del titular */}
+                        {titular && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="mb-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md mt-0.5">
+                                <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Titular</p>
+                                <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">
+                                  {titular}
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* Información del teléfono */}
+                        {telefono && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md mt-0.5">
+                                <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
+                                <a
+                                  href={`tel:${telefono}`}
+                                  className="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors break-all"
+                                >
+                                  {telefono}
+                                </a>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
-                    )}
-                    {telefono && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                          <strong>Teléfono:</strong> {telefono}
-                        </span>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Tipo de servicio */}
                 <div className="space-y-2">
-                  <Label htmlFor="servicio" className="text-base font-semibold">
+                  <Label htmlFor="servicio" className="text-sm sm:text-base font-semibold flex items-center gap-2">
+                    <Wrench className="h-4 w-4 text-blue-600" />
                     Tipo de Servicio Brindado *
                   </Label>
                   <Select value={servicio} onValueChange={setServicio}>
-                    <SelectTrigger id="servicio" className="h-12 text-lg">
+                    <SelectTrigger id="servicio" className="h-12 sm:h-14 text-base sm:text-lg">
                       <SelectValue placeholder="Selecciona el tipo de servicio" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="internet">Internet</SelectItem>
-                      <SelectItem value="electricidad">Electricidad</SelectItem>
-                      <SelectItem value="pfc">PFC (Plan de Financiamiento Colectivo)</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
+                      <SelectItem value="internet">🌐 Internet</SelectItem>
+                      <SelectItem value="electricidad">⚡ Electricidad</SelectItem>
+                      <SelectItem value="pfc">🏥 PFC (Plan de Financiamiento Colectivo)</SelectItem>
+                      <SelectItem value="otro">📋 Otro</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -496,9 +588,17 @@ export default function VisitasTecnicasPage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                      className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg flex items-start gap-3"
                     >
-                      <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm sm:text-base text-red-700 dark:text-red-300 flex-1">{error}</p>
+                      <button
+                        type="button"
+                        onClick={() => setError("")}
+                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 flex-shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -507,41 +607,63 @@ export default function VisitasTecnicasPage() {
                 <AnimatePresence>
                   {success && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-3"
+                      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                      className="p-4 sm:p-5 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-700 rounded-xl shadow-lg"
                     >
-                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      <p className="text-sm text-green-700 dark:text-green-300 font-semibold">
-                        ¡Visita registrada exitosamente! La encuesta ha sido enviada al usuario.
-                      </p>
+                      <div className="flex items-start gap-3">
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 200 }}
+                          className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full"
+                        >
+                          <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        </motion.div>
+                        <div className="flex-1">
+                          <p className="text-base sm:text-lg font-bold text-green-800 dark:text-green-200 mb-1">
+                            ¡Visita registrada exitosamente!
+                          </p>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            La encuesta ha sido enviada al usuario por WhatsApp.
+                          </p>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
                 {/* Botón de envío */}
                 <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="pt-2"
                 >
                   <Button
                     type="submit"
-                    disabled={submitting || !numeroCuenta.trim() || !servicio}
-                    className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={submitting || !numeroCuenta.trim() || !servicio || !titular}
+                    className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Enviando encuesta...
+                        <span className="hidden sm:inline">Enviando encuesta...</span>
+                        <span className="sm:hidden">Enviando...</span>
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="mr-2 h-5 w-5" />
-                        Confirmar Visita y Enviar Encuesta
+                        <span className="hidden sm:inline">Confirmar Visita y Enviar Encuesta</span>
+                        <span className="sm:hidden">Confirmar y Enviar</span>
                       </>
                     )}
                   </Button>
+                  {(!titular && numeroCuenta.trim()) && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                      Primero busca el número de cuenta para continuar
+                    </p>
+                  )}
                 </motion.div>
               </form>
             </CardContent>
