@@ -84,13 +84,13 @@ async function getDriveClient() {
 }
 
 /**
- * Busca una carpeta por nombre en Google Drive
+ * Busca un Google Sheet por nombre
  */
-async function findFolderByName(folderName: string): Promise<string | null> {
+async function findSheetByName(sheetName: string): Promise<string | null> {
   try {
     const drive = await getDriveClient();
     const response = await drive.files.list({
-      q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
+      q: `name='${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
       fields: "files(id, name)",
     });
 
@@ -98,53 +98,19 @@ async function findFolderByName(folderName: string): Promise<string | null> {
       return response.data.files[0].id!;
     }
 
-    return null;
-  } catch (error) {
-    console.error(`[SHEETS] ❌ Error buscando carpeta ${folderName}:`, error instanceof Error ? error.message : error);
-    return null;
-  }
-}
-
-/**
- * Busca un Google Sheet por nombre, opcionalmente dentro de una carpeta específica
- */
-async function findSheetByName(sheetName: string, folderName?: string): Promise<string | null> {
-  try {
-    const drive = await getDriveClient();
-    
-    // Si se especifica una carpeta, buscar primero la carpeta
-    let folderId: string | null = null;
-    if (folderName) {
-      folderId = await findFolderByName(folderName);
-      if (!folderId) {
-        console.error(`[SHEETS] ❌ No se encontró la carpeta "${folderName}"`);
-        return null;
-      }
-      console.log(`[SHEETS] ✅ Carpeta encontrada: "${folderName}" (ID: ${folderId})`);
-    }
-
-    // Construir la query de búsqueda
-    let query = `name='${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`;
-    if (folderId) {
-      query += ` and '${folderId}' in parents`;
-    }
-
-    const response = await drive.files.list({
-      q: query,
+    // También buscar archivos Excel (.xlsx)
+    const excelResponse = await drive.files.list({
+      q: `name='${sheetName}' and (mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel') and trashed=false`,
       fields: "files(id, name)",
     });
 
-    if (response.data.files && response.data.files.length > 0) {
-      console.log(`[SHEETS] ✅ Sheet encontrado: "${response.data.files[0].name}" (ID: ${response.data.files[0].id})`);
-      return response.data.files[0].id!;
+    if (excelResponse.data.files && excelResponse.data.files.length > 0) {
+      return excelResponse.data.files[0].id!;
     }
 
     return null;
   } catch (error) {
     console.error(`[SHEETS] ❌ Error buscando sheet ${sheetName}:`, error instanceof Error ? error.message : error);
-    if (error instanceof Error && error.message.includes("DECODER")) {
-      console.error(`[SHEETS] ⚠️ Error de decodificación de clave privada. Verifica el formato de GOOGLE_DRIVE_PRIVATE_KEY`);
-    }
     return null;
   }
 }
@@ -158,36 +124,13 @@ export async function buscarUsuarioPorCuenta(
   try {
     const sheets = await getSheetsClient();
     
-    // Buscar el sheet por nombre dentro de la carpeta "socios Procoop"
-    const sheetId = await findSheetByName("usuarios_totales", "socios Procoop");
+    // Buscar el sheet por nombre
+    const sheetId = await findSheetByName("usuarios_totales");
     
     if (!sheetId) {
-      console.error("[SHEETS] ❌ No se encontró el sheet usuarios_totales en la carpeta 'socios Procoop'");
-      // Intentar buscar sin especificar carpeta como fallback
-      const sheetIdFallback = await findSheetByName("usuarios_totales");
-      if (sheetIdFallback) {
-        console.log("[SHEETS] ✅ Sheet encontrado sin especificar carpeta");
-        return await buscarUsuarioPorCuentaEnSheet(sheets, sheetIdFallback, numeroCuenta);
-      }
+      console.error("[SHEETS] ❌ No se encontró el sheet usuarios_totales");
       return null;
     }
-    
-    return await buscarUsuarioPorCuentaEnSheet(sheets, sheetId, numeroCuenta);
-  } catch (error) {
-    console.error("[SHEETS] ❌ Error buscando usuario:", error instanceof Error ? error.message : error);
-    return null;
-  }
-}
-
-/**
- * Busca un usuario por número de cuenta en un sheet específico
- */
-async function buscarUsuarioPorCuentaEnSheet(
-  sheets: any,
-  sheetId: string,
-  numeroCuenta: string
-): Promise<{ titular: string; telefono: string } | null> {
-  try {
 
     console.log(`[SHEETS] 🔍 Buscando cuenta ${numeroCuenta} en sheet ${sheetId}`);
 
@@ -195,7 +138,7 @@ async function buscarUsuarioPorCuentaEnSheet(
     // Usamos un rango amplio para asegurarnos de leer todos los datos
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "A:C", // Columnas A (número de cuenta), B (titular), C (teléfono)
+      range: "A:Z", // Leemos hasta la columna Z para tener margen
     });
 
     const rows = response.data.values;
