@@ -130,8 +130,8 @@ export default function VisitasTecnicasPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!numeroCuenta.trim() || !servicio) {
-      setError("Por favor completa todos los campos");
+    if (!numeroCuenta.trim() || !servicio || !titular || !telefono) {
+      setError("Por favor completa todos los campos y busca el número de cuenta");
       return;
     }
 
@@ -139,21 +139,35 @@ export default function VisitasTecnicasPage() {
     setError("");
 
     try {
-      // TODO: Implementar envío de encuesta
-      // Por ahora simulamos el envío
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      setSuccess(true);
-      setNumeroCuenta("");
-      setServicio("");
-      setTitular("");
-      setTelefono("");
-      
-      setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
+      const response = await fetch("/api/visitas-tecnicas/confirmar-visita", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          numeroCuenta: numeroCuenta.trim(),
+          titular: titular,
+          telefono: telefono,
+          servicio: servicio,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess(true);
+        setNumeroCuenta("");
+        setServicio("");
+        setTitular("");
+        setTelefono("");
+        
+        setTimeout(() => {
+          setSuccess(false);
+        }, 5000);
+      } else {
+        setError(data.error || "Error al enviar la encuesta");
+      }
     } catch (error) {
-      setError("Error al enviar la encuesta");
+      console.error("Error confirmando visita:", error);
+      setError("Error al enviar la encuesta. Por favor intenta nuevamente.");
     } finally {
       setSubmitting(false);
     }
