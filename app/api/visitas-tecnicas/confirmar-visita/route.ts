@@ -19,8 +19,22 @@ export async function POST(request: NextRequest) {
     const token = generarTokenEncuesta();
 
     // Construir URL de la encuesta
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || "http://localhost:3000";
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || "http://localhost:3000";
+    
+    // Asegurar que la URL tenga protocolo
+    if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+      // Si es localhost, usar http, sino https
+      if (baseUrl.includes("localhost")) {
+        baseUrl = `http://${baseUrl}`;
+      } else {
+        baseUrl = `https://${baseUrl}`;
+      }
+    }
+    
     const urlEncuesta = `${baseUrl}/encuesta/${token}`;
+    
+    console.log("[API] URL de encuesta generada:", urlEncuesta);
+    console.log("[API] Teléfono recibido:", telefono);
 
     // Guardar la encuesta en la base de datos
     const { data: encuesta, error: dbError } = await supabase

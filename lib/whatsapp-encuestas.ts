@@ -104,7 +104,23 @@ export async function enviarMensajeEncuestaSinPlantilla(
   urlEncuesta: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const nombreServicio = obtenerNombreServicio(tipoServicio);
-  const telefonoFormateado = formatearTelefonoWhatsApp(telefono);
+  
+  console.log("[WHATSAPP] Enviando mensaje sin plantilla");
+  console.log("[WHATSAPP] Teléfono original:", telefono);
+  
+  let telefonoFormateado: string;
+  try {
+    telefonoFormateado = formatearTelefonoWhatsApp(telefono);
+    console.log("[WHATSAPP] Teléfono formateado:", telefonoFormateado);
+  } catch (error: any) {
+    console.error("[WHATSAPP] Error formateando teléfono:", error.message);
+    return { success: false, error: `Error formateando teléfono: ${error.message}` };
+  }
+  
+  console.log("[WHATSAPP] URL encuesta:", urlEncuesta);
+  console.log("[WHATSAPP] Nombre titular:", nombreTitular);
+  console.log("[WHATSAPP] Tipo servicio:", nombreServicio);
+  console.log("[WHATSAPP] Número cuenta:", numeroCuenta);
 
   // Construir el mensaje según la plantilla que se usará cuando esté aprobada
   const mensaje = `Hola ${nombreTitular}.
@@ -121,9 +137,15 @@ Cooperativa Eléctrica de San José de la Dormida
 
 ${urlEncuesta}`;
 
+  console.log("[WHATSAPP] Mensaje completo:", mensaje.substring(0, 100) + "...");
+
   // Por ahora enviamos como mensaje de texto simple
   // Cuando Meta apruebe la plantilla, cambiaremos a usar enviarMensajeEncuestaConPlantilla
-  return await sendTextMessage(telefonoFormateado, mensaje);
+  const resultado = await sendTextMessage(telefonoFormateado, mensaje);
+  
+  console.log("[WHATSAPP] Resultado del envío:", resultado);
+  
+  return resultado;
 }
 
 /**

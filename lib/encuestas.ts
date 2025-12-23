@@ -10,23 +10,47 @@ export function generarTokenEncuesta(): string {
 
 /**
  * Formatea el número de teléfono para WhatsApp (elimina caracteres especiales, agrega código de país)
+ * WhatsApp requiere formato internacional SIN el signo +
  */
 export function formatearTelefonoWhatsApp(telefono: string): string {
-  // Eliminar espacios, guiones, paréntesis y otros caracteres
+  if (!telefono || !telefono.trim()) {
+    throw new Error("Número de teléfono vacío");
+  }
+
+  // Eliminar espacios, guiones, paréntesis, puntos y otros caracteres
   let numero = telefono.replace(/[\s\-\(\)\.]/g, "");
   
-  // Si no empieza con código de país, agregar +54 (Argentina)
-  if (!numero.startsWith("+")) {
-    // Si empieza con 0, quitarlo
-    if (numero.startsWith("0")) {
-      numero = numero.substring(1);
-    }
-    // Agregar código de país de Argentina
-    numero = `54${numero}`;
-  } else {
-    // Si ya tiene +, quitarlo para agregarlo después
+  // Eliminar el signo + si existe (WhatsApp no lo acepta)
+  if (numero.startsWith("+")) {
     numero = numero.substring(1);
   }
+  
+  // Si ya empieza con 54 (código de país Argentina), dejarlo así
+  if (numero.startsWith("54")) {
+    // Ya tiene código de país, solo validar que sea válido
+    console.log(`[ENCUESTAS] Teléfono ya tiene código de país: ${numero}`);
+    return numero;
+  }
+  
+  // Si empieza con 0, quitarlo (código de área local)
+  if (numero.startsWith("0")) {
+    numero = numero.substring(1);
+  }
+  
+  // Agregar código de país de Argentina (54)
+  numero = `54${numero}`;
+  
+  // Validar que sea un número válido (solo dígitos)
+  if (!/^\d+$/.test(numero)) {
+    throw new Error(`Número de teléfono inválido: ${telefono} -> ${numero}`);
+  }
+  
+  // Validar longitud mínima (código de país + código de área + número)
+  if (numero.length < 10) {
+    throw new Error(`Número de teléfono muy corto: ${numero}`);
+  }
+  
+  console.log(`[ENCUESTAS] Teléfono formateado: ${telefono} -> ${numero}`);
   
   return numero;
 }
