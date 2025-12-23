@@ -84,87 +84,33 @@ async function getDriveClient() {
 }
 
 /**
- * Busca un Google Sheet por nombre (búsqueda flexible)
+ * Busca un Google Sheet por nombre
  */
 async function findSheetByName(sheetName: string): Promise<string | null> {
   try {
     const drive = await getDriveClient();
-    
-    // Primero buscar Google Sheets nativos con nombre exacto
-    console.log(`[SHEETS] 🔍 Buscando sheet "${sheetName}" (búsqueda exacta)...`);
-    let response = await drive.files.list({
+    const response = await drive.files.list({
       q: `name='${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
       fields: "files(id, name)",
     });
 
     if (response.data.files && response.data.files.length > 0) {
-      console.log(`[SHEETS] ✅ Encontrado Google Sheet: ${response.data.files[0].name} (ID: ${response.data.files[0].id})`);
       return response.data.files[0].id!;
     }
 
-    // Si no se encuentra, buscar todos los Google Sheets para ver qué hay disponible
-    console.log(`[SHEETS] 🔍 No encontrado con nombre exacto, listando todos los Google Sheets disponibles...`);
-    const allSheetsResponse = await drive.files.list({
-      q: `mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
-      fields: "files(id, name)",
-      pageSize: 100,
-    });
-
-    if (allSheetsResponse.data.files && allSheetsResponse.data.files.length > 0) {
-      console.log(`[SHEETS] 📋 Google Sheets encontrados (${allSheetsResponse.data.files.length}):`);
-      allSheetsResponse.data.files.forEach((file: any, index: number) => {
-        const match = file.name?.toLowerCase().includes(sheetName.toLowerCase()) ? " ⭐ POSIBLE COINCIDENCIA" : "";
-        console.log(`  ${index + 1}. "${file.name}" (ID: ${file.id})${match}`);
-      });
-
-      // Buscar coincidencias parciales (case-insensitive)
-      const partialMatch = allSheetsResponse.data.files.find((file: any) =>
-        file.name?.toLowerCase().includes(sheetName.toLowerCase())
-      );
-
-      if (partialMatch) {
-        console.log(`[SHEETS] ✅ Usando coincidencia parcial: "${partialMatch.name}"`);
-        return partialMatch.id!;
-      }
-    } else {
-      console.log(`[SHEETS] ⚠️ No se encontraron Google Sheets en la cuenta del Service Account`);
-      console.log(`[SHEETS] ⚠️ Verifica que el Service Account tenga acceso a Google Drive`);
-    }
-
-    // También buscar archivos Excel (.xlsx) - pero estos necesitan ser convertidos a Google Sheets
-    console.log(`[SHEETS] 🔍 Buscando archivos Excel con ese nombre...`);
+    // También buscar archivos Excel (.xlsx)
     const excelResponse = await drive.files.list({
-      q: `name contains '${sheetName}' and (mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel') and trashed=false`,
-      fields: "files(id, name, mimeType)",
+      q: `name='${sheetName}' and (mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel') and trashed=false`,
+      fields: "files(id, name)",
     });
 
     if (excelResponse.data.files && excelResponse.data.files.length > 0) {
-      const file = excelResponse.data.files[0];
-      console.log(`[SHEETS] ⚠️ Encontrado archivo Excel: ${file.name} (ID: ${file.id})`);
-      console.log(`[SHEETS] ⚠️ NOTA: Los archivos Excel (.xlsx) deben ser convertidos a Google Sheets para poder leerlos.`);
-      return file.id!;
+      return excelResponse.data.files[0].id!;
     }
 
-    console.log(`[SHEETS] ❌ No se encontró el sheet "${sheetName}"`);
-    console.log(`[SHEETS] 💡 Sugerencias:`);
-    console.log(`[SHEETS] 💡 1. Verifica que el archivo se llame exactamente "usuarios_totales"`);
-    console.log(`[SHEETS] 💡 2. Verifica que esté compartido con: drive-service-account@our-sign-480404-c3.iam.gserviceaccount.com`);
-    console.log(`[SHEETS] 💡 3. Verifica que el Service Account tenga permisos de "Lector" o superior`);
     return null;
   } catch (error) {
-    console.error(`[SHEETS] ❌ Error buscando sheet ${sheetName}:`, error);
-    if (error instanceof Error) {
-      console.error(`[SHEETS] ❌ Detalles del error:`, error.message);
-      console.error(`[SHEETS] ❌ Stack:`, error.stack);
-      
-      // Verificar si es un error de permisos
-      if (error.message.includes("permission") || error.message.includes("access")) {
-        console.error(`[SHEETS] ⚠️ ERROR DE PERMISOS:`);
-        console.error(`[SHEETS] ⚠️ El Service Account no tiene acceso. Verifica:`);
-        console.error(`[SHEETS] ⚠️ 1. Que el sheet esté compartido con: drive-service-account@our-sign-480404-c3.iam.gserviceaccount.com`);
-        console.error(`[SHEETS] ⚠️ 2. Que tenga permisos de "Lector" como mínimo`);
-      }
-    }
+    console.error(`[SHEETS] ❌ Error buscando sheet ${sheetName}:`, error instanceof Error ? error.message : error);
     return null;
   }
 }
