@@ -19,7 +19,18 @@ export async function POST(request: NextRequest) {
     const token = generarTokenEncuesta();
 
     // Construir URL de la encuesta
-    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || "http://localhost:3000";
+    // Prioridad: NEXT_PUBLIC_SITE_URL > dominio fijo > VERCEL_URL > localhost
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    
+    // Si no está configurado, usar el dominio de producción
+    if (!baseUrl) {
+      // En producción usar el dominio real, en desarrollo localhost
+      if (process.env.NODE_ENV === "production") {
+        baseUrl = "https://cooperativaladormida.com";
+      } else {
+        baseUrl = process.env.VERCEL_URL || "http://localhost:3000";
+      }
+    }
     
     // Asegurar que la URL tenga protocolo
     if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
@@ -30,6 +41,9 @@ export async function POST(request: NextRequest) {
         baseUrl = `https://${baseUrl}`;
       }
     }
+    
+    // Asegurar que no tenga barra final
+    baseUrl = baseUrl.replace(/\/$/, "");
     
     const urlEncuesta = `${baseUrl}/encuesta/${token}`;
     
