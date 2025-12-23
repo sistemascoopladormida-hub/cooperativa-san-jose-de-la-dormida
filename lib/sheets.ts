@@ -23,9 +23,23 @@ async function getAuth() {
       process.env.GOOGLE_DRIVE_PRIVATE_KEY &&
       process.env.GOOGLE_DRIVE_PROJECT_ID
     ) {
+      // Manejar diferentes formatos de clave privada
+      let privateKey = process.env.GOOGLE_DRIVE_PRIVATE_KEY;
+      
+      // Si la clave viene con \\n, reemplazarlos por saltos de línea reales
+      if (privateKey.includes("\\n")) {
+        privateKey = privateKey.replace(/\\n/g, "\n");
+      }
+      
+      // Si la clave viene sin los encabezados BEGIN/END, agregarlos si es necesario
+      if (!privateKey.includes("BEGIN PRIVATE KEY") && !privateKey.includes("BEGIN RSA PRIVATE KEY")) {
+        // La clave debería tener los encabezados, pero si no los tiene, intentamos usarla tal cual
+        console.log("[SHEETS] ⚠️ La clave privada no parece tener encabezados BEGIN/END");
+      }
+      
       credentials = {
         client_email: process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        private_key: privateKey,
         project_id: process.env.GOOGLE_DRIVE_PROJECT_ID,
       };
     } else {
@@ -89,28 +103,97 @@ async function getDriveClient() {
 async function findSheetByName(sheetName: string): Promise<string | null> {
   try {
     const drive = await getDriveClient();
-    const response = await drive.files.list({
+    
+    console.log(`[SHEETS] 🔍 Buscando sheet: "${sheetName}"`);
+    
+    // Primera búsqueda: nombre exacto con comillas (Google Sheets)
+    let response = await drive.files.list({
       q: `name='${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
       fields: "files(id, name)",
     });
 
     if (response.data.files && response.data.files.length > 0) {
+      console.log(`[SHEETS] ✅ Sheet encontrado (búsqueda exacta): "${response.data.files[0].name}" (ID: ${response.data.files[0].id})`);
       return response.data.files[0].id!;
     }
 
-    // También buscar archivos Excel (.xlsx)
+    // Segunda búsqueda: nombre exacto sin comillas (más flexible)
+    response = await drive.files.list({
+      q: `name='${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
+      fields: "files(id, name)",
+    });
+
+    // Tercera búsqueda: contiene el nombre (case-insensitive)
+    response = await drive.files.list({
+      q: `name contains '${sheetName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
+      fields: "files(id, name)",
+    });
+
+    if (response.data.files && response.data.files.length > 0) {
+      // Buscar coincidencia exacta (case-insensitive)
+      const exactMatch = response.data.files.find(
+        (file: any) => file.name?.toLowerCase() === sheetName.toLowerCase()
+      );
+      
+      if (exactMatch) {
+        console.log(`[SHEETS] ✅ Sheet encontrado (búsqueda flexible): "${exactMatch.name}" (ID: ${exactMatch.id})`);
+        return exactMatch.id!;
+      }
+      
+      console.log(`[SHEETS] ⚠️ Se encontraron ${response.data.files.length} sheets con nombre similar:`);
+      response.data.files.forEach((file: any, index: number) => {
+        console.log(`[SHEETS]   ${index + 1}. "${file.name}" (ID: ${file.id})`);
+      });
+    }
+
+    // Buscar archivos Excel (.xlsx)
     const excelResponse = await drive.files.list({
-      q: `name='${sheetName}' and (mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel') and trashed=false`,
+      q: `name contains '${sheetName}' and (mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType='application/vnd.ms-excel') and trashed=false`,
       fields: "files(id, name)",
     });
 
     if (excelResponse.data.files && excelResponse.data.files.length > 0) {
-      return excelResponse.data.files[0].id!;
+      const exactMatch = excelResponse.data.files.find(
+        (file: any) => file.name?.toLowerCase() === sheetName.toLowerCase()
+      );
+      
+      if (exactMatch) {
+        console.log(`[SHEETS] ✅ Archivo Excel encontrado: "${exactMatch.name}" (ID: ${exactMatch.id})`);
+        console.log(`[SHEETS] ⚠️ Nota: Los archivos Excel (.xlsx) deben convertirse a Google Sheets para poder leerlos`);
+        return exactMatch.id!;
+      }
+    }
+
+    // Si no se encuentra, listar todos los sheets disponibles para debugging
+    console.log(`[SHEETS] 🔍 Listando todos los Google Sheets disponibles...`);
+    const allSheetsResponse = await drive.files.list({
+      q: `mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
+      fields: "files(id, name)",
+      pageSize: 50,
+    });
+
+    if (allSheetsResponse.data.files && allSheetsResponse.data.files.length > 0) {
+      console.log(`[SHEETS] 📋 Google Sheets disponibles (${allSheetsResponse.data.files.length}):`);
+      allSheetsResponse.data.files.forEach((file: any, index: number) => {
+        const match = file.name?.toLowerCase().includes(sheetName.toLowerCase()) ? " ⭐ POSIBLE COINCIDENCIA" : "";
+        console.log(`[SHEETS]   ${index + 1}. "${file.name}" (ID: ${file.id})${match}`);
+      });
+    } else {
+      console.log(`[SHEETS] ⚠️ No se encontraron Google Sheets accesibles por el Service Account`);
+      console.log(`[SHEETS] ⚠️ Verifica que el Service Account tenga acceso al sheet "${sheetName}"`);
+      console.log(`[SHEETS] ⚠️ Email del Service Account: ${process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL || 'No configurado'}`);
     }
 
     return null;
   } catch (error) {
     console.error(`[SHEETS] ❌ Error buscando sheet ${sheetName}:`, error instanceof Error ? error.message : error);
+    if (error instanceof Error && error.message.includes("DECODER")) {
+      console.error(`[SHEETS] ⚠️ Error de decodificación de clave privada. Verifica el formato de GOOGLE_DRIVE_PRIVATE_KEY`);
+      console.error(`[SHEETS] ⚠️ La clave debe estar en formato PEM con saltos de línea correctos (\\n)`);
+    }
+    if (error instanceof Error) {
+      console.error(`[SHEETS] ❌ Stack trace:`, error.stack);
+    }
     return null;
   }
 }
@@ -124,11 +207,21 @@ export async function buscarUsuarioPorCuenta(
   try {
     const sheets = await getSheetsClient();
     
-    // Buscar el sheet por nombre
-    const sheetId = await findSheetByName("usuarios_totales");
+    // Buscar el sheet por nombre (intentar con y sin extensión)
+    let sheetId = await findSheetByName("usuarios_totales");
+    
+    // Si no se encuentra, intentar con extensión .xlsx
+    if (!sheetId) {
+      console.log("[SHEETS] 🔍 Intentando buscar con extensión .xlsx...");
+      sheetId = await findSheetByName("usuarios_totales.xlsx");
+    }
     
     if (!sheetId) {
       console.error("[SHEETS] ❌ No se encontró el sheet usuarios_totales");
+      console.error("[SHEETS] 💡 Verifica que:");
+      console.error("[SHEETS]   1. El sheet esté compartido con: drive-service-account@our-sign-480404-c3.iam.gserviceaccount.com");
+      console.error("[SHEETS]   2. El nombre del sheet sea exactamente 'usuarios_totales'");
+      console.error("[SHEETS]   3. El Service Account tenga permisos de lectura");
       return null;
     }
 
