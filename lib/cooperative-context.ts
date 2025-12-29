@@ -122,6 +122,12 @@ TURNERO DE FARMACIAS:
 - 23 de diciembre: Farmacia Robledo
 - 24 de diciembre: Farmacia Centro
 - 25 de diciembre: Farmacia Social
+- 26 de diciembre: Farmacia Carreño
+- 27 de diciembre: Farmacia Robledo
+- 28 de diciembre: Farmacia Centro
+- 29 de diciembre: Farmacia Social
+- 30 de diciembre: Farmacia Carreño
+- 31 de diciembre: Farmacia Robledo
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
