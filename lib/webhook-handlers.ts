@@ -355,96 +355,6 @@ async function handleInvoiceRequest(
 }
 
 /**
- * Detecta si el mensaje es una respuesta relacionada con deuda o pago
- */
-function isDebtOrPaymentResponse(text: string): boolean {
-  const lowerText = text.toLowerCase();
-  
-  // Palabras clave relacionadas con deuda y pago
-  const debtKeywords = [
-    "deuda",
-    "debo",
-    "debe",
-    "pagar",
-    "pago",
-    "comprobante",
-    "comprobante de pago",
-    "transferencia",
-    "transferí",
-    "transferencia bancaria",
-    "pagué",
-    "pague",
-    "regularizar",
-    "regularización",
-    "medidas",
-    "normativa",
-    "24 horas",
-    "veinticuatro horas",
-    "pendiente",
-    "situación",
-    "cuenta pendiente",
-    "saldo",
-    "adeudo",
-    "vencido",
-    "vencimiento",
-  ];
-  
-  // Verificar si contiene alguna palabra clave de deuda/pago
-  const hasDebtKeyword = debtKeywords.some(keyword => 
-    lowerText.includes(keyword)
-  );
-  
-  // También detectar si menciona número de cuenta junto con palabras de pago/deuda
-  const hasAccountAndDebt = /\d{3,4}/.test(text) && (
-    lowerText.includes("pagar") ||
-    lowerText.includes("deuda") ||
-    lowerText.includes("comprobante") ||
-    lowerText.includes("transferencia")
-  );
-  
-  return hasDebtKeyword || hasAccountAndDebt;
-}
-
-/**
- * Maneja respuestas relacionadas con deuda o pago
- */
-async function handleDebtOrPaymentResponse(
-  from: string,
-  text: string,
-  whatsappMessageId: string
-): Promise<boolean> {
-  if (!isDebtOrPaymentResponse(text)) {
-    return false;
-  }
-
-  console.log("[WEBHOOK] Detectada respuesta relacionada con deuda/pago, dirigiendo a oficina");
-
-  const response = `📞 Para consultas sobre deudas, pagos, comprobantes de pago o atención personalizada, te pedimos que te comuniques directamente con nuestra oficina:\n\n` +
-    `📱 *Teléfono: 3521-401330*\n\n` +
-    `En la oficina podrás:\n` +
-    `• Enviar comprobantes de pago\n` +
-    `• Recibir atención humana personalizada\n` +
-    `• Consultar sobre tu situación de cuenta\n` +
-    `• Regularizar deudas\n` +
-    `• Realizar cualquier otra gestión\n\n` +
-    `⚠️ *Importante:* Este asistente virtual es exclusivamente para solicitar facturas. Para cualquier otra consulta o gestión, por favor comunícate con la oficina al 3521-401330.\n\n` +
-    `Horarios de atención: Lunes a Viernes de 7:00 a 12:00`;
-
-  await sendTextMessage(from, response);
-
-  // Guardar en historial
-  try {
-    const conversationId = await getOrCreateConversation(from);
-    await saveMessage(conversationId, "user", text, whatsappMessageId);
-    await saveMessage(conversationId, "assistant", response);
-  } catch (dbError) {
-    console.error("Error guardando en BD:", dbError);
-  }
-
-  return true;
-}
-
-/**
  * Procesa un mensaje de texto recibido del webhook
  */
 export async function processTextMessage(
@@ -452,16 +362,6 @@ export async function processTextMessage(
   text: string,
   whatsappMessageId: string
 ): Promise<void> {
-  // 0. Verificar si es respuesta relacionada con deuda/pago (ANTES de todo)
-  const handledDebt = await handleDebtOrPaymentResponse(
-    from,
-    text,
-    whatsappMessageId
-  );
-  if (handledDebt) {
-    return;
-  }
-
   // 1. Verificar si pregunta sobre número de cuenta
   const handledAccountQuestion = await handleAccountNumberQuestion(
     from,
