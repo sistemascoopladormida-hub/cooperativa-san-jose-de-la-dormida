@@ -28,7 +28,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "¡Hola! 👋 Soy el asistente virtual de la Cooperativa La Dormida. Estoy aquí para ayudarte 24/7. ¿En qué puedo asistirte hoy?",
+      text: "¡Hola! 👋 ¡Feliz 2026! 🎉 Espero que estés teniendo un excelente comienzo de año. Soy el asistente virtual de la Cooperativa La Dormida y estoy aquí para ayudarte 24/7. ¿En qué puedo asistirte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
