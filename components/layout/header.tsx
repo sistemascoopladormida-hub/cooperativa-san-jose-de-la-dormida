@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Users,
+  Trees,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -38,6 +39,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
   const publicMenuItems = [
     { href: "/", label: "Inicio", icon: Home },
     { href: "/servicios", label: "Servicios", icon: Zap },
+    { href: "/camping", label: "Camping", icon: Trees },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
     { href: "/autoridades", label: "Autoridades", icon: Users },
     { href: "/reclamos", label: "Reclamos", icon: Phone },

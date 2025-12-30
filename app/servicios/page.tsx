@@ -119,21 +119,25 @@ export default function ServiciosPage() {
       title: "Servicios Fúnebres",
       description: "Acompañamiento en momentos difíciles",
       icon: Shield,
+      href: undefined,
     },
     {
-      title: "Eventos Sociales",
-      description: "camping Pisco Huasi",
+      title: "Camping Pisco Huasi",
+      description: "Disfrutá de la naturaleza en Quebrada del Tigre",
       icon: Users,
+      href: "/camping",
     },
     {
       title: "Asesoramiento Legal",
       description: "Consultas legales gratuitas",
       icon: CheckCircle,
+      href: undefined,
     },
     {
       title: "Descuentos Comerciales",
       description: "Beneficios en comercios adheridos",
       icon: Star,
+      href: undefined,
     },
   ]
 
@@ -297,17 +301,31 @@ export default function ServiciosPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {socialServices.map((service, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <service.icon className="w-12 h-12 text-coop-green mx-auto mb-4" />
-                  <CardTitle className="text-lg">{service.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{service.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
+            {socialServices.map((service, index) => {
+              const CardWrapper = service.href ? Link : 'div'
+              const cardProps = service.href ? { href: service.href } : {}
+              return (
+                <CardWrapper key={index} {...cardProps} className={service.href ? "block" : ""}>
+                  <Card className={`text-center hover:shadow-lg transition-all ${service.href ? 'hover:scale-105 cursor-pointer' : ''}`}>
+                    <CardHeader>
+                      <service.icon className="w-12 h-12 text-coop-green mx-auto mb-4" />
+                      <CardTitle className="text-lg">{service.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription>{service.description}</CardDescription>
+                      {service.href && (
+                        <div className="mt-4">
+                          <Button variant="outline" size="sm" className="text-coop-green border-coop-green hover:bg-coop-green hover:text-white">
+                            Más información
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </CardWrapper>
+              )
+            })}
           </div>
 
           <div className="text-center mt-12">
