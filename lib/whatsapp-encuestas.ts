@@ -21,18 +21,33 @@ export async function enviarMensajeEncuestaConPlantilla(
     return { success: false, error: "Configuración faltante" };
   }
 
-  // Extraer el token de la URL completa para el botón
-  // La URL viene como: https://cooperativaladormida.com/encuesta/[token]
-  // El botón necesita solo el token
-  const urlParts = urlEncuesta.split("/encuesta/");
-  const tokenEncuesta = urlParts.length > 1 ? urlParts[1] : urlEncuesta;
+  // Para botones URL dinámicos en WhatsApp:
+  // Si la plantilla tiene: https://cooperativaladormida.com/encuesta/{{1}}
+  // Necesitamos pasar solo el token como parámetro {{1}}
+  // La plantilla construirá la URL completa automáticamente
+  
+  let parametroBoton = urlEncuesta; // Por defecto usar URL completa
+  
+  // Extraer solo el token de la URL
+  // Formato esperado: https://cooperativaladormida.com/encuesta/[token]
+  const match = urlEncuesta.match(/\/encuesta\/([^?#]+)/);
+  if (match && match[1]) {
+    parametroBoton = match[1].trim();
+    // Validar que el token no esté vacío y tenga formato válido (solo caracteres alfanuméricos y guiones)
+    if (!parametroBoton || parametroBoton.length === 0) {
+      console.warn("[WHATSAPP] Token extraído está vacío, usando URL completa");
+      parametroBoton = urlEncuesta;
+    }
+  } else {
+    console.warn("[WHATSAPP] No se pudo extraer token de la URL, usando URL completa");
+  }
 
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
 
   console.log("[WHATSAPP] Enviando plantilla:", nombrePlantilla);
   console.log("[WHATSAPP] Parámetros body:", { nombreTitular, tipoServicio: obtenerNombreServicio(tipoServicio), numeroCuenta });
-  console.log("[WHATSAPP] Token para botón:", tokenEncuesta);
   console.log("[WHATSAPP] URL completa:", urlEncuesta);
+  console.log("[WHATSAPP] Parámetro para botón:", parametroBoton);
 
   try {
     const response = await fetch(url, {
@@ -75,7 +90,7 @@ export async function enviarMensajeEncuestaConPlantilla(
               parameters: [
                 {
                   type: "text",
-                  text: tokenEncuesta, // Solo el token, la URL base está en la plantilla
+                  text: parametroBoton, // Token extraído de la URL
                 },
               ],
             },
@@ -88,11 +103,39 @@ export async function enviarMensajeEncuestaConPlantilla(
 
     if (!response.ok) {
       console.error("[WHATSAPP] Error enviando plantilla:", data.error || data);
+      console.error("[WHATSAPP] Payload enviado:", JSON.stringify({
+        messaging_product: "whatsapp",
+        to: formatearTelefonoWhatsApp(telefono),
+        type: "template",
+        template: {
+          name: nombrePlantilla,
+          language: { code: "es_AR" },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                { type: "text", text: nombreTitular },
+                { type: "text", text: obtenerNombreServicio(tipoServicio) },
+                { type: "text", text: numeroCuenta },
+              ],
+            },
+            {
+              type: "button",
+              sub_type: "url",
+              index: 0,
+              parameters: [{ type: "text", text: parametroBoton }],
+            },
+          ],
+        },
+      }, null, 2));
+      
       return {
         success: false,
         error: data.error?.message || "Error enviando plantilla",
       };
     }
+
+    console.log("[WHATSAPP] ✅ Plantilla enviada exitosamente. MessageId:", data.messages?.[0]?.id);
 
     return {
       success: true,
