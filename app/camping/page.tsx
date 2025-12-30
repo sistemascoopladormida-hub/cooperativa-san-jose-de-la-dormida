@@ -234,8 +234,98 @@ export default function CampingPage() {
   // - camping-gallery-3.jpg: 1200x800px
   // - camping-gallery-4.jpg: 1200x800px
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cooperativaladormida.com"
+
+  // Datos estructurados JSON-LD para SEO - Campground
+  const campgroundData = {
+    "@context": "https://schema.org",
+    "@type": "Campground",
+    name: "Camping Pisco Huasi",
+    description: "Camping familiar ubicado en Quebrada del Tigre, con energía eléctrica, WiFi, agua potable, mirador y bajada de río. Abierto de martes a domingo de 9:00 a 21:00 hs.",
+    url: `${siteUrl}/camping`,
+    image: [
+      `${siteUrl}/images/11.png`,
+      `${siteUrl}/images/12.png`,
+      `${siteUrl}/images/13.png`,
+      `${siteUrl}/images/7.png`,
+    ],
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Quebrada del Tigre",
+      addressRegion: "Córdoba",
+      addressCountry: "AR",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: -30.30211407479485,
+      longitude: -63.994973724436285,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        opens: "09:00",
+        closes: "21:00",
+      },
+    ],
+    priceRange: "$3000 - $8000",
+    amenities: [
+      "WiFi",
+      "Agua potable",
+      "Agua caliente",
+      "Energía eléctrica",
+      "Sanitarios",
+      "Proveeduría",
+      "Mesas",
+      "Asadores",
+      "Mirador",
+      "Bajada de río",
+      "Espacio perimetrado",
+    ],
+    containsPlace: {
+      "@type": "Place",
+      name: "Quebrada del Tigre",
+    },
+    parentOrganization: {
+      "@type": "Organization",
+      name: "Cooperativa Eléctrica Limitada de San José de la Dormida",
+      url: siteUrl,
+    },
+  }
+
+  // Breadcrumbs para SEO
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Camping Pisco Huasi",
+        item: `${siteUrl}/camping`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/30">
+      {/* Schema.org JSON-LD para SEO - Campground */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(campgroundData) }}
+      />
+      {/* Schema.org JSON-LD para SEO - Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+      />
+      
       <Header />
 
       {/* Hero Section with Enhanced Image Carousel */}
