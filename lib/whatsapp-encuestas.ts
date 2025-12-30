@@ -22,12 +22,33 @@ export async function enviarMensajeEncuestaConPlantilla(
   }
 
   // Para botones URL dinámicos en WhatsApp:
-  // Si la plantilla tiene: https://cooperativaladormida.com/encuesta/{{1}}
-  // Y Meta está concatenando {{1}} literalmente, necesitamos pasar la URL completa
-  // Esto sobrescribirá la URL de la plantilla con la URL completa
+  // La plantilla tiene: https://cooperativaladormida.com/encuesta/{{1}}
+  // Meta reemplazará {{1}} con el valor que pasemos
+  // Por lo tanto, debemos pasar SOLO el token, no la URL completa
   
-  // Asegurar que la URL esté limpia y completa
-  const urlCompleta = urlEncuesta.trim();
+  // Extraer solo el token de la URL completa
+  // Formato: https://cooperativaladormida.com/encuesta/[token]
+  let tokenEncuesta = "";
+  
+  // Buscar el token después de /encuesta/
+  const match = urlEncuesta.match(/\/encuesta\/([a-f0-9]+)/i);
+  if (match && match[1]) {
+    tokenEncuesta = match[1].trim();
+  } else {
+    // Fallback: intentar extraer de cualquier forma
+    const parts = urlEncuesta.split("/encuesta/");
+    if (parts.length > 1) {
+      tokenEncuesta = parts[1].split("?")[0].split("#")[0].trim();
+    }
+  }
+
+  if (!tokenEncuesta) {
+    console.error("[WHATSAPP] ❌ No se pudo extraer el token de la URL:", urlEncuesta);
+    return { 
+      success: false, 
+      error: "No se pudo extraer el token de la URL de la encuesta" 
+    };
+  }
 
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
 
@@ -38,7 +59,8 @@ export async function enviarMensajeEncuestaConPlantilla(
     tipoServicio: obtenerNombreServicio(tipoServicio), 
     numeroCuenta 
   });
-  console.log("[WHATSAPP] URL completa para botón:", urlCompleta);
+  console.log("[WHATSAPP] URL completa recibida:", urlEncuesta);
+  console.log("[WHATSAPP] Token extraído para botón:", tokenEncuesta);
 
   try {
     const response = await fetch(url, {
@@ -81,7 +103,7 @@ export async function enviarMensajeEncuestaConPlantilla(
               parameters: [
                 {
                   type: "text",
-                  text: urlCompleta, // URL completa para sobrescribir la plantilla
+                  text: tokenEncuesta, // Solo el token, Meta lo insertará en {{1}}
                 },
               ],
             },
