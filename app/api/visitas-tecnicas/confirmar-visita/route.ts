@@ -72,15 +72,14 @@ export async function POST(request: NextRequest) {
       console.log("[API] Continuando sin guardar en BD (modo desarrollo)");
     }
 
-    // Enviar mensaje de WhatsApp
-    // Por ahora usarPlantilla = false hasta que Meta apruebe la plantilla
+    // Enviar mensaje de WhatsApp usando la plantilla aprobada
     const resultadoWhatsApp = await enviarMensajeEncuesta(
       telefono,
       titular,
       servicio,
       numeroCuenta,
       urlEncuesta,
-      false // Cambiar a true cuando Meta apruebe la plantilla
+      true // Usar plantilla aprobada de Meta
     );
 
     if (!resultadoWhatsApp.success) {

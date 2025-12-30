@@ -12,7 +12,7 @@ export async function enviarMensajeEncuestaConPlantilla(
   tipoServicio: string,
   numeroCuenta: string,
   urlEncuesta: string,
-  nombrePlantilla: string = "encuesta_visita_tecnica"
+  nombrePlantilla: string = "encuesta_de_servicios_tecnicos"
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -21,7 +21,18 @@ export async function enviarMensajeEncuestaConPlantilla(
     return { success: false, error: "Configuración faltante" };
   }
 
+  // Extraer el token de la URL completa para el botón
+  // La URL viene como: https://cooperativaladormida.com/encuesta/[token]
+  // El botón necesita solo el token
+  const urlParts = urlEncuesta.split("/encuesta/");
+  const tokenEncuesta = urlParts.length > 1 ? urlParts[1] : urlEncuesta;
+
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
+
+  console.log("[WHATSAPP] Enviando plantilla:", nombrePlantilla);
+  console.log("[WHATSAPP] Parámetros body:", { nombreTitular, tipoServicio: obtenerNombreServicio(tipoServicio), numeroCuenta });
+  console.log("[WHATSAPP] Token para botón:", tokenEncuesta);
+  console.log("[WHATSAPP] URL completa:", urlEncuesta);
 
   try {
     const response = await fetch(url, {
@@ -37,7 +48,7 @@ export async function enviarMensajeEncuestaConPlantilla(
         template: {
           name: nombrePlantilla,
           language: {
-            code: "es",
+            code: "es_AR", // Spanish (Argentina)
           },
           components: [
             {
@@ -64,7 +75,7 @@ export async function enviarMensajeEncuestaConPlantilla(
               parameters: [
                 {
                   type: "text",
-                  text: urlEncuesta,
+                  text: tokenEncuesta, // Solo el token, la URL base está en la plantilla
                 },
               ],
             },
