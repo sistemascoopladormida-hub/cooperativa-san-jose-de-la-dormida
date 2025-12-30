@@ -337,24 +337,26 @@ export default function EncuestaPage() {
                 >
                   <Label className="text-base font-semibold flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-600" />
-                    ¿El técnico llegó en el período establecido? *
+                    ¿El técnico llegó en el horario acordado? *
                   </Label>
                   <RadioGroup
                     value={respuestas.puntualidad}
                     onValueChange={(valor) =>
                       setRespuestas({ ...respuestas, puntualidad: valor })
                     }
-                    className="grid grid-cols-2 gap-3"
+                    className="grid grid-cols-2 sm:grid-cols-4 gap-3"
                   >
                     {[
-                      { valor: "si", label: "Sí" },
-                      { valor: "no", label: "No" },
+                      { valor: "muy_puntual", label: "Muy puntual" },
+                      { valor: "puntual", label: "Puntual" },
+                      { valor: "tarde", label: "Llegó tarde" },
+                      { valor: "muy_tarde", label: "Muy tarde" },
                     ].map((opcion) => (
                       <div key={opcion.valor} className="flex items-center space-x-2">
                         <RadioGroupItem value={opcion.valor} id={opcion.valor} />
                         <Label
                           htmlFor={opcion.valor}
-                          className="text-sm sm:text-base cursor-pointer font-normal"
+                          className="text-sm cursor-pointer font-normal"
                         >
                           {opcion.label}
                         </Label>
