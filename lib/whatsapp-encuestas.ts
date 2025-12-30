@@ -23,31 +23,22 @@ export async function enviarMensajeEncuestaConPlantilla(
 
   // Para botones URL dinámicos en WhatsApp:
   // Si la plantilla tiene: https://cooperativaladormida.com/encuesta/{{1}}
-  // Necesitamos pasar solo el token como parámetro {{1}}
-  // La plantilla construirá la URL completa automáticamente
+  // Y Meta está concatenando {{1}} literalmente, necesitamos pasar la URL completa
+  // Esto sobrescribirá la URL de la plantilla con la URL completa
   
-  let parametroBoton = urlEncuesta; // Por defecto usar URL completa
-  
-  // Extraer solo el token de la URL
-  // Formato esperado: https://cooperativaladormida.com/encuesta/[token]
-  const match = urlEncuesta.match(/\/encuesta\/([^?#]+)/);
-  if (match && match[1]) {
-    parametroBoton = match[1].trim();
-    // Validar que el token no esté vacío y tenga formato válido (solo caracteres alfanuméricos y guiones)
-    if (!parametroBoton || parametroBoton.length === 0) {
-      console.warn("[WHATSAPP] Token extraído está vacío, usando URL completa");
-      parametroBoton = urlEncuesta;
-    }
-  } else {
-    console.warn("[WHATSAPP] No se pudo extraer token de la URL, usando URL completa");
-  }
+  // Asegurar que la URL esté limpia y completa
+  const urlCompleta = urlEncuesta.trim();
 
   const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/messages`;
 
   console.log("[WHATSAPP] Enviando plantilla:", nombrePlantilla);
-  console.log("[WHATSAPP] Parámetros body:", { nombreTitular, tipoServicio: obtenerNombreServicio(tipoServicio), numeroCuenta });
-  console.log("[WHATSAPP] URL completa:", urlEncuesta);
-  console.log("[WHATSAPP] Parámetro para botón:", parametroBoton);
+  console.log("[WHATSAPP] Idioma:", "es_AR");
+  console.log("[WHATSAPP] Parámetros body:", { 
+    nombreTitular, 
+    tipoServicio: obtenerNombreServicio(tipoServicio), 
+    numeroCuenta 
+  });
+  console.log("[WHATSAPP] URL completa para botón:", urlCompleta);
 
   try {
     const response = await fetch(url, {
@@ -90,7 +81,7 @@ export async function enviarMensajeEncuestaConPlantilla(
               parameters: [
                 {
                   type: "text",
-                  text: parametroBoton, // Token extraído de la URL
+                  text: urlCompleta, // URL completa para sobrescribir la plantilla
                 },
               ],
             },
