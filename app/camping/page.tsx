@@ -32,53 +32,74 @@ import {
   ChevronRight,
 } from "lucide-react"
 
+// Función helper para obtener URLs de imágenes desde Supabase Storage
+const getSupabaseImageUrl = (imagePath: string): string => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  
+  if (!supabaseUrl) {
+    console.error("NEXT_PUBLIC_SUPABASE_URL no está configurado")
+    // Fallback a ruta local si no hay URL de Supabase
+    return imagePath
+  }
+  
+  // Las imágenes están en el bucket "news-images" dentro de la carpeta "camping"
+  const bucketName = "news-images"
+  const folderPath = "camping"
+  // Remover el "/images/" del path si existe ya que en Supabase solo necesitamos el nombre del archivo
+  const fileName = imagePath.replace("/images/", "")
+  // Construir la URL pública del storage de Supabase: bucket/carpeta/archivo
+  const url = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${folderPath}/${fileName}`
+  
+  return url
+}
+
 export default function CampingPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
-  // Imágenes para el carrusel del hero
+  // Imágenes para el carrusel del hero - desde Supabase Storage
   const heroImages = [
     {
       id: 1,
-      desktop: "/images/11.png",
-      mobile: "/images/1.png",
+      desktop: getSupabaseImageUrl("/images/11.png"),
+      mobile: getSupabaseImageUrl("/images/1.png"),
       alt: "Vista panorámica del camping Pisco Huasi",
       title: "Vista Panorámica",
     },
     {
       id: 2,
-      desktop: "/images/12.png",
-      mobile: "/images/2.png",
+      desktop: getSupabaseImageUrl("/images/12.png"),
+      mobile: getSupabaseImageUrl("/images/2.png"),
       alt: "Instalaciones del camping",
       title: "Instalaciones",
     },
     {
       id: 3,
-      desktop: "/images/13.png",
-      mobile: "/images/3.png",
+      desktop: getSupabaseImageUrl("/images/13.png"),
+      mobile: getSupabaseImageUrl("/images/3.png"),
       alt: "Naturaleza y río",
       title: "Naturaleza",
     },
     {
       id: 4,
-      desktop: "/images/camping-hero-4-desktop.png",
-      mobile: "/images/4.png",
+      desktop: getSupabaseImageUrl("/images/14.png"),
+      mobile: getSupabaseImageUrl("/images/4.png"),
       alt: "Mirador y vistas",
       title: "Mirador",
     },
     {
       id: 5,
-      desktop: "/images/camping-hero-5-desktop.png",
-      mobile: "/images/5.png",
+      desktop: getSupabaseImageUrl("/images/10.png"),
+      mobile: getSupabaseImageUrl("/images/5.png"),
       alt: "Áreas comunes y asadores",
       title: "Áreas Comunes",
     },
     {
         id: 6,
-        desktop: "/images/camping-hero-5-desktop.png",
-        mobile: "/images/6.png",
+        desktop: getSupabaseImageUrl("/images/11.png"),
+        mobile: getSupabaseImageUrl("/images/6.png"),
         alt: "Cartel de camping",
         title: "Cartel de camping",
       },
@@ -244,10 +265,10 @@ export default function CampingPage() {
     description: "Camping familiar ubicado en Quebrada del Tigre, con energía eléctrica, WiFi, agua potable, mirador y bajada de río. Abierto de martes a domingo de 9:00 a 21:00 hs.",
     url: `${siteUrl}/camping`,
     image: [
-      `${siteUrl}/images/11.png`,
-      `${siteUrl}/images/12.png`,
-      `${siteUrl}/images/13.png`,
-      `${siteUrl}/images/7.png`,
+      getSupabaseImageUrl("/images/11.png"),
+      getSupabaseImageUrl("/images/12.png"),
+      getSupabaseImageUrl("/images/13.png"),
+      getSupabaseImageUrl("/images/7.png"),
     ],
     address: {
       "@type": "PostalAddress",
@@ -365,6 +386,7 @@ export default function CampingPage() {
                         priority={index === 0}
                         className="object-cover"
                         sizes="100vw"
+                        unoptimized
                       />
                     </div>
                   </div>
@@ -384,6 +406,7 @@ export default function CampingPage() {
                         priority={index === 0}
                         className="object-cover"
                         sizes="100vw"
+                        unoptimized
                       />
                     </div>
                   </div>
@@ -553,6 +576,7 @@ export default function CampingPage() {
                         fill
                         className="object-cover"
                         sizes="80px"
+                        unoptimized
                       />
                       <div className={`absolute inset-0 transition-opacity ${
                         index === currentSlide ? "opacity-0" : "opacity-50 bg-black"
@@ -867,11 +891,12 @@ export default function CampingPage() {
                 </div>
               </div>
               <Image
-                src="/images/7.png"
+                src={getSupabaseImageUrl("/images/7.png")}
                 alt="Vista del camping Pisco Huasi"
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
             </motion.div>
 
@@ -884,18 +909,18 @@ export default function CampingPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               whileHover={{ scale: 1.02 }}
             >
-              {/* TODO: Agregar imagen galería 2: /images/camping-gallery-2.jpg - Dimensiones: 1200x800px */}
               <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/20 via-coop-purple/20 to-coop-green/20">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Camera className="w-24 h-24 text-white/30" />
                 </div>
               </div>
               <Image
-                src="/images/8.png"
+                src={getSupabaseImageUrl("/images/8.png")}
                 alt="Instalaciones del camping"
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
             </motion.div>
 
@@ -908,18 +933,18 @@ export default function CampingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               whileHover={{ scale: 1.02 }}
             >
-              {/* TODO: Agregar imagen galería 3: /images/camping-gallery-3.jpg - Dimensiones: 1200x800px */}
               <div className="absolute inset-0 bg-gradient-to-br from-coop-purple/20 via-coop-green/20 to-coop-orange/20">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Camera className="w-24 h-24 text-white/30" />
                 </div>
               </div>
               <Image
-                src="/images/9.png"
+                src={getSupabaseImageUrl("/images/9.png")}
                 alt="Naturaleza del camping"
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
             </motion.div>
 
@@ -932,18 +957,18 @@ export default function CampingPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               whileHover={{ scale: 1.02 }}
             >
-              {/* TODO: Agregar imagen galería 4: /images/camping-gallery-4.jpg - Dimensiones: 1200x800px */}
               <div className="absolute inset-0 bg-gradient-to-br from-coop-orange/20 via-coop-green/20 to-coop-blue/20">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Camera className="w-24 h-24 text-white/30" />
                 </div>
               </div>
               <Image
-                src="/images/10.png"
+                src={getSupabaseImageUrl("/images/10.png")}
                 alt="Actividades en el camping"
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
             </motion.div>
           </div>

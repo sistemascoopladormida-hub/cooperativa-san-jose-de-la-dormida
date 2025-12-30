@@ -1,6 +1,16 @@
 import type { Metadata } from "next"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cooperativaladormida.com"
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const STORAGE_BUCKET = "news-images" // Bucket en Supabase
+const STORAGE_FOLDER = "camping" // Carpeta dentro del bucket donde están las imágenes
+
+// Función helper para obtener URLs de imágenes desde Supabase Storage
+const getSupabaseImageUrl = (imagePath: string): string => {
+  const fileName = imagePath.replace("/images/", "")
+  // Estructura: bucket/carpeta/archivo
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${STORAGE_FOLDER}/${fileName}`
+}
 
 export const metadata: Metadata = {
   title: "Camping Pisco Huasi - Quebrada del Tigre | Verano 2026 | Cooperativa La Dormida",
@@ -47,10 +57,11 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE_URL}/images/8.png`, // Primera imagen del carrusel
+        url: getSupabaseImageUrl("/images/8.png"), // URL absoluta desde Supabase Storage
         width: 1920,
         height: 800,
         alt: "Vista panorámica del Camping Pisco Huasi en Quebrada del Tigre",
+        type: "image/png",
       },
     ],
   },
@@ -59,7 +70,10 @@ export const metadata: Metadata = {
     title: "Camping Pisco Huasi - Quebrada del Tigre | Verano 2026",
     description:
       "Disfrutá del verano 2026 en Camping Pisco Huasi. Camping con energía eléctrica, WiFi, agua potable, mirador y bajada de río. Abierto de martes a domingo.",
-    images: [`${SITE_URL}/images/11.png`],
+    images: {
+      url: getSupabaseImageUrl("/images/8.png"), // URL absoluta desde Supabase Storage
+      alt: "Vista panorámica del Camping Pisco Huasi en Quebrada del Tigre",
+    },
     creator: "@cooperativaladormida", // Actualizar con el handle real si existe
   },
   robots: {
