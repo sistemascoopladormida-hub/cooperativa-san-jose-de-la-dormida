@@ -50,7 +50,7 @@ async function handleAccountNumberQuestion(
     const imageBuffer = await readFile(imagePath);
 
     // Enviar la imagen con un mensaje explicativo
-    const imageCaption = `📋 Aquí puedes ver dónde está el número de cuenta en tu factura.\n\n⚠️ *IMPORTANTE:* El número de cuenta tiene 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\nEl número de cuenta aparece como "Cuenta: XXX" o "Cuenta: XXXX" en la parte superior de la factura, justo después del nombre del cliente.\n\nEjemplo: Si ves "Cuenta: 2862" (4 dígitos) o "Cuenta: 637" (3 dígitos), ese es tu número de cuenta.`;
+    const imageCaption = `📋 El número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos.`;
 
     const imageResult = await sendImageMessage(from, imageBuffer, imageCaption);
 
@@ -67,7 +67,7 @@ async function handleAccountNumberQuestion(
     } else {
       console.error("[WEBHOOK] Error enviando imagen:", imageResult.error);
       // Si falla, enviar mensaje de texto como respaldo
-      const fallbackMessage = `📋 El número de cuenta se encuentra en la parte superior de tu factura, identificado como "Cuenta: XXX" o "Cuenta: XXXX" (de 3 a 4 dígitos).\n\n⚠️ *IMPORTANTE:* El formato antiguo de matrícula (como "54-0556-A") ya NO es válido. Ahora necesitas el número de cuenta de 3 o 4 dígitos.\n\nEstá ubicado justo después del nombre del cliente. Si tienes una factura física o PDF, búscalo en la sección de información del cliente.`;
+      const fallbackMessage = `📋 El número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos.`;
       await sendTextMessage(from, fallbackMessage);
 
       try {
@@ -114,7 +114,7 @@ async function sendAccountNumberImage(
     );
     const imageBuffer = await readFile(imagePath);
 
-    const imageCaption = message || `📋 Para poder enviarte tu factura, necesito que me indiques tu número de cuenta.\n\n⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: 2862"`;
+    const imageCaption = message || `📋 Para poder enviarte tu factura, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`;
 
     const imageResult = await sendImageMessage(from, imageBuffer, imageCaption);
 
@@ -130,7 +130,7 @@ async function sendAccountNumberImage(
     } else {
       console.error("[WEBHOOK] Error enviando imagen:", imageResult.error);
       // Si falla, enviar mensaje de texto como respaldo
-      const fallbackMessage = `📋 Para poder enviarte tu factura, necesito que me indiques tu número de cuenta.\n\n⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXX" o "Nro Cuenta: XXXX" (de 3 a 4 dígitos).\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: 2862"`;
+      const fallbackMessage = `📋 Para poder enviarte tu factura, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos.`;
       await sendTextMessage(from, fallbackMessage);
 
       try {
@@ -176,7 +176,7 @@ async function handleInvoiceRequest(
       from,
       text,
       whatsappMessageId,
-      `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\n⚠️ *IMPORTANTE:* El formato antiguo de matrícula (como "54-0556-A") ya NO es válido. Ahora necesitas el número de cuenta que es de 3 a 4 dígitos solamente.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXX" o "Nro Cuenta: XXXX" (de 3 a 4 dígitos).\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: 2862"\n\nSi no tienes el número de cuenta, puedes encontrarlo en cualquier factura reciente que tengas.`
+      `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
     );
     return true;
   }
@@ -201,7 +201,7 @@ async function handleInvoiceRequest(
       from,
       text,
       whatsappMessageId,
-      `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\nEn la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, envíame tu solicitud con el formato:\n"Me puede pasar boleta de luz, número de cuenta: 2862"`
+      `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
     );
     return true;
   }
@@ -322,7 +322,7 @@ async function handleInvoiceRequest(
         from,
         text,
         whatsappMessageId,
-        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\n📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\nEl número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\nPor favor, verifica que el número de cuenta sea correcto (3 o 4 dígitos) y envíame tu solicitud nuevamente con el formato:\n"Me puede pasar boleta de luz, número de cuenta: 2862"\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`
+        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\nPor favor, verifica que el número de cuenta sea correcto. El número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`
       );
     }
     return true;

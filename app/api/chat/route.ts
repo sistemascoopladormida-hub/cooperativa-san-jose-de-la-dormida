@@ -58,13 +58,11 @@ export async function POST(request: NextRequest) {
 
       if (addressOrNameCheck.isAddressOrName) {
         const response =
-          `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\n` +
-          `⚠️ *IMPORTANTE:* El formato antiguo de matrícula (como "54-0556-A") ya NO es válido. Ahora necesitas el número de cuenta que es de 3 a 4 dígitos solamente.\n\n` +
-          `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
-          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXX" o "Nro Cuenta: XXXX" (de 3 a 4 dígitos).\n\n` +
-          `Por favor, envíame tu solicitud con el formato:\n` +
-          `"Me puede pasar boleta de luz, número de cuenta: 2862"\n\n` +
-          `Si no tienes el número de cuenta, puedes encontrarlo en cualquier factura reciente que tengas.`;
+          `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\n` +
+          `El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+          `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+          `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+          `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`;
 
         await logWebMessages(lastUserMessage, response);
 
@@ -106,11 +104,10 @@ export async function POST(request: NextRequest) {
         if (invoiceRequest.confidence === "low") {
           const response =
             `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n` +
-            `⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\n` +
-            `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
-            `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
-            `Por favor, envíame tu solicitud con el formato:\n` +
-            `"Me puede pasar boleta de luz, número de cuenta: 2862"`;
+            `El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+            `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+            `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+            `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`;
 
           await logWebMessages(lastUserMessage, response);
 
@@ -163,12 +160,11 @@ export async function POST(request: NextRequest) {
         // No se encontró la factura → mismo comportamiento que WhatsApp: mostrar imagen
         const response =
           `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n` +
-          `⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\n` +
-          `📋 En la imagen puedes ver dónde encontrar el número de cuenta correcto en tu factura.\n\n` +
-          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
-          `Por favor, verifica que el número de cuenta sea correcto (3 o 4 dígitos) y envíame tu solicitud nuevamente con el formato:\n` +
-          `"Me puede pasar boleta de luz, número de cuenta: 2862"\n\n` +
-          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`;
+          `Por favor, verifica que el número de cuenta sea correcto. El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+          `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+          `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+          `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\n` +
+          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
 
         await logWebMessages(lastUserMessage, response);
 
