@@ -46,65 +46,25 @@ export async function POST(request: NextRequest) {
     };
 
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
-    // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
-    const addressOrNameCheck =
-      detectAddressOrNameInsteadOfAccount(lastUserMessage);
+    // Primero verificar si es una pregunta informativa sobre facturas (no procesarla como solicitud)
+    const isInformationalQuestion = /(?:están|estan|está|esta|disponible|cuando|cuándo|hay|existen)/i.test(lastUserMessage) &&
+                                   /(?:facturas?|boletas?|recibos?)/i.test(lastUserMessage) &&
+                                   !/(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|podrías|puedes)/i.test(lastUserMessage);
+    
+    if (!isInformationalQuestion) {
+      // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
+      const addressOrNameCheck =
+        detectAddressOrNameInsteadOfAccount(lastUserMessage);
 
-    if (addressOrNameCheck.isAddressOrName) {
-      const response =
-        `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\n` +
-        `⚠️ *IMPORTANTE:* El formato antiguo de matrícula (como "54-0556-A") ya NO es válido. Ahora necesitas el número de cuenta que es de 3 a 4 dígitos solamente.\n\n` +
-        `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
-        `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXX" o "Nro Cuenta: XXXX" (de 3 a 4 dígitos).\n\n` +
-        `Por favor, envíame tu solicitud con el formato:\n` +
-        `"Me puede pasar boleta de luz, número de cuenta: 2862"\n\n` +
-        `Si no tienes el número de cuenta, puedes encontrarlo en cualquier factura reciente que tengas.`;
-
-      await logWebMessages(lastUserMessage, response);
-
-      return NextResponse.json({
-        response,
-        showImage: "ubicacion de numero de cuenta",
-      });
-    }
-
-    // 1.b) Detección de solicitud de factura
-    let invoiceRequest = detectInvoiceRequest(lastUserMessage);
-
-    // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
-    // buscar en mensajes anteriores (últimos 5 mensajes del usuario) si hay un número de cuenta reciente
-    if (!invoiceRequest.accountNumber && (invoiceRequest.month || invoiceRequest.year || 
-        /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(lastUserMessage))) {
-      // Buscar número de cuenta en mensajes anteriores del usuario
-      for (let i = messages.length - 1; i >= Math.max(0, messages.length - 10); i--) {
-        if (messages[i]?.sender === "user") {
-          const previousRequest = detectInvoiceRequest(messages[i].text || "");
-          if (previousRequest.accountNumber && 
-              (previousRequest.confidence === "high" || previousRequest.confidence === "medium")) {
-            console.log(`[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`);
-            // Usar el número de cuenta del mensaje anterior
-            invoiceRequest.accountNumber = previousRequest.accountNumber;
-            // Mantener el mes/año del mensaje actual si existe, sino usar el del anterior
-            if (!invoiceRequest.month) invoiceRequest.month = previousRequest.month;
-            if (!invoiceRequest.year) invoiceRequest.year = previousRequest.year;
-            // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
-            invoiceRequest.confidence = "high";
-            break;
-          }
-        }
-      }
-    }
-
-    if (invoiceRequest.accountNumber) {
-      // Si la confianza es baja, enviar imagen explicativa
-      if (invoiceRequest.confidence === "low") {
+      if (addressOrNameCheck.isAddressOrName) {
         const response =
-          `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n` +
-          `⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\n` +
+          `📋 Para poder enviarte tu factura, necesito el número de cuenta, no el domicilio ni el nombre.\n\n` +
+          `⚠️ *IMPORTANTE:* El formato antiguo de matrícula (como "54-0556-A") ya NO es válido. Ahora necesitas el número de cuenta que es de 3 a 4 dígitos solamente.\n\n` +
           `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
-          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
+          `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura, identificado como "Nro Cuenta: XXX" o "Nro Cuenta: XXXX" (de 3 a 4 dígitos).\n\n` +
           `Por favor, envíame tu solicitud con el formato:\n` +
-          `"Me puede pasar boleta de luz, número de cuenta: 2862"`;
+          `"Me puede pasar boleta de luz, número de cuenta: 2862"\n\n` +
+          `Si no tienes el número de cuenta, puedes encontrarlo en cualquier factura reciente que tengas.`;
 
         await logWebMessages(lastUserMessage, response);
 
@@ -113,6 +73,52 @@ export async function POST(request: NextRequest) {
           showImage: "ubicacion de numero de cuenta",
         });
       }
+
+      // 1.b) Detección de solicitud de factura
+      let invoiceRequest = detectInvoiceRequest(lastUserMessage);
+
+      // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
+      // buscar en mensajes anteriores (últimos 5 mensajes del usuario) si hay un número de cuenta reciente
+      if (!invoiceRequest.accountNumber && (invoiceRequest.month || invoiceRequest.year || 
+          /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(lastUserMessage))) {
+        // Buscar número de cuenta en mensajes anteriores del usuario
+        for (let i = messages.length - 1; i >= Math.max(0, messages.length - 10); i--) {
+          if (messages[i]?.sender === "user") {
+            const previousRequest = detectInvoiceRequest(messages[i].text || "");
+            if (previousRequest.accountNumber && 
+                (previousRequest.confidence === "high" || previousRequest.confidence === "medium")) {
+              console.log(`[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`);
+              // Usar el número de cuenta del mensaje anterior
+              invoiceRequest.accountNumber = previousRequest.accountNumber;
+              // Mantener el mes/año del mensaje actual si existe, sino usar el del anterior
+              if (!invoiceRequest.month) invoiceRequest.month = previousRequest.month;
+              if (!invoiceRequest.year) invoiceRequest.year = previousRequest.year;
+              // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
+              invoiceRequest.confidence = "high";
+              break;
+            }
+          }
+        }
+      }
+
+      if (invoiceRequest.accountNumber) {
+        // Si la confianza es baja, enviar imagen explicativa
+        if (invoiceRequest.confidence === "low") {
+          const response =
+            `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n` +
+            `⚠️ *IMPORTANTE:* El número de cuenta debe tener 3 o 4 dígitos solamente. El formato antiguo de matrícula (como "54-0556-A") ya NO es válido.\n\n` +
+            `En la imagen puedes ver dónde encontrar el número de cuenta en tu factura.\n\n` +
+            `El número de cuenta aparece en la sección "DATOS PARA INGRESAR A LA WEB" de tu factura.\n\n` +
+            `Por favor, envíame tu solicitud con el formato:\n` +
+            `"Me puede pasar boleta de luz, número de cuenta: 2862"`;
+
+          await logWebMessages(lastUserMessage, response);
+
+          return NextResponse.json({
+            response,
+            showImage: "ubicacion de numero de cuenta",
+          });
+        }
 
       // Buscar la factura en Google Drive (igual que en WhatsApp)
       const invoice = await findInvoiceInDrive(
@@ -171,6 +177,7 @@ export async function POST(request: NextRequest) {
           showImage: "ubicacion de numero de cuenta",
         });
       }
+      }
     }
 
     // 2) Si no es un caso de factura, usar OpenAI como antes
@@ -180,7 +187,14 @@ export async function POST(request: NextRequest) {
 
 ${cooperativeContext}
 
-Responde siempre en español, de forma natural y conversacional. Sé empático, útil y profesional. Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa.`,
+Responde siempre en español, de forma natural, conversacional y HUMANA. Sé empático, útil, profesional y amigable. Usa un tono cercano pero profesional, como si fueras un empleado de la cooperativa hablando con un socio.
+
+IMPORTANTE sobre facturas:
+- Si preguntan si las facturas están disponibles o cuándo estarán disponibles, responde de forma natural y amigable explicando que sí, las facturas están disponibles y pueden solicitarlas proporcionando su número de cuenta (3-4 dígitos).
+- Si preguntan cómo obtener su factura, explica que necesitan su número de cuenta de 3-4 dígitos y pueden solicitarla aquí mismo.
+- Sé conversacional: evita respuestas robóticas o demasiado formales. Responde como si fueras una persona real ayudando a otra.
+
+Si el usuario pregunta algo que no está en la información proporcionada, admítelo honestamente y sugiere que contacten directamente con la cooperativa al 3521-401330.`,
     };
 
     // Preparar los mensajes para OpenAI

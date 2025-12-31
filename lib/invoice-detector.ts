@@ -231,6 +231,27 @@ export function detectInvoiceRequest(
 }
 
 /**
+ * Detecta si un mensaje es una pregunta informativa sobre facturas (no una solicitud)
+ */
+function isInformationalQuestion(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+  
+  // Patrones que indican preguntas informativas
+  const informationalPatterns = [
+    /(?:están|estan|está|esta)\s+disponibles/i,
+    /(?:cuándo|cuando|qué|que)\s+(?:están|estan|está|esta|estan disponibles)/i,
+    /(?:ya\s+)?(?:están|estan|está|esta)\s+(?:las\s+)?facturas/i,
+    /(?:hay|existen)\s+(?:facturas|boletas|recibos)/i,
+    /(?:disponible|disponibilidad)/i,
+    /(?:cuando|cuándo)\s+(?:se|las|están|estan)/i,
+    /(?:en\s+)?qué\s+fecha/i,
+    /(?:para\s+cuándo|para cuando)/i,
+  ];
+  
+  return informationalPatterns.some(pattern => pattern.test(message));
+}
+
+/**
  * Detecta si el mensaje contiene una solicitud de factura pero con dirección/nombre
  * en lugar de número de cuenta válido
  */
@@ -242,12 +263,29 @@ export function detectAddressOrNameInsteadOfAccount(
 } {
   const lowerMessage = message.toLowerCase();
   
-  // Palabras clave que indican solicitud de factura
-  const invoiceKeywords = [
-    "boleta", "factura", "recibo", "pasar", "enviar", "mandar",
-    "necesito", "quiero", "podrían", "podrian", "pueden", "me pueden",
-    "me podrían", "me podrian", "podrías", "podrias", "puedes", "me puedes"
+  // Si es una pregunta informativa, NO es una solicitud de factura
+  if (isInformationalQuestion(message)) {
+    return { isAddressOrName: false, hasInvoiceRequest: false };
+  }
+  
+  // Palabras clave que indican solicitud REAL de factura (no preguntas)
+  const invoiceRequestKeywords = [
+    "pasar", "enviar", "mandar", "dar", "entregar", "enviarme", "mandarme",
+    "necesito", "quiero", "quiero que", "me gustaría", "me gustaria",
+    "podrían", "podrian", "pueden", "me pueden", "me podrían", "me podrian",
+    "podrías", "podrias", "puedes", "me puedes", "podrías", "podrias",
+    "dame", "dame la", "pásame", "pasame", "envíame", "envíame",
+    "solicito", "solicitar"
   ];
+  
+  // Verificar si hay solicitud REAL de factura (no solo menciona la palabra "factura")
+  const hasInvoiceRequest = invoiceRequestKeywords.some(keyword => 
+    lowerMessage.includes(keyword)
+  ) || (
+    // También considerar solicitud si dice "factura de" o "boleta de" seguido de algo específico
+    (lowerMessage.includes("factura") || lowerMessage.includes("boleta") || lowerMessage.includes("recibo")) &&
+    (lowerMessage.includes("de") || lowerMessage.includes("del") || /\d{3,4}/.test(message))
+  );
   
   // Palabras clave que indican dirección
   const addressKeywords = [
