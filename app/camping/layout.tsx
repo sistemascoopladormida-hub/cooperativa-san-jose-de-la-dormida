@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: getSupabaseImageUrl("/images/8.png"), // URL absoluta desde Supabase Storage
+        url: getSupabaseImageUrl("https://bqyuycgoojhgpnshfpmq.supabase.co/storage/v1/object/public/news-images/camping/8.png"), // URL absoluta desde Supabase Storage
         width: 1920,
         height: 800,
         alt: "Vista panorámica del Camping Pisco Huasi en Quebrada del Tigre",

@@ -59,6 +59,14 @@ export default function CampingPage() {
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
+  // Debug: Verificar URLs de imágenes (remover en producción)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('Ejemplo de URL de imagen:', getSupabaseImageUrl("/images/1.png"))
+    }
+  }, [])
+
   // Imágenes para el carrusel del hero - desde Supabase Storage
   const heroImages = [
     {
