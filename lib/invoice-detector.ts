@@ -177,16 +177,49 @@ export function detectInvoiceRequest(
     type = "electricidad";
   }
 
-  // Detectar mes
+  // Detectar mes - mejorar para capturar "mes pasado", "del mes", etc.
   const monthPattern =
     /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i;
   const monthMatch = message.match(monthPattern);
-  const month = monthMatch ? monthMatch[1].toLowerCase() : undefined;
+  let month = monthMatch ? monthMatch[1].toLowerCase() : undefined;
+
+  // Si no se encontró mes específico, verificar si dice "mes pasado" o similar
+  if (!month) {
+    const lowerMessage = message.toLowerCase();
+    if (/(?:mes\s+pasado|del\s+mes\s+pasado|el\s+mes\s+pasado)/i.test(message)) {
+      // Calcular el mes pasado
+      const now = new Date();
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const monthNames = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+      ];
+      month = monthNames[lastMonth.getMonth()];
+      console.log(`[INVOICE-DETECTOR] Mes pasado detectado: ${month}`);
+    } else if (/(?:mes\s+anterior|del\s+mes\s+anterior|el\s+mes\s+anterior)/i.test(message)) {
+      // Calcular el mes anterior (igual que mes pasado)
+      const now = new Date();
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const monthNames = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+      ];
+      month = monthNames[lastMonth.getMonth()];
+      console.log(`[INVOICE-DETECTOR] Mes anterior detectado: ${month}`);
+    }
+  }
 
   // Detectar año
   const yearPattern = /(20\d{2})/;
   const yearMatch = message.match(yearPattern);
-  const year = yearMatch ? yearMatch[1] : undefined;
+  let year = yearMatch ? yearMatch[1] : undefined;
+
+  // Si se detectó "mes pasado" o similar, también calcular el año si es necesario
+  if (!year && month && /(?:mes\s+pasado|mes\s+anterior)/i.test(message)) {
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    year = lastMonth.getFullYear().toString();
+  }
 
   return {
     accountNumber,

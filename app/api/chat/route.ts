@@ -69,7 +69,31 @@ export async function POST(request: NextRequest) {
     }
 
     // 1.b) Detección de solicitud de factura
-    const invoiceRequest = detectInvoiceRequest(lastUserMessage);
+    let invoiceRequest = detectInvoiceRequest(lastUserMessage);
+
+    // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
+    // buscar en mensajes anteriores (últimos 5 mensajes del usuario) si hay un número de cuenta reciente
+    if (!invoiceRequest.accountNumber && (invoiceRequest.month || invoiceRequest.year || 
+        /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(lastUserMessage))) {
+      // Buscar número de cuenta en mensajes anteriores del usuario
+      for (let i = messages.length - 1; i >= Math.max(0, messages.length - 10); i--) {
+        if (messages[i]?.sender === "user") {
+          const previousRequest = detectInvoiceRequest(messages[i].text || "");
+          if (previousRequest.accountNumber && 
+              (previousRequest.confidence === "high" || previousRequest.confidence === "medium")) {
+            console.log(`[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`);
+            // Usar el número de cuenta del mensaje anterior
+            invoiceRequest.accountNumber = previousRequest.accountNumber;
+            // Mantener el mes/año del mensaje actual si existe, sino usar el del anterior
+            if (!invoiceRequest.month) invoiceRequest.month = previousRequest.month;
+            if (!invoiceRequest.year) invoiceRequest.year = previousRequest.year;
+            // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
+            invoiceRequest.confidence = "high";
+            break;
+          }
+        }
+      }
+    }
 
     if (invoiceRequest.accountNumber) {
       // Si la confianza es baja, enviar imagen explicativa
