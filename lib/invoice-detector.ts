@@ -287,6 +287,10 @@ export function detectAddressOrNameInsteadOfAccount(
     (lowerMessage.includes("de") || lowerMessage.includes("del") || /\d{3,4}/.test(message))
   );
   
+  if (!hasInvoiceRequest) {
+    return { isAddressOrName: false, hasInvoiceRequest: false };
+  }
+  
   // Palabras clave que indican dirección
   const addressKeywords = [
     "dpto", "depto", "departamento", "apartamento", "apto",
@@ -307,15 +311,6 @@ export function detectAddressOrNameInsteadOfAccount(
     "garcia", "garcía", "perez", "pérez", "sanchez", "sánchez", "ramirez", "ramírez",
     "torres", "flores", "rivera", "gomez", "gómez", "diaz", "díaz", "reyes", "cruz"
   ];
-  
-  // Verificar si hay solicitud de factura
-  const hasInvoiceRequest = invoiceKeywords.some(keyword => 
-    lowerMessage.includes(keyword)
-  );
-  
-  if (!hasInvoiceRequest) {
-    return { isAddressOrName: false, hasInvoiceRequest: false };
-  }
   
   // Verificar si hay palabras de dirección
   const hasAddressKeyword = addressKeywords.some(keyword => 
