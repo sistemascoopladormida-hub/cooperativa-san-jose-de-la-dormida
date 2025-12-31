@@ -95,20 +95,28 @@ export function extractAccountNumber(filename: string): string | null {
 
 /**
  * Determina si un mes/año usa la estructura antigua (facturas) o nueva (servicios/electricidad separadas)
- * Estructura antigua: agosto, septiembre, octubre 2025 → "facturas-{mes}-{año}"
- * Estructura nueva: noviembre 2025 en adelante → "servicios-{mes}-{año}" y "electricidad-{mes}-{año}"
+ * Estructura antigua: "facturas-{mes}-{año}" (una sola carpeta)
+ *   - Agosto, septiembre, octubre, diciembre 2025
+ *   - Todo el año 2026 en adelante
+ * Estructura nueva: "servicios-{mes}-{año}" y "electricidad-{mes}-{año}" (carpetas separadas)
+ *   - Solo noviembre 2025
  */
 function usesOldStructure(month: string, year: string): boolean {
   const monthNumber = getMonthNumber(month);
   const yearNumber = parseInt(year, 10);
   
-  // Agosto, septiembre, octubre 2025 usan estructura antigua
-  if (yearNumber === 2025 && monthNumber) {
-    return monthNumber >= 8 && monthNumber <= 10;
+  // Año 2026 en adelante: siempre estructura antigua (todo junto en facturas-{mes}-{año})
+  if (yearNumber >= 2026) {
+    return true;
   }
   
-  // Antes de agosto 2025 también usa estructura antigua (por si acaso)
-  if (yearNumber === 2025 && monthNumber && monthNumber < 8) {
+  // Año 2025: Noviembre es la única excepción (estructura nueva con carpetas separadas)
+  if (yearNumber === 2025 && monthNumber) {
+    // Noviembre 2025 es el único mes que usa estructura nueva (separada)
+    if (monthNumber === 11) {
+      return false; // Estructura nueva (servicios/electricidad separadas)
+    }
+    // Todos los demás meses de 2025 usan estructura antigua
     return true;
   }
   
@@ -117,14 +125,14 @@ function usesOldStructure(month: string, year: string): boolean {
     return true;
   }
   
-  // Noviembre 2025 en adelante usa estructura nueva
-  return false;
+  // Por defecto, estructura antigua
+  return true;
 }
 
 /**
  * Obtiene el nombre de la carpeta según el mes y tipo
- * Para meses antiguos (agosto-octubre 2025): "facturas-[mes]-[año]"
- * Para meses nuevos (noviembre 2025+): "servicios-[mes]-[año]" o "electricidad-[mes]-[año]"
+ * Estructura antigua: "facturas-{mes}-{año}" (agosto, septiembre, octubre, diciembre 2025 y todo 2026+)
+ * Estructura nueva: "servicios-{mes}-{año}" o "electricidad-{mes}-{año}" (solo noviembre 2025)
  */
 function getFolderName(
   month: string,
@@ -135,24 +143,41 @@ function getFolderName(
     // Estructura antigua: una sola carpeta "facturas-{mes}-{año}"
     return `facturas-${month}-${year}`;
   } else {
-    // Estructura nueva: carpetas separadas por tipo
+    // Estructura nueva: carpetas separadas por tipo (solo noviembre 2025)
     return `${type}-${month}-${year}`;
   }
 }
 
 /**
  * Busca una carpeta en Google Drive por nombre
+ * También intenta variantes con punto en lugar de guion (ej: "facturas-diciembre.2025")
  */
 async function findFolderByName(folderName: string): Promise<string | null> {
   try {
     const drive = await getDriveClient();
-    const response = await drive.files.list({
+    
+    // Intentar primero con el nombre exacto
+    let response = await drive.files.list({
       q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
       fields: "files(id, name)",
     });
     
     if (response.data.files && response.data.files.length > 0) {
       return response.data.files[0].id!;
+    }
+    
+    // Si no se encuentra, intentar con punto en lugar de guion (fallback para diciembre.2025)
+    const variantName = folderName.replace(/-(\d{4})$/, '.$1'); // Reemplaza "-2025" con ".2025"
+    if (variantName !== folderName) {
+      response = await drive.files.list({
+        q: `mimeType='application/vnd.google-apps.folder' and name='${variantName}' and trashed=false`,
+        fields: "files(id, name)",
+      });
+      
+      if (response.data.files && response.data.files.length > 0) {
+        console.log(`[DRIVE] ✅ Encontrada carpeta con variante: ${variantName}`);
+        return response.data.files[0].id!;
+      }
     }
 
     return null;
@@ -178,7 +203,7 @@ async function searchPDFInFolder(
     // Buscar con paginación para obtener todos los PDFs
     do {
       // Listar PDFs en la carpeta (con paginación)
-      const response = await drive.files.list({
+      const response: any = await drive.files.list({
         q: `'${folderId}' in parents and mimeType='application/pdf' and trashed=false`,
         fields: "nextPageToken, files(id, name)",
         pageSize: 1000, // Máximo permitido por la API
@@ -305,10 +330,14 @@ export async function findInvoiceInDrive(
     }
     console.log(`[DRIVE] ❌ No encontrado en ${targetMonth} ${targetYear}`);
 
-    // Si no se encuentra en el mes especificado, buscar en meses anteriores (hasta 3 meses atrás)
+    // Si no se encuentra en el mes especificado, buscar en meses anteriores
+    // Si el usuario especificó mes/año, solo buscar en ese mes. Si no, buscar hasta 6 meses atrás
+    // (desde agosto 2025 en adelante según las carpetas disponibles)
     if (!month && !year) {
       console.log(`[DRIVE] 🔍 Buscando en meses anteriores...`);
-      for (let i = 1; i <= 3; i++) {
+      // Buscar hasta 6 meses atrás para cubrir desde agosto 2025
+      const maxMonthsBack = 6;
+      for (let i = 1; i <= maxMonthsBack; i++) {
         const pastDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const pastMonth = getMonthName(pastDate.getMonth() + 1);
         const pastYear = pastDate.getFullYear().toString();
