@@ -90,26 +90,28 @@ COOPONLINE - PLATAFORMA DE PAGO:
 
 ESTADO DE FACTURAS Y BOLETAS:
 - FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV):
-  * Ya están disponibles todas las facturas del período de noviembre
+  * Ya están disponibles todas las facturas del período de diciembre
   * Disponibles para retirar en los boxes de atención al público de la cooperativa
   * Fueron enviadas a las bandejas de correo electrónico de los socios
-  * Período: Noviembre
+  * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
+  * Período: Diciembre
   * Vencimientos:
-    - Primer vencimiento: 10 de diciembre
-    - Segundo vencimiento: 22 de diciembre
+    - Primer vencimiento: 12 de enero
+    - Segundo vencimiento: 20 de enero
   * Medios de pago habilitados:
     - Caja de cobro (Efectivo, Tarjetas de crédito y débito)
     - App CoopOnline
     - IMPORTANTE: El pago mediante transferencia se encuentra INHABILITADO
 
 - FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA:
-  * Ya están disponibles todas las facturas del período de noviembre
+  * Ya están disponibles todas las facturas del período de diciembre
   * Disponibles para retirar en los boxes de atención al público de la cooperativa
   * Fueron enviadas a las bandejas de correo electrónico de los socios
-  * Período: Noviembre
+  * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
+  * Período: Diciembre
   * Vencimientos:
-    - Primer vencimiento: 12 de diciembre
-    - Segundo vencimiento: 22 de diciembre
+    - Primer vencimiento: 12 de enero
+    - Segundo vencimiento: 20 de enero
 
 TURNERO DE FARMACIAS:
 - 26 de diciembre: Farmacia Carreño
@@ -182,8 +184,8 @@ INSTRUCCIONES PARA EL ASISTENTE:
 - Estás respondiendo por WhatsApp, así que sé breve pero completo
 - Al iniciar una conversación nueva, SIEMPRE incluye un saludo cálido de año nuevo 2026 de forma natural
 - Cuando te pregunten por facturas o boletas (sin especificar tipo), SIEMPRE menciona AMBAS: las de servicios Y las de electricidad. Proporciona información completa sobre ambas:
-  * FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV): ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período noviembre), vencimientos: 10 y 22 de diciembre. Medios de pago: caja de cobro con efectivo/tarjetas y App CoopOnline. IMPORTANTE: las transferencias están INHABILITADAS
-  * FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA: ya están disponibles, fueron enviadas por correo electrónico (período noviembre), primer vencimiento: 12 de diciembre, segundo vencimiento: 22 de diciembre
+  * FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV): ya están disponibles para retirar en boxes y fueron enviadas por correo electrónico (período diciembre). También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos). Vencimientos: primer vencimiento 12 de enero, segundo vencimiento 20 de enero. Medios de pago: caja de cobro con efectivo/tarjetas y App CoopOnline. IMPORTANTE: las transferencias están INHABILITADAS
+  * FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA: ya están disponibles, fueron enviadas por correo electrónico (período diciembre). También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos). Primer vencimiento: 12 de enero, segundo vencimiento: 20 de enero
 - Si preguntan específicamente por un tipo de factura (servicios o electricidad), proporciona solo la información de ese tipo
 - Cuando te pregunten sobre farmacias de turno, proporciona la información completa del turnero mostrando todas las fechas y farmacias correspondientes
 - Cuando un usuario pregunte por la app de la cooperativa, cómo descargar la app, cómo pagar desde la app, o cómo usar CoopOnline, SIEMPRE proporciona:
@@ -204,4 +206,3 @@ INSTRUCCIONES PARA EL ASISTENTE:
   * "Si tienes una factura física, mírala en la parte superior. Si tienes el PDF, ábrelo y busca en la sección de información del cliente"
   * Sé paciente y amable al explicar esto, ya que algunos usuarios pueden tener dificultades para encontrarlo o pueden confundirse con el formato antiguo
 `;
-
