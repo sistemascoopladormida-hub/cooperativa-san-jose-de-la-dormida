@@ -6,10 +6,7 @@ import {
   detectAddressOrNameInsteadOfAccount,
 } from "@/lib/invoice-detector";
 import { findInvoiceInDrive } from "@/lib/drive";
-import {
-  getOrCreateConversation,
-  saveMessage,
-} from "@/lib/conversations";
+import { getOrCreateConversation, saveMessage } from "@/lib/conversations";
 
 export const runtime = "nodejs";
 
@@ -28,8 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const lastUserMessageRaw =
-      messages[messages.length - 1]?.text || "";
+    const lastUserMessageRaw = messages[messages.length - 1]?.text || "";
     const lastUserMessage = lastUserMessageRaw.trim();
 
     // Helper para registrar conversaciones del chatbot web en Supabase
@@ -47,10 +43,15 @@ export async function POST(request: NextRequest) {
 
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
     // Primero verificar si es una pregunta informativa sobre facturas (no procesarla como solicitud)
-    const isInformationalQuestion = /(?:están|estan|está|esta|disponible|cuando|cuándo|hay|existen)/i.test(lastUserMessage) &&
-                                   /(?:facturas?|boletas?|recibos?)/i.test(lastUserMessage) &&
-                                   !/(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|podrías|puedes)/i.test(lastUserMessage);
-    
+    const isInformationalQuestion =
+      /(?:están|estan|está|esta|disponible|cuando|cuándo|hay|existen)/i.test(
+        lastUserMessage
+      ) &&
+      /(?:facturas?|boletas?|recibos?)/i.test(lastUserMessage) &&
+      !/(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|podrías|puedes)/i.test(
+        lastUserMessage
+      );
+
     if (!isInformationalQuestion) {
       // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
       const addressOrNameCheck =
@@ -77,20 +78,39 @@ export async function POST(request: NextRequest) {
 
       // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
       // buscar en mensajes anteriores (últimos 5 mensajes del usuario) si hay un número de cuenta reciente
-      if (!invoiceRequest.accountNumber && (invoiceRequest.month || invoiceRequest.year || 
-          /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(lastUserMessage))) {
+      if (
+        !invoiceRequest.accountNumber &&
+        (invoiceRequest.month ||
+          invoiceRequest.year ||
+          /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(
+            lastUserMessage
+          ))
+      ) {
         // Buscar número de cuenta en mensajes anteriores del usuario
-        for (let i = messages.length - 1; i >= Math.max(0, messages.length - 10); i--) {
+        for (
+          let i = messages.length - 1;
+          i >= Math.max(0, messages.length - 10);
+          i--
+        ) {
           if (messages[i]?.sender === "user") {
-            const previousRequest = detectInvoiceRequest(messages[i].text || "");
-            if (previousRequest.accountNumber && 
-                (previousRequest.confidence === "high" || previousRequest.confidence === "medium")) {
-              console.log(`[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`);
+            const previousRequest = detectInvoiceRequest(
+              messages[i].text || ""
+            );
+            if (
+              previousRequest.accountNumber &&
+              (previousRequest.confidence === "high" ||
+                previousRequest.confidence === "medium")
+            ) {
+              console.log(
+                `[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`
+              );
               // Usar el número de cuenta del mensaje anterior
               invoiceRequest.accountNumber = previousRequest.accountNumber;
               // Mantener el mes/año del mensaje actual si existe, sino usar el del anterior
-              if (!invoiceRequest.month) invoiceRequest.month = previousRequest.month;
-              if (!invoiceRequest.year) invoiceRequest.year = previousRequest.year;
+              if (!invoiceRequest.month)
+                invoiceRequest.month = previousRequest.month;
+              if (!invoiceRequest.year)
+                invoiceRequest.year = previousRequest.year;
               // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
               invoiceRequest.confidence = "high";
               break;
@@ -117,62 +137,62 @@ export async function POST(request: NextRequest) {
           });
         }
 
-      // Buscar la factura en Google Drive (igual que en WhatsApp)
-      const invoice = await findInvoiceInDrive(
-        invoiceRequest.accountNumber,
-        invoiceRequest.month,
-        invoiceRequest.year
-      );
+        // Buscar la factura en Google Drive (igual que en WhatsApp)
+        const invoice = await findInvoiceInDrive(
+          invoiceRequest.accountNumber,
+          invoiceRequest.month,
+          invoiceRequest.year
+        );
 
-      if (invoice) {
-        const typeLabel =
-          invoice.type === "servicios" ? "servicios" : "energía eléctrica";
+        if (invoice) {
+          const typeLabel =
+            invoice.type === "servicios" ? "servicios" : "energía eléctrica";
 
-        const downloadUrl = `/api/chat/invoice?fileId=${encodeURIComponent(
-          invoice.fileId
-        )}&fileName=${encodeURIComponent(invoice.fileName)}`;
+          const downloadUrl = `/api/chat/invoice?fileId=${encodeURIComponent(
+            invoice.fileId
+          )}&fileName=${encodeURIComponent(invoice.fileName)}`;
 
-        let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.\n\n`;
+          let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.\n\n`;
 
-        if (invoiceRequest.month) {
-          confirmationMessage += `📅 Período: ${
-            invoiceRequest.month
-          }${invoiceRequest.year ? " " + invoiceRequest.year : ""}\n\n`;
+          if (invoiceRequest.month) {
+            confirmationMessage += `📅 Período: ${invoiceRequest.month}${
+              invoiceRequest.year ? " " + invoiceRequest.year : ""
+            }\n\n`;
+          }
+
+          confirmationMessage += `📄 Archivo: ${invoice.fileName}\n\n`;
+          confirmationMessage +=
+            `💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:\n` +
+            `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
+            `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
+
+          await logWebMessages(lastUserMessage, confirmationMessage);
+
+          return NextResponse.json({
+            response: confirmationMessage,
+            invoice: {
+              downloadUrl,
+              fileName: invoice.fileName,
+              type: typeLabel,
+            },
+          });
+        } else {
+          // No se encontró la factura → mismo comportamiento que WhatsApp: mostrar imagen
+          const response =
+            `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n` +
+            `Por favor, verifica que el número de cuenta sea correcto. El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+            `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+            `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+            `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\n` +
+            `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
+
+          await logWebMessages(lastUserMessage, response);
+
+          return NextResponse.json({
+            response,
+            showImage: "ubicacion de numero de cuenta",
+          });
         }
-
-        confirmationMessage += `📄 Archivo: ${invoice.fileName}\n\n`;
-        confirmationMessage +=
-          `💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:\n` +
-          `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
-          `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
-
-        await logWebMessages(lastUserMessage, confirmationMessage);
-
-        return NextResponse.json({
-          response: confirmationMessage,
-          invoice: {
-            downloadUrl,
-            fileName: invoice.fileName,
-            type: typeLabel,
-          },
-        });
-      } else {
-        // No se encontró la factura → mismo comportamiento que WhatsApp: mostrar imagen
-        const response =
-          `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\n` +
-          `Por favor, verifica que el número de cuenta sea correcto. El número de cuenta aparece en dos lugares de tu factura:\n\n` +
-          `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
-          `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
-          `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\n` +
-          `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
-
-        await logWebMessages(lastUserMessage, response);
-
-        return NextResponse.json({
-          response,
-          showImage: "ubicacion de numero de cuenta",
-        });
-      }
       }
     }
 
