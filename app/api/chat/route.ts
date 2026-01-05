@@ -76,8 +76,13 @@ export async function POST(request: NextRequest) {
       // 1.b) Detección de solicitud de factura
       let invoiceRequest = detectInvoiceRequest(lastUserMessage);
 
+      // Guardar el mes/año del mensaje actual ANTES de buscar en mensajes anteriores
+      // para no perderlos si el usuario los especificó explícitamente
+      const currentMonth = invoiceRequest.month;
+      const currentYear = invoiceRequest.year;
+
       // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
-      // buscar en mensajes anteriores (últimos 5 mensajes del usuario) si hay un número de cuenta reciente
+      // buscar en mensajes anteriores (últimos 10 mensajes del usuario) si hay un número de cuenta reciente
       if (
         !invoiceRequest.accountNumber &&
         (invoiceRequest.month ||
@@ -106,16 +111,54 @@ export async function POST(request: NextRequest) {
               );
               // Usar el número de cuenta del mensaje anterior
               invoiceRequest.accountNumber = previousRequest.accountNumber;
-              // Mantener el mes/año del mensaje actual si existe, sino usar el del anterior
-              if (!invoiceRequest.month)
+              // PRIORIZAR el mes/año del mensaje actual si existe (el usuario lo especificó explícitamente)
+              // Solo usar el del mensaje anterior si el actual no tiene mes/año
+              if (currentMonth) {
+                invoiceRequest.month = currentMonth;
+                console.log(`[CHAT] 📅 Usando mes del mensaje actual: ${currentMonth}`);
+              } else if (previousRequest.month) {
                 invoiceRequest.month = previousRequest.month;
-              if (!invoiceRequest.year)
+              }
+              
+              if (currentYear) {
+                invoiceRequest.year = currentYear;
+                console.log(`[CHAT] 📅 Usando año del mensaje actual: ${currentYear}`);
+              } else if (previousRequest.year) {
                 invoiceRequest.year = previousRequest.year;
+              }
+              
               // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
               invoiceRequest.confidence = "high";
               break;
             }
           }
+        }
+      }
+
+      // Si el usuario especificó un mes pero no un año, inferir el año correcto
+      // Si estamos en enero 2026 y piden noviembre o diciembre, debe ser 2025
+      if (invoiceRequest.month && !invoiceRequest.year) {
+        const now = new Date();
+        const currentYearNum = now.getFullYear();
+        const currentMonthNum = now.getMonth() + 1; // 1-12
+        
+        const monthNames = [
+          "enero", "febrero", "marzo", "abril", "mayo", "junio",
+          "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+        const requestedMonthNum = monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
+        
+        // Si estamos en enero y piden noviembre o diciembre, debe ser el año anterior
+        if (currentMonthNum === 1 && (requestedMonthNum === 11 || requestedMonthNum === 12)) {
+          invoiceRequest.year = (currentYearNum - 1).toString();
+          console.log(`[CHAT] 📅 Año inferido para ${invoiceRequest.month}: ${invoiceRequest.year}`);
+        } else if (requestedMonthNum > currentMonthNum) {
+          // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
+          invoiceRequest.year = (currentYearNum - 1).toString();
+          console.log(`[CHAT] 📅 Año inferido para ${invoiceRequest.month}: ${invoiceRequest.year}`);
+        } else {
+          // Por defecto, usar el año actual
+          invoiceRequest.year = currentYearNum.toString();
         }
       }
 
