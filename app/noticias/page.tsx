@@ -108,12 +108,13 @@ export default async function NoticiasPage() {
         <div className="mb-12">
           <Card className="overflow-hidden border-2 border-coop-green/20">
             <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="relative h-64 lg:h-auto">
+              <div className="relative w-full aspect-[4/5] lg:aspect-[4/5]">
                 <Image
                   src={featuredNews.image || "/placeholder.svg"}
                   alt={featuredNews.title}
                   fill
                   className="object-cover"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                 />
                 <div className="absolute top-4 left-4">
                   <Badge className={`${getCategoryColor(featuredNews.category)} flex items-center gap-1`}>
@@ -153,18 +154,45 @@ export default async function NoticiasPage() {
         {/* News Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {news.map((article) => (
-            <Card key={article.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className={`${getCategoryColor(article.category)} flex items-center gap-1`}>
-                    {getCategoryIcon(article.category)}
-                    {article.category}
-                  </Badge>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {article.readTime}
+            <Card key={article.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+              {article.image && (
+                <div className="relative w-full aspect-[4/5]">
+                  <Image
+                    src={article.image}
+                    alt={article.title}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  />
+                  <div className="absolute top-2 left-2">
+                    <Badge className={`${getCategoryColor(article.category)} flex items-center gap-1 text-xs`}>
+                      {getCategoryIcon(article.category)}
+                      {article.category}
+                    </Badge>
                   </div>
                 </div>
+              )}
+              <CardHeader>
+                {!article.image && (
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className={`${getCategoryColor(article.category)} flex items-center gap-1`}>
+                      {getCategoryIcon(article.category)}
+                      {article.category}
+                    </Badge>
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {article.readTime}
+                    </div>
+                  </div>
+                )}
+                {article.image && (
+                  <div className="flex items-center justify-end mb-2">
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {article.readTime}
+                    </div>
+                  </div>
+                )}
                 <CardTitle className="text-lg line-clamp-2">{article.title}</CardTitle>
                 <CardDescription className="line-clamp-3">{article.excerpt}</CardDescription>
               </CardHeader>

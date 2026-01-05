@@ -368,7 +368,7 @@ export default function HomePage() {
                 >
                   <Sparkles className="w-4 h-4 text-coop-orange" />
                 </motion.div>
-                <span className="text-sm font-medium">Más de 50 años sirviendo a la comunidad</span>
+                <span className="text-sm font-medium">Más de 60 años sirviendo a la comunidad</span>
               </motion.div>
               
               <motion.div 

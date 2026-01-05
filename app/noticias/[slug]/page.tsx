@@ -144,7 +144,7 @@ export default async function NoticiaIndividual({ params }: Props) {
               )}
             </div>
 
-            <div className="relative h-52 sm:h-64 lg:h-72 rounded-xl overflow-hidden shadow-lg ring-1 ring-white/20">
+            <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/20">
               <Image
                 src={post.image || "/placeholder.svg"}
                 alt={post.title}
