@@ -30,6 +30,8 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
+  Download,
+  FileText,
 } from "lucide-react"
 
 // Función helper para obtener URLs de imágenes desde Supabase Storage
@@ -854,6 +856,47 @@ export default function CampingPage() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Reglamento Download Section */}
+          <motion.div
+            className="max-w-4xl mx-auto mt-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="border-2 border-coop-blue/30 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 hover:border-coop-blue/50 transition-all">
+              <CardHeader>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <div className="p-3 bg-coop-blue/10 rounded-full">
+                    <FileText className="w-6 h-6 text-coop-blue" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold text-gray-900">
+                    Reglamento del Camping
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-center text-gray-600">
+                  Descargá el reglamento completo para conocer todas las normas y recomendaciones del camping
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <motion.a
+                  href="/REGLAMENTO DEL CAMPING.pdf"
+                  download="REGLAMENTO DEL CAMPING.pdf"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-coop-blue to-coop-purple hover:from-coop-blue/90 hover:to-coop-purple/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6"
+                  >
+                    <Download className="mr-2 w-5 h-5" />
+                    Descargar Reglamento
+                  </Button>
+                </motion.a>
               </CardContent>
             </Card>
           </motion.div>

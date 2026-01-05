@@ -446,13 +446,18 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Link href="/asociarse" className="group">
+                  <a 
+                    href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
                     <Button
                       size="lg"
                       variant="outline"
                       className="border-2 border-white/30 bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
-                      Asociarse
+                      Cuadro Tarifario
                       <motion.span
                         className="inline-block ml-2"
                         whileHover={{ x: 5 }}
@@ -461,7 +466,7 @@ export default function HomePage() {
                         <ArrowRight className="w-5 h-5" />
                       </motion.span>
                     </Button>
-                  </Link>
+                  </a>
                 </motion.div>
               </motion.div>
 
@@ -737,16 +742,21 @@ export default function HomePage() {
                     <Users className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Únete a nuestra familia</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Consulta nuestras tarifas</h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      Más de 2,500 familias confían en nosotros para sus servicios esenciales.
+                      Accede al cuadro tarifario oficial de ERSeP con toda la información actualizada.
                     </p>
-                    <Link href="/asociarse" className="block">
+                    <a 
+                      href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
                       <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        Asociarse Ahora
+                        Ver Cuadro Tarifario
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </motion.div>
