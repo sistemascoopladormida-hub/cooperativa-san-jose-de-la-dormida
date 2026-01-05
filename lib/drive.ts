@@ -267,8 +267,30 @@ export async function findInvoiceInDrive(
   try {
     // Si no se especifica mes/año, usar el mes actual
     const now = new Date();
-    const targetMonth = month || getMonthName(now.getMonth() + 1);
-    const targetYear = year || now.getFullYear().toString();
+    const currentYearNum = now.getFullYear();
+    const currentMonthNum = now.getMonth() + 1; // 1-12
+    
+    let targetMonth = month || getMonthName(currentMonthNum);
+    let targetYear = year;
+    
+    // Si no se especificó año, inferirlo basándose en el mes solicitado
+    if (!targetYear) {
+      const monthNames = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+      ];
+      const requestedMonthNum = monthNames.indexOf(targetMonth.toLowerCase()) + 1;
+      
+      // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
+      // Ejemplo: estamos en enero 2026, si piden noviembre, debe ser noviembre 2025
+      if (requestedMonthNum > currentMonthNum) {
+        targetYear = (currentYearNum - 1).toString();
+        console.log(`[DRIVE] 📅 Año inferido: ${targetMonth} debe ser ${targetYear} (mes solicitado ${requestedMonthNum} > mes actual ${currentMonthNum})`);
+      } else {
+        // Por defecto, usar el año actual
+        targetYear = currentYearNum.toString();
+      }
+    }
 
     console.log(`[DRIVE] 🔍 Buscando cuenta ${accountNumber} en ${targetMonth} ${targetYear}`);
 

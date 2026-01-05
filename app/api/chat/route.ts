@@ -164,18 +164,23 @@ export async function POST(request: NextRequest) {
         ];
         const requestedMonthNum = monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
         
+        console.log(`[CHAT] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`);
+        
         // Si estamos en enero y piden noviembre o diciembre, debe ser el año anterior
         if (currentMonthNum === 1 && (requestedMonthNum === 11 || requestedMonthNum === 12)) {
           invoiceRequest.year = (currentYearNum - 1).toString();
-          console.log(`[CHAT] 📅 Año inferido para ${invoiceRequest.month}: ${invoiceRequest.year}`);
+          console.log(`[CHAT] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`);
         } else if (requestedMonthNum > currentMonthNum) {
           // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
           invoiceRequest.year = (currentYearNum - 1).toString();
-          console.log(`[CHAT] 📅 Año inferido para ${invoiceRequest.month}: ${invoiceRequest.year}`);
+          console.log(`[CHAT] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`);
         } else {
           // Por defecto, usar el año actual
           invoiceRequest.year = currentYearNum.toString();
+          console.log(`[CHAT] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`);
         }
+      } else if (invoiceRequest.month && invoiceRequest.year) {
+        console.log(`[CHAT] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
       }
 
       if (invoiceRequest.accountNumber) {
@@ -211,14 +216,14 @@ export async function POST(request: NextRequest) {
         console.log(`[CHAT] 🔍 Buscando factura:`, {
           accountNumber: invoiceRequest.accountNumber,
           month: invoiceRequest.month,
-          year: invoiceRequest.year,
-          type: invoiceRequest.type
+          year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
+          type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
         });
         
         const invoice = await findInvoiceInDrive(
           invoiceRequest.accountNumber,
           invoiceRequest.month,
-          invoiceRequest.year,
+          invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
           invoiceRequest.type
         );
 

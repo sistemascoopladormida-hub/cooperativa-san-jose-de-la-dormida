@@ -192,8 +192,44 @@ async function handleInvoiceRequest(
     return false;
   }
 
-  // Si la confianza es baja, enviar la imagen en lugar de buscar la factura
-  if (invoiceRequest.confidence === "low") {
+  // Si el usuario especificó un mes pero no un año, inferir el año correcto
+  // Si estamos en enero 2026 y piden noviembre o diciembre, debe ser 2025
+  if (invoiceRequest.month && !invoiceRequest.year) {
+    const now = new Date();
+    const currentYearNum = now.getFullYear();
+    const currentMonthNum = now.getMonth() + 1; // 1-12
+    
+    const monthNames = [
+      "enero", "febrero", "marzo", "abril", "mayo", "junio",
+      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ];
+    const requestedMonthNum = monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
+    
+    console.log(`[WEBHOOK] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`);
+    
+    // Si estamos en enero y piden noviembre o diciembre, debe ser el año anterior
+    if (currentMonthNum === 1 && (requestedMonthNum === 11 || requestedMonthNum === 12)) {
+      invoiceRequest.year = (currentYearNum - 1).toString();
+      console.log(`[WEBHOOK] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`);
+    } else if (requestedMonthNum > currentMonthNum) {
+      // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
+      invoiceRequest.year = (currentYearNum - 1).toString();
+      console.log(`[WEBHOOK] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`);
+    } else {
+      // Por defecto, usar el año actual
+      invoiceRequest.year = currentYearNum.toString();
+      console.log(`[WEBHOOK] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`);
+    }
+  } else if (invoiceRequest.month && invoiceRequest.year) {
+    console.log(`[WEBHOOK] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
+  }
+
+  // Si la confianza es baja PERO hay un mes mencionado, es muy probable que sea una solicitud válida
+  // En ese caso, intentar buscar la factura de todas formas
+  const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
+  
+  // Si la confianza es baja Y NO hay mes/tipo, enviar imagen explicativa
+  if (invoiceRequest.confidence === "low" && !hasMonthOrType) {
     console.log(
       `[WEBHOOK] ⚠️ Confianza baja en la detección del número de cuenta: ${invoiceRequest.accountNumber}. Enviando imagen de ayuda.`
     );
@@ -204,6 +240,12 @@ async function handleInvoiceRequest(
       `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
     );
     return true;
+  }
+  
+  // Si la confianza es baja pero hay mes/tipo, subir la confianza a media para intentar buscar
+  if (invoiceRequest.confidence === "low" && hasMonthOrType) {
+    console.log(`[WEBHOOK] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
+    invoiceRequest.confidence = "medium";
   }
 
   // Es una solicitud de factura
@@ -217,10 +259,19 @@ async function handleInvoiceRequest(
 
   try {
     // Buscar la factura en Google Drive
+    // Pasar el tipo de factura detectado para buscar primero en la carpeta correcta
+    console.log(`[WEBHOOK] 🔍 Buscando factura:`, {
+      accountNumber: invoiceRequest.accountNumber,
+      month: invoiceRequest.month,
+      year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
+      type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
+    });
+    
     const invoice = await findInvoiceInDrive(
       invoiceRequest.accountNumber,
       invoiceRequest.month,
-      invoiceRequest.year
+      invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
+      invoiceRequest.type
     );
     console.log(
       "[WEBHOOK] Resultado de búsqueda en Drive:",
