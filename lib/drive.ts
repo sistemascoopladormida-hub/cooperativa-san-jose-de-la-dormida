@@ -249,11 +249,16 @@ async function searchPDFInFolder(
 
 /**
  * Busca una factura en Google Drive por número de cuenta y mes/año
+ * @param accountNumber - Número de cuenta (3-4 dígitos)
+ * @param month - Mes en español (ej: "noviembre")
+ * @param year - Año (ej: "2025")
+ * @param requestedType - Tipo de factura solicitado ("servicios" o "electricidad"). Si se especifica, busca primero en esa carpeta.
  */
 export async function findInvoiceInDrive(
   accountNumber: string,
   month?: string,
-  year?: string
+  year?: string,
+  requestedType?: "servicios" | "electricidad"
 ): Promise<{
   fileId: string;
   fileName: string;
@@ -293,10 +298,16 @@ export async function findInvoiceInDrive(
       }
     } else {
       // Estructura nueva: buscar en carpetas separadas "servicios" y "electricidad"
-      const types: Array<"servicios" | "electricidad"> = [
-        "servicios",
-        "electricidad",
-      ];
+      // Si el usuario especificó un tipo, buscar primero en esa carpeta
+      let types: Array<"servicios" | "electricidad">;
+      if (requestedType) {
+        // Buscar primero en el tipo solicitado, luego en el otro
+        types = [requestedType, requestedType === "servicios" ? "electricidad" : "servicios"];
+        console.log(`[DRIVE] 🔍 Tipo solicitado: ${requestedType}, buscando primero en esa carpeta`);
+      } else {
+        // Si no se especificó tipo, buscar en ambas
+        types = ["servicios", "electricidad"];
+      }
 
       for (let i = 0; i < types.length; i++) {
         const type = types[i];
@@ -367,10 +378,13 @@ export async function findInvoiceInDrive(
           }
         } else {
           // Estructura nueva: buscar en carpetas separadas
-          const types: Array<"servicios" | "electricidad"> = [
-            "servicios",
-            "electricidad",
-          ];
+          // Si el usuario especificó un tipo, buscar primero en esa carpeta
+          let types: Array<"servicios" | "electricidad">;
+          if (requestedType) {
+            types = [requestedType, requestedType === "servicios" ? "electricidad" : "servicios"];
+          } else {
+            types = ["servicios", "electricidad"];
+          }
 
           for (let j = 0; j < types.length; j++) {
             const type = types[j];

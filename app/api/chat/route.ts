@@ -75,11 +75,20 @@ export async function POST(request: NextRequest) {
 
       // 1.b) Detección de solicitud de factura
       let invoiceRequest = detectInvoiceRequest(lastUserMessage);
+      
+      console.log(`[CHAT] 📋 Detección inicial:`, {
+        accountNumber: invoiceRequest.accountNumber,
+        month: invoiceRequest.month,
+        year: invoiceRequest.year,
+        type: invoiceRequest.type,
+        confidence: invoiceRequest.confidence
+      });
 
       // Guardar el mes/año del mensaje actual ANTES de buscar en mensajes anteriores
       // para no perderlos si el usuario los especificó explícitamente
       const currentMonth = invoiceRequest.month;
       const currentYear = invoiceRequest.year;
+      const currentType = invoiceRequest.type;
 
       // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
       // buscar en mensajes anteriores (últimos 10 mensajes del usuario) si hay un número de cuenta reciente
@@ -111,8 +120,8 @@ export async function POST(request: NextRequest) {
               );
               // Usar el número de cuenta del mensaje anterior
               invoiceRequest.accountNumber = previousRequest.accountNumber;
-              // PRIORIZAR el mes/año del mensaje actual si existe (el usuario lo especificó explícitamente)
-              // Solo usar el del mensaje anterior si el actual no tiene mes/año
+              // PRIORIZAR el mes/año/tipo del mensaje actual si existe (el usuario lo especificó explícitamente)
+              // Solo usar el del mensaje anterior si el actual no tiene mes/año/tipo
               if (currentMonth) {
                 invoiceRequest.month = currentMonth;
                 console.log(`[CHAT] 📅 Usando mes del mensaje actual: ${currentMonth}`);
@@ -125,6 +134,13 @@ export async function POST(request: NextRequest) {
                 console.log(`[CHAT] 📅 Usando año del mensaje actual: ${currentYear}`);
               } else if (previousRequest.year) {
                 invoiceRequest.year = previousRequest.year;
+              }
+              
+              if (currentType) {
+                invoiceRequest.type = currentType;
+                console.log(`[CHAT] 🔌 Usando tipo del mensaje actual: ${currentType}`);
+              } else if (previousRequest.type) {
+                invoiceRequest.type = previousRequest.type;
               }
               
               // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
@@ -181,10 +197,19 @@ export async function POST(request: NextRequest) {
         }
 
         // Buscar la factura en Google Drive (igual que en WhatsApp)
+        // Pasar el tipo de factura detectado para buscar primero en la carpeta correcta
+        console.log(`[CHAT] 🔍 Buscando factura:`, {
+          accountNumber: invoiceRequest.accountNumber,
+          month: invoiceRequest.month,
+          year: invoiceRequest.year,
+          type: invoiceRequest.type
+        });
+        
         const invoice = await findInvoiceInDrive(
           invoiceRequest.accountNumber,
           invoiceRequest.month,
-          invoiceRequest.year
+          invoiceRequest.year,
+          invoiceRequest.type
         );
 
         if (invoice) {
