@@ -100,26 +100,60 @@ export function detectInvoiceRequest(
         const afterContext = message.substring(numIndex + num.length, Math.min(message.length, numIndex + num.length + 40)).toLowerCase();
         const fullContext = beforeContext + " " + afterContext;
         
-        // Si el número está cerca de palabras de dirección, probablemente es una dirección
-        // Esto aplica para números de cualquier longitud (3-6 dígitos)
-        const hasAddressKeyword = addressKeywords.some(keyword => {
-          // Buscar la palabra clave cerca del número (dentro de 5 palabras antes o después)
+        // Verificar si hay palabras clave de factura cerca del número
+        // Si hay palabras de factura, es muy probable que sea un número de cuenta, no una dirección
+        const invoiceKeywords = [
+          "factura", "boleta", "recibo", "cuenta", "socio", "servicio", "servicios",
+          "electricidad", "energía", "energia", "luz", "internet", "cable", "tv",
+          "número", "numero", "nro", "n°", "de la cuenta", "de cuenta", "cuenta número",
+          "cuenta numero", "cuenta nro", "mes", "período", "periodo", "del mes"
+        ];
+        
+        const hasInvoiceKeyword = invoiceKeywords.some(keyword => {
           const keywordIndex = fullContext.indexOf(keyword);
           if (keywordIndex === -1) return false;
           
-          // Verificar que la palabra clave esté cerca del número (dentro de 30 caracteres)
+          // Verificar que la palabra clave esté cerca del número (dentro de 50 caracteres)
           const keywordPos = keywordIndex < beforeContext.length 
             ? keywordIndex 
             : beforeContext.length + (keywordIndex - beforeContext.length);
           const numPos = beforeContext.length;
           const distance = Math.abs(keywordPos - numPos);
           
-          return distance < 30;
+          return distance < 50;
         });
         
-        if (hasAddressKeyword) {
-          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`);
-          return false;
+        // También verificar si hay un mes mencionado en el mensaje completo
+        // Si hay un mes, es muy probable que sea una solicitud de factura
+        const monthPattern = /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i;
+        const hasMonth = monthPattern.test(message);
+        
+        // Si hay palabras clave de factura O un mes mencionado, NO descartar como dirección
+        if (hasInvoiceKeyword || hasMonth) {
+          console.log(`[INVOICE-DETECTOR] Número ${num} NO descartado: ${hasInvoiceKeyword ? 'hay palabras clave de factura' : 'hay mes mencionado'} cerca`);
+          // Continuar con las otras verificaciones pero no descartar por dirección
+        } else {
+          // Si el número está cerca de palabras de dirección, probablemente es una dirección
+          // Esto aplica para números de cualquier longitud (3-6 dígitos)
+          const hasAddressKeyword = addressKeywords.some(keyword => {
+            // Buscar la palabra clave cerca del número (dentro de 5 palabras antes o después)
+            const keywordIndex = fullContext.indexOf(keyword);
+            if (keywordIndex === -1) return false;
+            
+            // Verificar que la palabra clave esté cerca del número (dentro de 30 caracteres)
+            const keywordPos = keywordIndex < beforeContext.length 
+              ? keywordIndex 
+              : beforeContext.length + (keywordIndex - beforeContext.length);
+            const numPos = beforeContext.length;
+            const distance = Math.abs(keywordPos - numPos);
+            
+            return distance < 30;
+          });
+          
+          if (hasAddressKeyword) {
+            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`);
+            return false;
+          }
         }
         
         // Verificar si el número está después de "dpto", "depto", "departamento" seguido de una letra

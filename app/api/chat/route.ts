@@ -179,8 +179,12 @@ export async function POST(request: NextRequest) {
       }
 
       if (invoiceRequest.accountNumber) {
-        // Si la confianza es baja, enviar imagen explicativa
-        if (invoiceRequest.confidence === "low") {
+        // Si la confianza es baja PERO hay un mes mencionado, es muy probable que sea una solicitud válida
+        // En ese caso, intentar buscar la factura de todas formas
+        const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
+        
+        // Si la confianza es baja Y NO hay mes/tipo, enviar imagen explicativa
+        if (invoiceRequest.confidence === "low" && !hasMonthOrType) {
           const response =
             `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\n` +
             `El número de cuenta aparece en dos lugares de tu factura:\n\n` +
@@ -194,6 +198,12 @@ export async function POST(request: NextRequest) {
             response,
             showImage: "ubicacion de numero de cuenta",
           });
+        }
+        
+        // Si la confianza es baja pero hay mes/tipo, subir la confianza a media para intentar buscar
+        if (invoiceRequest.confidence === "low" && hasMonthOrType) {
+          console.log(`[CHAT] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
+          invoiceRequest.confidence = "medium";
         }
 
         // Buscar la factura en Google Drive (igual que en WhatsApp)
