@@ -1165,7 +1165,7 @@ export default function HomePage() {
                       <WifiIcon className="w-8 h-8 text-blue-600" />
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Internet</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Internet / TV</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 
@@ -1225,7 +1225,7 @@ export default function HomePage() {
                       <FileText className="w-8 h-8 text-gray-600" />
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Servicios Funebres</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Servicio Funebres</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 

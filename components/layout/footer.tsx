@@ -56,7 +56,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link 
-                  href="/servicios/electricidad" 
+                  href="/servicios" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
@@ -65,7 +65,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/servicios/internet" 
+                  href="/servicios" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
@@ -74,7 +74,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/servicios/television" 
+                  href="/servicios" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
@@ -83,7 +83,16 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/servicios/farmacia" 
+                  href="/servicios" 
+                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  Programa PFC
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/servicios" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
@@ -92,11 +101,11 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/servicios/sociales" 
+                  href="/camping" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
-                  Servicios Sociales
+                  Camping Pisco Huasi
                 </Link>
               </li>
             </ul>
@@ -135,6 +144,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
+                  href="/contacto" 
+                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  Contacto
+                </Link>
+              </li>
+              <li>
+                <Link 
                   href="/autoridades" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
@@ -143,13 +161,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/login" 
+                <a 
+                  href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
-                  Área Socios
-                </Link>
+                  Área Socios (CoopOnline)
+                </a>
               </li>
             </ul>
           </div>
@@ -202,7 +222,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Horario</p>
-                  <p className="text-green-100 text-sm">Lun-Vie: 7:00-12:00</p>
+                  <p className="text-green-100 text-sm">Lun-Jue: 7:00-15:00 | Viernes: 7:00-12:00</p>
                 </div>
               </div>
             </div>
