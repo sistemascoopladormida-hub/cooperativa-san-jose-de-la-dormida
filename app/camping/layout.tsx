@@ -52,14 +52,14 @@ export const metadata: Metadata = {
     description:
       "Viví el verano 2026 con familia y amigos en Camping Pisco Huasi. Dos hectáreas perimetradas con energía eléctrica, WiFi, agua potable, mirador, bajada de río y todas las comodidades. Abierto de martes a domingo de 9:00 a 21:00 hs.",
     url: `${SITE_URL}/camping`,
-    siteName: "Cooperativa Eléctrica San José de la Dormida",
+    siteName: "Cooperativa La Dormida",
     locale: "es_AR",
     type: "website",
     images: [
       {
-        url: getSupabaseImageUrl("https://bqyuycgoojhgpnshfpmq.supabase.co/storage/v1/object/public/news-images/camping/8.png"), // URL absoluta desde Supabase Storage
-        width: 1920,
-        height: 800,
+        url: "https://bqyuycgoojhgpnshfpmq.supabase.co/storage/v1/object/public/news-images/camping/8.png",
+        width: 1200,
+        height: 630,
         alt: "Vista panorámica del Camping Pisco Huasi en Quebrada del Tigre",
         type: "image/png",
       },
@@ -70,11 +70,11 @@ export const metadata: Metadata = {
     title: "Camping Pisco Huasi - Quebrada del Tigre | Verano 2026",
     description:
       "Disfrutá del verano 2026 en Camping Pisco Huasi. Camping con energía eléctrica, WiFi, agua potable, mirador y bajada de río. Abierto de martes a domingo.",
-    images: {
-      url: getSupabaseImageUrl("/images/8.png"), // URL absoluta desde Supabase Storage
-      alt: "Vista panorámica del Camping Pisco Huasi en Quebrada del Tigre",
-    },
-    creator: "@cooperativaladormida", // Actualizar con el handle real si existe
+    images: [
+      "https://bqyuycgoojhgpnshfpmq.supabase.co/storage/v1/object/public/news-images/camping/8.png",
+    ],
+    creator: "@cooperativaladormida",
+    site: "@cooperativaladormida",
   },
   robots: {
     index: true,
