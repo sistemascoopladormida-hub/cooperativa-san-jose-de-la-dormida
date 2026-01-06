@@ -155,41 +155,53 @@ export default function ImageGallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
             onClick={closeLightbox}
           >
-            {/* Botón cerrar */}
-            <button
-              onClick={closeLightbox}
-              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+            {/* Botón cerrar - Posicionado debajo del header */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                closeLightbox()
+              }}
+              className="absolute top-20 sm:top-24 right-4 sm:right-6 p-2.5 sm:p-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-all duration-300 z-20 shadow-lg hover:shadow-xl hover:scale-110 border border-white/20"
               aria-label="Cerrar"
             >
-              <X className="w-6 h-6" />
-            </button>
+              <X className="w-6 h-6 sm:w-8 sm:h-8" strokeWidth={2.5} />
+            </motion.button>
 
             {/* Navegación */}
             {images.length > 1 && (
               <>
-                <button
+                <motion.button
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
                   onClick={(e) => {
                     e.stopPropagation()
                     navigateImage("prev")
                   }}
-                  className="absolute left-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-all duration-300 z-20 shadow-lg hover:shadow-xl hover:scale-110 border border-white/20"
                   aria-label="Imagen anterior"
                 >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
+                  <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
+                </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
                   onClick={(e) => {
                     e.stopPropagation()
                     navigateImage("next")
                   }}
-                  className="absolute right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-all duration-300 z-20 shadow-lg hover:shadow-xl hover:scale-110 border border-white/20"
                   aria-label="Siguiente imagen"
                 >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
+                  <ChevronRight className="w-8 h-8" strokeWidth={2.5} />
+                </motion.button>
               </>
             )}
 
@@ -213,9 +225,14 @@ export default function ImageGallery() {
 
             {/* Contador */}
             {images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white text-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-semibold border border-white/20 shadow-lg"
+              >
                 {images.findIndex((img) => img.url === selectedImage.url) + 1} / {images.length}
-              </div>
+              </motion.div>
             )}
           </motion.div>
         )}
