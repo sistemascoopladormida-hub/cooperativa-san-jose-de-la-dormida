@@ -80,13 +80,16 @@ export default async function NoticiasPage() {
     .select("*")
     .order("date", { ascending: false })
 
-  let featuredNews = staticFeaturedNews
-  let news: NewsPost[] = staticNews
+  let allNews: NewsPost[] = [...staticNews]
+  
+  // Si hay noticias destacadas estáticas, agregarlas al inicio
+  if (staticFeaturedNews) {
+    allNews = [staticFeaturedNews, ...staticNews]
+  }
 
   if (!error && dbPosts && dbPosts.length > 0) {
     const mapped = dbPosts.map(mapDbToNewsPost)
-    featuredNews = mapped[0]
-    news = mapped.slice(1)
+    allNews = mapped
   }
 
   return (
@@ -104,56 +107,9 @@ export default async function NoticiasPage() {
       </section>
 
       <div className="container mx-auto px-4 py-12">
-        {/* Featured News */}
-        <div className="mb-12">
-          <Card className="overflow-hidden border-2 border-coop-green/20">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="relative w-full aspect-[4/5] lg:aspect-[4/5]">
-                <Image
-                  src={featuredNews.image || "/placeholder.svg"}
-                  alt={featuredNews.title}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                />
-                <div className="absolute top-4 left-4">
-                  <Badge className={`${getCategoryColor(featuredNews.category)} flex items-center gap-1`}>
-                    {getCategoryIcon(featuredNews.category)}
-                    {featuredNews.category}
-                  </Badge>
-                </div>
-              </div>
-              <div className="p-6 lg:p-8">
-                <CardHeader className="p-0 mb-4">
-                  <CardTitle className="text-2xl lg:text-3xl mb-3">{featuredNews.title}</CardTitle>
-                  <CardDescription className="text-base">{featuredNews.excerpt}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="flex items-center text-sm text-gray-500 mb-4 space-x-4">
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(featuredNews.date).toLocaleDateString("es-AR")}
-                    </div>
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-1" />
-                      {featuredNews.author}
-                    </div>
-                  </div>
-                  <Button asChild className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white">
-                    <Link href={`/noticias/${featuredNews.slug}`}>
-                      Leer Completa
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* News Grid */}
+        {/* News Grid - Todas las noticias con el mismo formato */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {news.map((article) => (
+          {allNews.map((article) => (
             <Card key={article.id} className="hover:shadow-lg transition-shadow overflow-hidden">
               {article.image && (
                 <div className="relative w-full aspect-[4/5]">

@@ -33,6 +33,8 @@ import {
   Download,
   FileText,
 } from "lucide-react"
+import ImageUpload from "@/components/camping/image-upload"
+import ImageGallery from "@/components/camping/image-gallery"
 
 // Función helper para obtener URLs de imágenes desde Supabase Storage
 const getSupabaseImageUrl = (imagePath: string): string => {
@@ -1021,6 +1023,60 @@ export default function CampingPage() {
                 sizes="(max-width: 768px) 100vw, 50vw"
                 unoptimized
               />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* User Gallery Section - Upload and View */}
+      <section className="py-20 lg:py-28 bg-white relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-coop-green/10 rounded-full mb-6">
+              <Users className="w-4 h-4 text-coop-green" />
+              <span className="text-sm font-medium text-coop-green">Galería de Usuarios</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+              Compartí tu Experiencia
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Subí tus fotos del camping y compartilas con la comunidad. ¡Mostrá cómo disfrutaste tu estadía!
+            </p>
+          </motion.div>
+
+          <div className="max-w-6xl mx-auto space-y-12">
+            {/* Upload Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <ImageUpload />
+            </motion.div>
+
+            {/* User Gallery */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="mb-8">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-center">
+                  Fotos de Nuestros Visitantes
+                </h3>
+                <p className="text-gray-600 text-center">
+                  Descubrí cómo otros visitantes disfrutaron su estadía en el camping
+                </p>
+              </div>
+              <ImageGallery />
             </motion.div>
           </div>
         </div>
