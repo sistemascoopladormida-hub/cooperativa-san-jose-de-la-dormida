@@ -236,6 +236,45 @@ export default async function NoticiaIndividual({ params }: Props) {
   )
 }
 
+// Función helper para normalizar URLs de imágenes
+function normalizeImageUrl(imageUrl: string | null | undefined): string | undefined {
+  if (!imageUrl) return undefined
+
+  // Si ya es una URL absoluta (http/https), retornarla tal cual
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl
+  }
+
+  // Si es una ruta de Supabase Storage (puede venir como ruta relativa o nombre de archivo)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  if (supabaseUrl) {
+    // Si la imagen está en Supabase Storage (bucket news-images)
+    // Puede venir como: "/images/nombre.jpg" o "nombre.jpg" o ruta completa
+    if (imageUrl.includes("/images/") || imageUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
+      const bucketName = "news-images"
+      // Remover "/images/" si existe
+      const fileName = imageUrl.replace("/images/", "")
+      // Construir la URL pública de Supabase Storage
+      const cleanFileName = fileName.startsWith("/") ? fileName.substring(1) : fileName
+      return `${supabaseUrl}/storage/v1/object/public/${bucketName}/${cleanFileName}`
+    }
+
+    // Si ya incluye el dominio de Supabase, retornarla
+    if (imageUrl.includes(supabaseUrl)) {
+      return imageUrl
+    }
+
+    // Si es una ruta que empieza con /storage/, construir la URL completa
+    if (imageUrl.startsWith("/storage/")) {
+      return `${supabaseUrl}${imageUrl}`
+    }
+  }
+
+  // Si es una ruta local, construir URL absoluta con SITE_URL
+  const cleanPath = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`
+  return `${SITE_URL}${cleanPath}`
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -253,11 +292,16 @@ export async function generateMetadata({
   let title = "Noticia no encontrada"
   let description = "La noticia que buscas no existe o fue eliminada."
   let imageUrl: string | undefined
+  let author = "Cooperativa Eléctrica Ltda."
+  let publishedTime: string | undefined
+  let articleUrl = `${SITE_URL}/noticias/${slug}`
 
   if (dbPost) {
     title = dbPost.title + " | Cooperativa La Dormida"
-    description = dbPost.excerpt
-    imageUrl = dbPost.image_url || undefined
+    description = dbPost.excerpt || "Noticia de la Cooperativa Eléctrica Ltda. de San José de la Dormida"
+    imageUrl = normalizeImageUrl(dbPost.image_url)
+    author = dbPost.author || author
+    publishedTime = dbPost.date ? new Date(dbPost.date).toISOString() : undefined
   } else {
     const staticPost =
       slug === staticFeaturedNews.slug
@@ -265,29 +309,48 @@ export async function generateMetadata({
         : staticNews.find((n) => n.slug === slug)
     if (staticPost) {
       title = staticPost.title + " | Cooperativa La Dormida"
-      description = staticPost.excerpt
-      imageUrl = staticPost.image
-        ? staticPost.image.startsWith("http")
-          ? staticPost.image
-          : `${SITE_URL}${staticPost.image}`
-        : undefined
+      description = staticPost.excerpt || "Noticia de la Cooperativa Eléctrica Ltda. de San José de la Dormida"
+      imageUrl = normalizeImageUrl(staticPost.image)
+      author = staticPost.author || author
+      publishedTime = new Date(staticPost.date).toISOString()
     }
   }
+
+  // Imagen por defecto si no hay imagen
+  const defaultImage = `${SITE_URL}/logo.png`
+  const ogImage = imageUrl || defaultImage
 
   return {
     title,
     description,
+    alternates: {
+      canonical: articleUrl,
+    },
     openGraph: {
       title,
       description,
-      images: imageUrl ? [imageUrl] : undefined,
+      url: articleUrl,
+      siteName: "Cooperativa La Dormida",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
       type: "article",
+      publishedTime,
+      authors: [author],
+      locale: "es_AR",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: imageUrl ? [imageUrl] : undefined,
+      images: [ogImage],
+      creator: "@cooperativaladormida",
+      site: "@cooperativaladormida",
     },
   }
 }
