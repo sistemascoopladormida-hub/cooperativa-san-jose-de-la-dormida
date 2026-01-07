@@ -599,88 +599,6 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
-            {/* Chatbot Web */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-              whileHover={{ y: -5 }}
-            >
-              <Card className="h-full border-2 border-coop-blue/20 hover:border-coop-blue/40 transition-all duration-300 bg-white shadow-lg hover:shadow-2xl overflow-hidden group">
-                <div className="relative bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green p-8 text-white">
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
-                  </div>
-                  <div className="relative z-10 flex items-center gap-4 mb-6">
-                    <motion.div
-                      className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30"
-                      whileHover={{ scale: 1.1, rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Globe className="w-8 h-8" />
-                    </motion.div>
-                    <div>
-                      <h3 className="text-2xl font-bold">Chatbot Web</h3>
-                      <p className="text-green-50 text-sm">Disponible en nuestro sitio web</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <CardContent className="p-8">
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-coop-blue/5 to-coop-green/5 p-4 rounded-xl border-2 border-coop-blue/20 mb-6">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="w-5 h-5 text-coop-blue" />
-                        <h4 className="font-bold text-gray-900">Función Principal: Descarga de Facturas</h4>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed font-medium">
-                        Proporciona tu <span className="text-coop-blue font-bold">número de cuenta</span> y el asistente te entregará tus facturas de forma instantánea para descargar.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <HelpCircle className="w-5 h-5 text-coop-blue" />
-                        ¿Para qué sirve?
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        <span className="font-semibold text-coop-blue">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También responde consultas sobre servicios, horarios de atención y más.
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <MessageCircle className="w-5 h-5 text-coop-green" />
-                        ¿Cómo usarlo?
-                      </h4>
-                      <ul className="space-y-2 text-gray-600">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
-                          <span>Haz clic en el botón flotante del chatbot en la esquina inferior derecha</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
-                          <span><span className="font-semibold text-coop-green">Para facturas:</span> Escribe "quiero descargar mi factura" o "factura número de cuenta [tu número]"</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
-                          <span>El asistente te devolverá el enlace de descarga de tu factura al instante</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-200">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Clock className="w-4 h-4 text-coop-blue" />
-                        <span>Disponible 24/7 desde cualquier dispositivo</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
             {/* Asistente WhatsApp */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
@@ -756,6 +674,87 @@ export default function HomePage() {
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <Clock className="w-4 h-4 text-coop-green" />
                         <span>Disponible 24/7 desde tu WhatsApp</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+                        {/* Chatbot Web */}
+                        <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -5 }}
+            >
+              <Card className="h-full border-2 border-coop-blue/20 hover:border-coop-blue/40 transition-all duration-300 bg-white shadow-lg hover:shadow-2xl overflow-hidden group">
+                <div className="relative bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green p-8 text-white">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
+                  </div>
+                  <div className="relative z-10 flex items-center gap-4 mb-6">
+                    <motion.div
+                      className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30"
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Globe className="w-8 h-8" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Chatbot Web</h3>
+                      <p className="text-green-50 text-sm">Disponible en nuestro sitio web</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-coop-blue/5 to-coop-green/5 p-4 rounded-xl border-2 border-coop-blue/20 mb-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-coop-blue" />
+                        <h4 className="font-bold text-gray-900">Función Principal: Descarga de Facturas</h4>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed font-medium">
+                        Proporciona tu <span className="text-coop-blue font-bold">número de cuenta</span> y el asistente te entregará tus facturas de forma instantánea para descargar.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <HelpCircle className="w-5 h-5 text-coop-blue" />
+                        ¿Para qué sirve?
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        <span className="font-semibold text-coop-blue">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También responde consultas sobre servicios, horarios de atención y más.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-coop-green" />
+                        ¿Cómo usarlo?
+                      </h4>
+                      <ul className="space-y-2 text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>Haz clic en el botón flotante del chatbot en la esquina inferior derecha</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span><span className="font-semibold text-coop-green">Para facturas:</span> Escribe "quiero descargar mi factura" o "factura número de cuenta [tu número]"</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>El asistente te devolverá el enlace de descarga de tu factura al instante</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="w-4 h-4 text-coop-blue" />
+                        <span>Disponible 24/7 desde cualquier dispositivo</span>
                       </div>
                     </div>
                   </div>
