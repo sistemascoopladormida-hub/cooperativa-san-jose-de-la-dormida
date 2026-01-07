@@ -139,6 +139,13 @@ TURNERO DE FARMACIAS:
 - 5 de enero: Farmacia Centro
 - 6 de enero: Farmacia Social
 - 7 de enero: Farmacia Carreño
+- 8 de enero: Farmacia Robledo
+- 9 de enero: Farmacia Centro
+- 10 de enero: Farmacia Social
+- 11 de enero: Farmacia Carreño
+- 12 de enero: Farmacia Robledo
+- 13 de enero: Farmacia Centro
+- 14 de enero: Farmacia Social
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
