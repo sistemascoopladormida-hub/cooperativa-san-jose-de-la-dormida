@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle } from "lucide-react"
 import { motion } from "framer-motion"
 
 type Service = {
@@ -504,6 +504,302 @@ export default function HomePage() {
             </motion.div>
             
           </div>
+        </div>
+      </motion.section>
+
+      {/* Asistentes Virtuales Section - Enhanced with Framer Motion */}
+      <motion.section 
+        className="py-20 lg:py-28 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-5">
+          <motion.div 
+            className="absolute top-20 right-10 w-72 h-72 bg-coop-blue rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, -20, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-20 left-10 w-96 h-96 bg-coop-green rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, 20, 0],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-coop-blue/10 rounded-full mb-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              >
+                <Bot className="w-4 h-4 text-coop-blue" />
+              </motion.div>
+              <span className="text-sm font-medium text-coop-blue">Asistencia 24/7</span>
+            </motion.div>
+            <motion.h2 
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Asistentes Virtuales
+            </motion.h2>
+            <motion.p 
+              className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <span className="font-bold text-coop-green">Solicita tus facturas de forma instantánea</span> proporcionando tu número de cuenta. También respondemos consultas sobre servicios, horarios y más.
+            </motion.p>
+            <motion.div
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-coop-blue/10 via-coop-purple/10 to-coop-green/10 rounded-full border-2 border-coop-green/30 max-w-2xl mx-auto"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <FileText className="w-5 h-5 text-coop-green" />
+              <span className="text-base font-semibold text-gray-800">
+                Con tu número de cuenta, recibes tus facturas al instante
+              </span>
+            </motion.div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
+            {/* Chatbot Web */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -5 }}
+            >
+              <Card className="h-full border-2 border-coop-blue/20 hover:border-coop-blue/40 transition-all duration-300 bg-white shadow-lg hover:shadow-2xl overflow-hidden group">
+                <div className="relative bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green p-8 text-white">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
+                  </div>
+                  <div className="relative z-10 flex items-center gap-4 mb-6">
+                    <motion.div
+                      className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30"
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Globe className="w-8 h-8" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Chatbot Web</h3>
+                      <p className="text-green-50 text-sm">Disponible en nuestro sitio web</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-coop-blue/5 to-coop-green/5 p-4 rounded-xl border-2 border-coop-blue/20 mb-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-coop-blue" />
+                        <h4 className="font-bold text-gray-900">Función Principal: Descarga de Facturas</h4>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed font-medium">
+                        Proporciona tu <span className="text-coop-blue font-bold">número de cuenta</span> y el asistente te entregará tus facturas de forma instantánea para descargar.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <HelpCircle className="w-5 h-5 text-coop-blue" />
+                        ¿Para qué sirve?
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        <span className="font-semibold text-coop-blue">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También responde consultas sobre servicios, horarios de atención y más.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-coop-green" />
+                        ¿Cómo usarlo?
+                      </h4>
+                      <ul className="space-y-2 text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>Haz clic en el botón flotante del chatbot en la esquina inferior derecha</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span><span className="font-semibold text-coop-green">Para facturas:</span> Escribe "quiero descargar mi factura" o "factura número de cuenta [tu número]"</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>El asistente te devolverá el enlace de descarga de tu factura al instante</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="w-4 h-4 text-coop-blue" />
+                        <span>Disponible 24/7 desde cualquier dispositivo</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Asistente WhatsApp */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -5 }}
+            >
+              <Card className="h-full border-2 border-coop-green/20 hover:border-coop-green/40 transition-all duration-300 bg-white shadow-lg hover:shadow-2xl overflow-hidden group">
+                <div className="relative bg-gradient-to-br from-coop-green via-emerald-500 to-teal-500 p-8 text-white">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
+                  </div>
+                  <div className="relative z-10 flex items-center gap-4 mb-6">
+                    <motion.div
+                      className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30"
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Smartphone className="w-8 h-8" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Asistente WhatsApp</h3>
+                      <p className="text-green-50 text-sm">Desde tu teléfono móvil</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-coop-green/5 to-teal-500/5 p-4 rounded-xl border-2 border-coop-green/20 mb-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-coop-green" />
+                        <h4 className="font-bold text-gray-900">Función Principal: Descarga de Facturas</h4>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed font-medium">
+                        Proporciona tu <span className="text-coop-green font-bold">número de cuenta</span> y el asistente te entregará tus facturas de forma instantánea para descargar.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <HelpCircle className="w-5 h-5 text-coop-green" />
+                        ¿Para qué sirve?
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        <span className="font-semibold text-coop-green">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También consulta información sobre servicios, horarios y más directamente desde WhatsApp.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-coop-green" />
+                        ¿Cómo usarlo?
+                      </h4>
+                      <ul className="space-y-2 text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>Envía un mensaje al número de WhatsApp de la cooperativa</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span><span className="font-semibold text-coop-green">Para facturas:</span> Escribe "quiero mi factura" o "factura número de cuenta [tu número]"</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-5 h-5 text-coop-green flex-shrink-0 mt-0.5" />
+                          <span>El asistente te devolverá el enlace de descarga de tu factura al instante</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="w-4 h-4 text-coop-green" />
+                        <span>Disponible 24/7 desde tu WhatsApp</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Beneficios compartidos */}
+          <motion.div 
+            className="mt-16 max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="bg-gradient-to-br from-coop-blue/5 via-coop-purple/5 to-coop-green/5 border-2 border-coop-green/20 p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Beneficios de nuestros asistentes virtuales
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { icon: FileText, text: "Descarga de facturas con número de cuenta" },
+                  { icon: Clock, text: "Respuestas instantáneas 24/7" },
+                  { icon: Zap, text: "Información actualizada en tiempo real" },
+                ].map((benefit, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex flex-col items-center text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-coop-green/10 hover:bg-white/80 transition-colors"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -3 }}
+                  >
+                    <div className="p-3 rounded-full bg-gradient-to-br from-coop-blue to-coop-green mb-3">
+                      <benefit.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <p className="text-gray-700 font-medium">{benefit.text}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
         </div>
       </motion.section>
 
