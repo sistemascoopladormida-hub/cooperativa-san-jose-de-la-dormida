@@ -7,6 +7,7 @@ import { sendTextMessage } from "./whatsapp-messages";
 import {
   getOrCreateConversation,
   saveMessage,
+  getRecentMessages,
 } from "@/lib/conversations";
 import {
   getInvoiceRequestCountThisMonth,
@@ -181,6 +182,28 @@ async function handleInvoiceRequest(
     return true;
   }
   
+  // Obtener el contexto de la conversación para números mencionados anteriormente
+  let conversationContext: string[] = [];
+  try {
+    const conversationId = await getOrCreateConversation(from);
+    const recentMessages = await getRecentMessages(conversationId, 5); // Últimos 5 mensajes
+    
+    // Extraer todos los números de cuenta mencionados en los mensajes anteriores del usuario
+    const previousAccountNumbers = new Set<string>();
+    for (const msg of recentMessages) {
+      if (msg.sender === "user") {
+        const prevRequest = detectInvoiceRequest(msg.content);
+        for (const num of prevRequest.accountNumbers) {
+          previousAccountNumbers.add(num);
+        }
+      }
+    }
+    conversationContext = Array.from(previousAccountNumbers);
+    console.log(`[WEBHOOK] 📝 Contexto de conversación: números mencionados anteriormente:`, conversationContext);
+  } catch (error) {
+    console.error("[WEBHOOK] Error obteniendo contexto de conversación:", error);
+  }
+
   const invoiceRequest = detectInvoiceRequest(text);
   console.log("[WEBHOOK] Mensaje recibido:", text);
   console.log(
@@ -188,9 +211,25 @@ async function handleInvoiceRequest(
     JSON.stringify(invoiceRequest)
   );
 
-  if (!invoiceRequest.accountNumber) {
+  // Combinar números del mensaje actual con el contexto
+  const allAccountNumbers = new Set<string>();
+  for (const num of invoiceRequest.accountNumbers) {
+    allAccountNumbers.add(num);
+  }
+  for (const num of conversationContext) {
+    allAccountNumbers.add(num);
+  }
+  const combinedAccountNumbers = Array.from(allAccountNumbers);
+  
+  console.log(`[WEBHOOK] 🔢 Números de cuenta a intentar:`, combinedAccountNumbers);
+
+  if (combinedAccountNumbers.length === 0) {
     return false;
   }
+
+  // Actualizar invoiceRequest con todos los números combinados
+  invoiceRequest.accountNumbers = combinedAccountNumbers;
+  invoiceRequest.accountNumber = combinedAccountNumbers[0]; // Primero para retrocompatibilidad
 
   // Si el usuario especificó un mes pero no un año, inferir el año correcto
   // Si estamos en enero 2026 y piden noviembre o diciembre, debe ser 2025
@@ -224,14 +263,15 @@ async function handleInvoiceRequest(
     console.log(`[WEBHOOK] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
   }
 
-  // Si la confianza es baja PERO hay un mes mencionado, es muy probable que sea una solicitud válida
-  // En ese caso, intentar buscar la factura de todas formas
+  // Si tenemos números del contexto o del mensaje actual, intentar buscar primero
+  // Solo mostrar imagen de ayuda si realmente no hay números válidos para intentar
   const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
   
-  // Si la confianza es baja Y NO hay mes/tipo, enviar imagen explicativa
-  if (invoiceRequest.confidence === "low" && !hasMonthOrType) {
+  // Si la confianza es baja Y NO hay mes/tipo Y no hay números del contexto, enviar imagen explicativa
+  // Pero si hay números del contexto o del mensaje actual, intentar buscar primero
+  if (combinedAccountNumbers.length === 0 && invoiceRequest.confidence === "low" && !hasMonthOrType) {
     console.log(
-      `[WEBHOOK] ⚠️ Confianza baja en la detección del número de cuenta: ${invoiceRequest.accountNumber}. Enviando imagen de ayuda.`
+      `[WEBHOOK] ⚠️ Confianza baja y no hay números de cuenta detectados. Enviando imagen de ayuda.`
     );
     await sendAccountNumberImage(
       from,
@@ -242,43 +282,52 @@ async function handleInvoiceRequest(
     return true;
   }
   
-  // Si la confianza es baja pero hay mes/tipo, subir la confianza a media para intentar buscar
-  if (invoiceRequest.confidence === "low" && hasMonthOrType) {
+  // Si la confianza es baja pero hay números para intentar, subir la confianza a media para intentar buscar
+  if (combinedAccountNumbers.length > 0 && invoiceRequest.confidence === "low" && hasMonthOrType) {
     console.log(`[WEBHOOK] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
     invoiceRequest.confidence = "medium";
   }
 
-  // Es una solicitud de factura
+  // Es una solicitud de factura - Intentar buscar con TODOS los números mencionados
   console.log(
-    `[WEBHOOK] Buscando factura para cuenta: ${
-      invoiceRequest.accountNumber
-    }, mes: ${invoiceRequest.month || "no especificado"}, año: ${
+    `[WEBHOOK] Buscando factura para cuentas: ${combinedAccountNumbers.join(", ")}, mes: ${invoiceRequest.month || "no especificado"}, año: ${
       invoiceRequest.year || "no especificado"
     }, confianza: ${invoiceRequest.confidence}`
   );
 
   try {
-    // Buscar la factura en Google Drive
-    // Pasar el tipo de factura detectado para buscar primero en la carpeta correcta
-    console.log(`[WEBHOOK] 🔍 Buscando factura:`, {
-      accountNumber: invoiceRequest.accountNumber,
-      month: invoiceRequest.month,
-      year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
-      type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
-    });
+    let invoice = null;
+    let lastAccountNumberAttempted = "";
     
-    const invoice = await findInvoiceInDrive(
-      invoiceRequest.accountNumber,
-      invoiceRequest.month,
-      invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
-      invoiceRequest.type
-    );
-    console.log(
-      "[WEBHOOK] Resultado de búsqueda en Drive:",
-      invoice
-        ? `Encontrada: ${invoice.fileName} (${invoice.type})`
-        : "No encontrada"
-    );
+    // Intentar buscar con cada número de cuenta hasta encontrar una factura
+    for (const accountNum of combinedAccountNumbers) {
+      lastAccountNumberAttempted = accountNum;
+      console.log(`[WEBHOOK] 🔍 Intentando buscar factura con número de cuenta: ${accountNum}`);
+      console.log(`[WEBHOOK] 🔍 Parámetros de búsqueda:`, {
+        accountNumber: accountNum,
+        month: invoiceRequest.month,
+        year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
+        type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
+      });
+      
+      invoice = await findInvoiceInDrive(
+        accountNum,
+        invoiceRequest.month,
+        invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
+        invoiceRequest.type
+      );
+      
+      if (invoice) {
+        console.log(
+          `[WEBHOOK] ✅ Factura encontrada con número de cuenta ${accountNum}: ${invoice.fileName} (${invoice.type})`
+        );
+        break; // Si encontramos una factura, dejar de buscar
+      } else {
+        console.log(
+          `[WEBHOOK] ❌ No se encontró factura con número de cuenta ${accountNum}`
+        );
+      }
+    }
 
     if (invoice) {
       console.log(`[WEBHOOK] ✅ Factura encontrada, descargando PDF...`);
@@ -363,17 +412,29 @@ async function handleInvoiceRequest(
         console.error("Error guardando en BD:", dbError);
       }
     } else {
-      // No se encontró la factura - enviar imagen de ayuda
+      // No se encontró la factura con ningún número - enviar imagen de ayuda
+      const numbersAttempted = combinedAccountNumbers.join(", ");
       console.log(
-        `[WEBHOOK] ❌ Factura no encontrada para cuenta ${invoiceRequest.accountNumber}`
+        `[WEBHOOK] ❌ Factura no encontrada para ninguno de los números intentados: ${numbersAttempted}`
       );
+      
+      // Mensaje mejorado que menciona todos los números intentados
+      let errorMessage = `❌ No pude encontrar tu factura con los siguientes números de cuenta: ${numbersAttempted}.\n\n`;
+      errorMessage += `Por favor, verifica que el número de cuenta sea correcto. `;
+      errorMessage += `El número de cuenta aparece en dos lugares de tu factura:\n\n`;
+      errorMessage += `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n`;
+      errorMessage += `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n`;
+      errorMessage += `Es un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\n`;
+      errorMessage += `💡 *Tip:* Si mencionaste varios números, intenté buscar con todos ellos. `;
+      errorMessage += `Si ninguno funcionó, verifica que estés usando el número de cuenta correcto de tu factura más reciente.\n\n`;
+      errorMessage += `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
       
       // Enviar imagen mostrando dónde encontrar el número de cuenta
       await sendAccountNumberImage(
         from,
         text,
         whatsappMessageId,
-        `❌ No pude encontrar tu factura con el número de cuenta ${invoiceRequest.accountNumber}.\n\nPor favor, verifica que el número de cuenta sea correcto. El número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.\n\nSi el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`
+        errorMessage
       );
     }
     return true;

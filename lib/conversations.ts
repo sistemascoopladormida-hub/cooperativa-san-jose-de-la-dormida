@@ -93,6 +93,41 @@ export async function isMessageAlreadyProcessed(
 }
 
 /**
+ * Obtiene los mensajes recientes de una conversación
+ */
+export async function getRecentMessages(
+  conversationId: number,
+  limit: number = 5
+): Promise<Array<{ role: "user" | "assistant"; content: string }>> {
+  try {
+    const { data: messages, error } = await supabase
+      .from("messages")
+      .select("role, content")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error obteniendo mensajes recientes:", error);
+      return [];
+    }
+
+    // Invertir el orden para tener los más antiguos primero
+    return (
+      messages
+        ?.reverse()
+        .map((msg: { role: "user" | "assistant"; content: string }) => ({
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+        })) || []
+    );
+  } catch (error) {
+    console.error("Error en getRecentMessages:", error);
+    return [];
+  }
+}
+
+/**
  * Obtiene el historial de conversación desde Supabase
  */
 export async function getConversationHistory(

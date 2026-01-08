@@ -2,11 +2,13 @@
  * Detecta si el mensaje contiene una solicitud de factura y extrae el número de cuenta
  * También detecta si se menciona un mes específico
  * Retorna un objeto con confidence que indica qué tan segura es la detección
+ * AHORA RETORNA TODOS LOS NÚMEROS DE CUENTA MENCIONADOS
  */
 export function detectInvoiceRequest(
   message: string
 ): {
-  accountNumber: string | null;
+  accountNumbers: string[]; // Múltiples números de cuenta
+  accountNumber: string | null; // El primero para retrocompatibilidad
   month?: string;
   year?: string;
   type?: "servicios" | "electricidad";
@@ -31,25 +33,34 @@ export function detectInvoiceRequest(
     /(\d{3,4})\s*(?:es\s*)?(?:mi|el|la)\s*(?:número|numero|nro|cuenta|factura|boleta)/i,
   ];
 
+  let accountNumbers: string[] = [];
   let accountNumber: string | null = null;
   let confidence: "high" | "medium" | "low" = "low";
 
-  // Buscar número de cuenta con patrones de alta confianza
+  // Buscar TODOS los números de cuenta con patrones de alta confianza
+  const foundHighConfidenceNumbers = new Set<string>();
   for (const pattern of highConfidencePatterns) {
-    const match = message.match(pattern);
-    if (match && match[1]) {
-      const number = match[1].trim();
-      // Validar que sea un número de cuenta válido (3-4 dígitos solamente)
-      if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
-        accountNumber = number;
-        confidence = "high";
-        break;
+    const matches = [...message.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+    for (const match of matches) {
+      if (match && match[1]) {
+        const number = match[1].trim();
+        // Validar que sea un número de cuenta válido (3-4 dígitos solamente)
+        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
+          foundHighConfidenceNumbers.add(number);
+          confidence = "high";
+        }
       }
     }
   }
 
+  // Si se encontraron números con alta confianza, usarlos
+  if (foundHighConfidenceNumbers.size > 0) {
+    accountNumbers = Array.from(foundHighConfidenceNumbers);
+    accountNumber = accountNumbers[0]; // El primero para retrocompatibilidad
+  }
+
   // Si no se encontró con patrones de alta confianza, buscar con patrones de confianza media
-  if (!accountNumber) {
+  if (accountNumbers.length === 0) {
     const mediumConfidencePatterns = [
       /(?:mi|el|la|número|numero|cuenta|factura|boleta).*?(\d{3,4})\b/i,
       /(?:factura|boleta).*?(\d{3,4})\b/i,
@@ -57,17 +68,24 @@ export function detectInvoiceRequest(
       /(\d{3,4})\b.*?(?:factura|boleta|cuenta)/i,
     ];
 
+    const foundMediumConfidenceNumbers = new Set<string>();
     for (const pattern of mediumConfidencePatterns) {
-      const match = message.match(pattern);
-      if (match && match[1]) {
-        const number = match[1].trim();
-        // Solo aceptar números de 3-4 dígitos para confianza media (número de cuenta)
-        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
-          accountNumber = number;
-          confidence = "medium";
-          break;
+      const matches = [...message.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+      for (const match of matches) {
+        if (match && match[1]) {
+          const number = match[1].trim();
+          // Solo aceptar números de 3-4 dígitos para confianza media (número de cuenta)
+          if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
+            foundMediumConfidenceNumbers.add(number);
+            confidence = "medium";
+          }
         }
       }
+    }
+
+    if (foundMediumConfidenceNumbers.size > 0) {
+      accountNumbers = Array.from(foundMediumConfidenceNumbers);
+      accountNumber = accountNumbers[0]; // El primero para retrocompatibilidad
     }
   }
 
@@ -185,14 +203,16 @@ export function detectInvoiceRequest(
         return true;
       });
       
-      // Si hay números filtrados, usar el primero (son todos de 3-4 dígitos, número de cuenta válido)
+      // Si hay números filtrados, usar TODOS (son todos de 3-4 dígitos, número de cuenta válido)
       if (filteredNumbers.length > 0) {
-        accountNumber = filteredNumbers[0];
+        accountNumbers = filteredNumbers;
+        accountNumber = accountNumbers[0]; // El primero para retrocompatibilidad
         // Todos los números son válidos (3-4 dígitos), usar confianza media
         confidence = "medium";
       } else if (nonYearNumbers.length > 0) {
-        // Si todos fueron filtrados pero había números, usar el primero con baja confianza
-        accountNumber = nonYearNumbers[0];
+        // Si todos fueron filtrados pero había números, usar todos con baja confianza
+        accountNumbers = nonYearNumbers;
+        accountNumber = accountNumbers[0];
         confidence = "low";
       }
     }
@@ -256,6 +276,7 @@ export function detectInvoiceRequest(
   }
 
   return {
+    accountNumbers: accountNumbers.length > 0 ? accountNumbers : (accountNumber ? [accountNumber] : []),
     accountNumber,
     month,
     year,
@@ -388,7 +409,7 @@ export function detectAddressOrNameInsteadOfAccount(
   
   // Verificar si hay un número de cuenta válido (3-4 dígitos, con confianza alta o media)
   const invoiceRequest = detectInvoiceRequest(message);
-  const hasValidAccountNumber = invoiceRequest.accountNumber !== null && 
+  const hasValidAccountNumber = invoiceRequest.accountNumbers.length > 0 && 
                                  (invoiceRequest.confidence === "high" || invoiceRequest.confidence === "medium") &&
                                  !hasOldMatricula;
   
