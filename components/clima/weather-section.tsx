@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Header from "@/components/layout/header"
-import Footer from "@/components/layout/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,7 +10,6 @@ import {
   Droplets,
   Wind,
   Sun,
-  Moon,
   Thermometer,
   Gauge,
   Eye,
@@ -134,7 +131,7 @@ function formatTime(timeString: string): string {
   return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
 }
 
-export default function ClimaPage() {
+export default function WeatherSection() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -168,9 +165,8 @@ export default function ClimaPage() {
 
   if (loading && !weatherData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-        <Header />
-        <div className="container mx-auto px-4 py-20">
+      <section id="clima" className="py-12 lg:py-16 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-4">
               <RefreshCw className="w-12 h-12 text-coop-green animate-spin mx-auto" />
@@ -178,16 +174,14 @@ export default function ClimaPage() {
             </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </section>
     )
   }
 
   if (error && !weatherData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-        <Header />
-        <div className="container mx-auto px-4 py-20">
+      <section id="clima" className="py-12 lg:py-16 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle className="text-red-600">Error al cargar el clima</CardTitle>
@@ -201,8 +195,7 @@ export default function ClimaPage() {
             </CardContent>
           </Card>
         </div>
-        <Footer />
-      </div>
+      </section>
     )
   }
 
@@ -235,14 +228,13 @@ export default function ClimaPage() {
   const CurrentWeatherIcon = getWeatherIcon(weatherData.current.condition)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-gray-50">
-      <Header />
-      
+    <section id="clima" className="py-12 lg:py-16 bg-gradient-to-b from-blue-50 via-white to-gray-50 scroll-mt-20">
       {/* Hero Section */}
-      <motion.section
-        className="relative bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white py-12 lg:py-16 overflow-hidden"
+      <motion.div
+        className="relative bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white py-12 lg:py-16 overflow-hidden rounded-2xl mb-8"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
         <div className="absolute inset-0 opacity-10">
@@ -254,11 +246,12 @@ export default function ClimaPage() {
           <motion.div
             className="flex items-center justify-between flex-wrap gap-4"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div>
-              <h1 className="text-4xl lg:text-5xl font-bold mb-2">Clima en San José de la Dormida</h1>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-2">Clima en San José de la Dormida</h2>
               <div className="flex items-center gap-2 text-green-100">
                 <MapPin className="w-5 h-5" />
                 <span className="text-lg">Córdoba, Argentina</span>
@@ -279,21 +272,23 @@ export default function ClimaPage() {
             <motion.p
               className="text-sm text-green-100 mt-4"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
               transition={{ delay: 0.4 }}
             >
               Última actualización: {lastUpdate.toLocaleTimeString("es-AR")}
             </motion.p>
           )}
         </div>
-      </motion.section>
+      </motion.div>
 
-      <div className="container mx-auto px-4 py-8 lg:py-12">
+      <div className="container mx-auto px-4">
         {/* Clima Actual */}
         <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Card className="border-2 border-coop-green/20 shadow-xl">
@@ -413,7 +408,8 @@ export default function ClimaPage() {
           <TabsContent value="pronostico" className="space-y-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <Card>
@@ -432,7 +428,8 @@ export default function ClimaPage() {
                         <motion.div
                           key={day.date}
                           initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: index * 0.1 }}
                           whileHover={{ scale: 1.05, y: -5 }}
                         >
@@ -482,7 +479,8 @@ export default function ClimaPage() {
           <TabsContent value="graficos" className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <Card>
@@ -542,7 +540,8 @@ export default function ClimaPage() {
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Card>
@@ -578,7 +577,8 @@ export default function ClimaPage() {
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <Card>
@@ -615,7 +615,8 @@ export default function ClimaPage() {
             {/* Mapa de Ubicación */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <Card>
@@ -641,7 +642,8 @@ export default function ClimaPage() {
             {/* Mapa de Temperatura */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Card>
@@ -668,7 +670,8 @@ export default function ClimaPage() {
             {/* Mapa de Vientos */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <Card>
@@ -698,7 +701,8 @@ export default function ClimaPage() {
           <TabsContent value="radar">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <Card>
@@ -727,8 +731,6 @@ export default function ClimaPage() {
           </TabsContent>
         </Tabs>
       </div>
-
-      <Footer />
-    </div>
+    </section>
   )
 }

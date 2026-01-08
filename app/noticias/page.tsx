@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -5,9 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Calendar, Clock, User, ArrowRight, Megaphone, AlertTriangle, Info } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { Calendar, Clock, User, ArrowRight, Megaphone, AlertTriangle, Info, Cloud } from "lucide-react"
 import { news as staticNews, featuredNews as staticFeaturedNews, type NewsPost } from "./posts"
+import WeatherModal from "@/components/clima/weather-modal"
 
 type DbNewsPost = {
   id: number
@@ -71,26 +74,45 @@ const getCategoryColor = (category: string) => {
   }
 }
 
-export const dynamic = "force-dynamic"
+export default function NoticiasPage() {
+  const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false)
+  const [allNews, setAllNews] = useState<NewsPost[]>([
+    ...(staticFeaturedNews ? [staticFeaturedNews] : []),
+    ...staticNews,
+  ])
 
-export default async function NoticiasPage() {
-  // 1) Intentar leer desde Supabase
-  const { data: dbPosts, error } = await supabase
-    .from("news_posts")
-    .select("*")
-    .order("date", { ascending: false })
+  // Cargar noticias desde el cliente usando la API
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const response = await fetch("/api/noticias/public")
+        
+        if (!response.ok) {
+          throw new Error("Error al obtener noticias")
+        }
 
-  let allNews: NewsPost[] = [...staticNews]
-  
-  // Si hay noticias destacadas estáticas, agregarlas al inicio
-  if (staticFeaturedNews) {
-    allNews = [staticFeaturedNews, ...staticNews]
-  }
+        const { posts: dbPosts } = await response.json()
 
-  if (!error && dbPosts && dbPosts.length > 0) {
-    const mapped = dbPosts.map(mapDbToNewsPost)
-    allNews = mapped
-  }
+        let news: NewsPost[] = [...staticNews]
+        
+        if (staticFeaturedNews) {
+          news = [staticFeaturedNews, ...staticNews]
+        }
+
+        if (dbPosts && dbPosts.length > 0) {
+          const mapped = dbPosts.map(mapDbToNewsPost)
+          setAllNews(mapped)
+        } else {
+          setAllNews(news)
+        }
+      } catch (err) {
+        console.error("Error loading news:", err)
+        // En caso de error, usar noticias estáticas
+        setAllNews([...(staticFeaturedNews ? [staticFeaturedNews] : []), ...staticNews])
+      }
+    }
+    loadNews()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,12 +123,21 @@ export default async function NoticiasPage() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">Noticias y Novedades</h1>
-            <p className="text-xl text-green-100">Mantente informado sobre las últimas novedades de tu cooperativa</p>
+            <p className="text-xl text-green-100 mb-8">Mantente informado sobre las últimas novedades de tu cooperativa</p>
+            <Button
+              onClick={() => setIsWeatherModalOpen(true)}
+              size="lg"
+              className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 text-lg px-8 py-6"
+            >
+              <Cloud className="w-5 h-5 mr-2" />
+              Ver Clima
+            </Button>
           </div>
         </div>
       </section>
 
       <div className="container mx-auto px-4 py-12">
+
         {/* News Grid - Todas las noticias con el mismo formato */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {allNews.map((article) => (
@@ -178,6 +209,9 @@ export default async function NoticiasPage() {
           </Button>
         </div>
       </div>
+
+      {/* Modal del Clima */}
+      <WeatherModal open={isWeatherModalOpen} onOpenChange={setIsWeatherModalOpen} />
 
       <Footer />
     </div>

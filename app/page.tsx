@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Cloud } from "lucide-react"
 import { motion } from "framer-motion"
+import WeatherModal from "@/components/clima/weather-modal"
 
 type Service = {
   icon: React.ComponentType<{ className?: string }>
@@ -232,6 +233,8 @@ function ServicesCarousel({ services }: { services: Service[] }) {
 }
 
 export default function HomePage() {
+  const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false)
+  
   const services = [
     {
       icon: Zap,
@@ -348,6 +351,38 @@ export default function HomePage() {
           />
         </div>
         
+        {/* Botón Clima Flotante - Esquina Superior Derecha */}
+        <motion.div
+          className="absolute top-6 right-6 lg:top-8 lg:right-8 z-20"
+          initial={{ opacity: 0, scale: 0.8, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.5 }}
+        >
+          <motion.button
+            onClick={() => setIsWeatherModalOpen(true)}
+            className="group relative flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 hover:bg-white/25 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "easeInOut",
+                repeatDelay: 2
+              }}
+            >
+              <Cloud className="w-5 h-5 text-white" />
+            </motion.div>
+            <span className="text-sm font-medium text-white hidden sm:inline">Clima</span>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-coop-orange rounded-full animate-pulse opacity-80"></div>
+          </motion.button>
+        </motion.div>
+
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div 
@@ -1588,6 +1623,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Modal del Clima */}
+      <WeatherModal open={isWeatherModalOpen} onOpenChange={setIsWeatherModalOpen} />
 
       <Footer />
     </div>
