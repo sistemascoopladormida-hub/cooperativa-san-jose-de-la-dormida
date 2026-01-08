@@ -203,17 +203,17 @@ export default function WeatherModal({ open, onOpenChange }: WeatherModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl max-h-[95vh] w-full p-0 overflow-hidden flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className="max-w-7xl max-h-[95vh] w-full p-0 overflow-hidden flex flex-col !top-4 sm:!top-[50%] !translate-y-0 sm:!translate-y-[-50%] rounded-t-2xl sm:rounded-lg [&_.absolute]:!top-12 [&_.absolute]:sm:!top-4 [&_.absolute]:!z-[60]">
+        <DialogHeader className="px-6 pt-16 sm:pt-6 pb-4 border-b relative">
           <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-2xl lg:text-3xl font-bold flex items-center gap-3">
-                <MapPin className="w-6 h-6 text-coop-green" />
-                Clima en San José de la Dormida
+            <div className="flex-1 pr-2">
+              <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 sm:gap-3">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-coop-green flex-shrink-0" />
+                <span>Clima en San José de la Dormida</span>
               </DialogTitle>
-              <p className="text-sm text-gray-600 mt-1">Córdoba, Argentina</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Córdoba, Argentina</p>
               {lastUpdate && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                   Última actualización: {lastUpdate.toLocaleTimeString("es-AR")}
                 </p>
               )}
@@ -223,11 +223,23 @@ export default function WeatherModal({ open, onOpenChange }: WeatherModalProps) 
               disabled={loading}
               variant="outline"
               size="sm"
+              className="hidden sm:flex flex-shrink-0"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               Actualizar
             </Button>
           </div>
+          {/* Botón de actualizar para móvil - dentro del header */}
+          <Button
+            onClick={fetchWeatherData}
+            disabled={loading}
+            variant="outline"
+            size="sm"
+            className="sm:hidden mt-4 w-full"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            Actualizar
+          </Button>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
