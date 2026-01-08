@@ -3,12 +3,17 @@
 import { useEffect, useRef, useState } from "react"
 import { MapContainer, TileLayer, useMap, Circle, Marker, Popup } from "react-leaflet"
 import L from "leaflet"
+import { ChevronDown, ChevronUp, Info, Sun, Cloud, CloudSun } from "lucide-react"
 import "leaflet/dist/leaflet.css"
 
 interface WeatherRadarMapProps {
   lat: number
   lon: number
   locationName: string
+  currentCondition?: string
+  cloud?: number
+  uv?: number
+  condition?: string
 }
 
 // Componente para ajustar el viewport
@@ -99,9 +104,31 @@ function RainViewerLayer({
   return null
 }
 
-export default function WeatherRadarMap({ lat, lon, locationName }: WeatherRadarMapProps) {
+export default function WeatherRadarMap({ 
+  lat, 
+  lon, 
+  locationName,
+  currentCondition,
+  cloud = 0,
+  uv = 0,
+  condition = ""
+}: WeatherRadarMapProps) {
   const [radarLoaded, setRadarLoaded] = useState(false)
   const [radarTime, setRadarTime] = useState<string | null>(null)
+  const [isLegendOpen, setIsLegendOpen] = useState(false)
+
+  // Determinar intensidad del sol basado en nubosidad y UV
+  const getSunIntensity = () => {
+    if (cloud >= 75) return { level: "Nublado", icon: Cloud, color: "text-gray-600", bgColor: "bg-gray-100" }
+    if (cloud >= 50) return { level: "Parcialmente nublado", icon: CloudSun, color: "text-yellow-600", bgColor: "bg-yellow-50" }
+    if (uv >= 8) return { level: "Sol intenso", icon: Sun, color: "text-orange-600", bgColor: "bg-orange-50" }
+    if (uv >= 5) return { level: "Sol moderado", icon: Sun, color: "text-yellow-600", bgColor: "bg-yellow-50" }
+    if (cloud < 25) return { level: "Soleado", icon: Sun, color: "text-yellow-500", bgColor: "bg-yellow-50" }
+    return { level: "Parcialmente soleado", icon: CloudSun, color: "text-yellow-500", bgColor: "bg-yellow-50" }
+  }
+
+  const sunInfo = getSunIntensity()
+  const SunIcon = sunInfo.icon
 
   // Crear icono personalizado para la ubicación (blanco con borde)
   const locationIcon = L.divIcon({
@@ -149,62 +176,123 @@ export default function WeatherRadarMap({ lat, lon, locationName }: WeatherRadar
         </Marker>
       </MapContainer>
       
-      {/* Leyenda mejorada */}
-      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-xl border-2 border-gray-300 z-[1000] max-w-xs">
-        <div className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          Radar de Precipitación
-        </div>
-        
-        {radarLoaded ? (
-          <>
-            <div className="space-y-2 mb-3">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded border-2 border-gray-300" style={{ 
-                  background: "linear-gradient(to bottom, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)" 
-                }}></div>
-                <span className="text-gray-700 font-medium">Celeste/Azul claro - Lluvia ligera</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded border-2 border-gray-300" style={{ 
-                  background: "linear-gradient(to bottom, #2563eb 0%, #1d4ed8 50%, #1e40af 100%)" 
-                }}></div>
-                <span className="text-gray-700 font-medium">Azul - Lluvia moderada</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded border-2 border-gray-300" style={{ 
-                  background: "linear-gradient(to bottom, #fbbf24 0%, #f59e0b 50%, #d97706 100%)" 
-                }}></div>
-                <span className="text-gray-700 font-medium">Amarillo/Naranja - Lluvia fuerte</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded border-2 border-gray-300 bg-red-600"></div>
-                <span className="text-gray-700 font-medium">Rojo - Lluvia intensa</span>
-              </div>
-            </div>
-            
-            {radarTime && (
-              <div className="text-xs text-gray-500 pt-2 border-t border-gray-200">
-                Última actualización: {radarTime}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
-            Cargando datos del radar...
+      {/* Leyenda - Colapsable en mobile, siempre visible en desktop */}
+      <div className="absolute bottom-4 left-4 z-[1000] max-w-xs lg:max-w-sm">
+        {/* Botón para mostrar/ocultar en mobile */}
+        <button
+          onClick={() => setIsLegendOpen(!isLegendOpen)}
+          className="lg:hidden w-full bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border-2 border-gray-300 flex items-center justify-between gap-2 hover:bg-white transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-bold text-gray-900">Leyenda del Radar</span>
           </div>
-        )}
-        
-        <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
-          Fuente: <a href="https://www.rainviewer.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">RainViewer</a>
-        </div>
-      </div>
-      
-      {/* Nota importante */}
-      <div className="absolute top-4 right-4 bg-blue-50 border-2 border-blue-200 rounded-lg p-3 shadow-lg z-[1000] max-w-xs">
-        <div className="text-xs font-semibold text-blue-900 mb-1">⚠️ Importante</div>
-        <div className="text-xs text-blue-700">
-          Los colores del radar muestran la <strong>precipitación real</strong>. El verde que ves es del mapa base (campos/vegetación), no del radar.
+          {isLegendOpen ? (
+            <ChevronUp className="w-4 h-4 text-gray-600" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-600" />
+          )}
+        </button>
+
+        {/* Contenido de la leyenda */}
+        <div
+          className={`${
+            isLegendOpen ? "block" : "hidden"
+          } lg:block bg-white/95 backdrop-blur-sm rounded-lg p-2.5 lg:p-4 shadow-xl border-2 border-gray-300 mt-2 lg:mt-0`}
+        >
+          <div className="text-xs lg:text-sm font-bold text-gray-900 mb-2 lg:mb-3 flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span>Radar de Precipitación</span>
+          </div>
+          
+          {radarLoaded ? (
+            <>
+              {/* Información sobre condiciones actuales (Sol/Nubes) */}
+              <div className={`mb-2 lg:mb-3 p-2 rounded-lg ${sunInfo.bgColor} border border-gray-200`}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <SunIcon className={`w-3.5 h-3.5 lg:w-4 lg:h-4 ${sunInfo.color} flex-shrink-0`} />
+                  <span className={`text-[10px] lg:text-xs font-bold ${sunInfo.color}`}>
+                    Condición: {sunInfo.level}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 lg:gap-3 text-[9px] lg:text-[10px] text-gray-600 mt-1">
+                  {cloud !== undefined && cloud >= 0 && (
+                    <span className="flex items-center gap-1">
+                      <Cloud className="w-3 h-3" />
+                      Nubosidad: {cloud}%
+                    </span>
+                  )}
+                  {uv !== undefined && uv > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Sun className="w-3 h-3 text-yellow-600" />
+                      UV: {uv} {uv >= 8 ? "(Muy alto)" : uv >= 5 ? "(Moderado)" : "(Bajo)"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Leyenda de Precipitación */}
+              <div className="space-y-1.5 lg:space-y-2 mb-2 lg:mb-3">
+                <div className="text-[9px] lg:text-[10px] font-semibold text-gray-500 mb-1">
+                  Precipitación:
+                </div>
+                <div className="flex items-center gap-2 text-[10px] lg:text-xs">
+                  <div className="w-4 h-4 lg:w-5 lg:h-5 rounded border border-gray-300 flex-shrink-0" style={{ 
+                    background: "linear-gradient(to bottom, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)" 
+                  }}></div>
+                  <span className="text-gray-700 font-medium">Celeste/Azul - Lluvia ligera</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] lg:text-xs">
+                  <div className="w-4 h-4 lg:w-5 lg:h-5 rounded border border-gray-300 flex-shrink-0" style={{ 
+                    background: "linear-gradient(to bottom, #2563eb 0%, #1d4ed8 50%, #1e40af 100%)" 
+                  }}></div>
+                  <span className="text-gray-700 font-medium">Azul oscuro - Lluvia moderada</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] lg:text-xs">
+                  <div className="w-4 h-4 lg:w-5 lg:h-5 rounded border border-gray-300 flex-shrink-0" style={{ 
+                    background: "linear-gradient(to bottom, #fbbf24 0%, #f59e0b 50%, #d97706 100%)" 
+                  }}></div>
+                  <span className="text-gray-700 font-medium">Amarillo/Naranja - Lluvia fuerte</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] lg:text-xs">
+                  <div className="w-4 h-4 lg:w-5 lg:h-5 rounded border border-gray-300 bg-red-600 flex-shrink-0"></div>
+                  <span className="text-gray-700 font-medium">Rojo - Lluvia intensa</span>
+                </div>
+              </div>
+
+              {/* Nota sobre días soleados */}
+              {cloud < 50 && (
+                <div className="mb-2 lg:mb-3 p-2 rounded-lg bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200">
+                  <div className="flex items-start gap-2">
+                    <Sun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-yellow-600 flex-shrink-0 mt-0.5 animate-pulse" />
+                    <div className="text-[9px] lg:text-[10px] text-yellow-900 leading-relaxed">
+                      <span className="font-bold">Condición Soleada:</span> El radar solo muestra <strong>precipitaciones</strong>. 
+                      Si no ves colores azules/rojos en el mapa, significa que <strong className="text-orange-700">no hay lluvia</strong> y las condiciones son soleadas o parcialmente nubladas.
+                      {uv >= 5 && (
+                        <span className="block mt-1 text-orange-700 font-semibold">
+                          ⚠️ Índice UV {uv}: Protégete del sol
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {radarTime && (
+                <div className="text-[10px] lg:text-xs text-gray-500 pt-1.5 lg:pt-2 border-t border-gray-200">
+                  Actualización: {radarTime}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-[10px] lg:text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
+              Cargando datos del radar...
+            </div>
+          )}
+          
+          <div className="text-[10px] lg:text-xs text-gray-500 mt-1.5 lg:mt-2 pt-1.5 lg:pt-2 border-t border-gray-200">
+            Fuente: <a href="https://www.rainviewer.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">RainViewer</a>
+          </div>
         </div>
       </div>
     </div>

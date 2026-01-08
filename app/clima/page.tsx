@@ -382,11 +382,31 @@ export default function ClimaPage() {
 
         {/* Tabs para Pronóstico, Gráficos y Mapas */}
         <Tabs defaultValue="pronostico" className="mb-8">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
-            <TabsTrigger value="pronostico">Pronóstico</TabsTrigger>
-            <TabsTrigger value="graficos">Gráficos</TabsTrigger>
-            <TabsTrigger value="mapas">Mapas</TabsTrigger>
-            <TabsTrigger value="radar">Radar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6 gap-2 lg:gap-1 p-1.5 lg:p-1">
+            <TabsTrigger 
+              value="pronostico"
+              className="px-3 py-2.5 lg:px-3 lg:py-1.5 text-xs lg:text-sm font-medium"
+            >
+              Pronóstico
+            </TabsTrigger>
+            <TabsTrigger 
+              value="graficos"
+              className="px-3 py-2.5 lg:px-3 lg:py-1.5 text-xs lg:text-sm font-medium"
+            >
+              Gráficos
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mapas"
+              className="px-3 py-2.5 lg:px-3 lg:py-1.5 text-xs lg:text-sm font-medium"
+            >
+              Mapas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="radar"
+              className="px-3 py-2.5 lg:px-3 lg:py-1.5 text-xs lg:text-sm font-medium"
+            >
+              Radar
+            </TabsTrigger>
           </TabsList>
 
           {/* Pronóstico de 7 días */}
@@ -696,6 +716,10 @@ export default function ClimaPage() {
                     lat={weatherData.location.lat}
                     lon={weatherData.location.lon}
                     locationName={weatherData.location.name}
+                    currentCondition={weatherData.current.condition}
+                    cloud={weatherData.current.cloud}
+                    uv={weatherData.current.uv}
+                    condition={weatherData.current.condition}
                   />
                 </CardContent>
               </Card>
