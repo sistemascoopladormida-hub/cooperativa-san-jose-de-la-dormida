@@ -75,7 +75,7 @@ export default function CondicionesServiciosPage() {
                   <li>Ambulancia: 3521 406183</li>
                   <li>Eléctrica: 3521 406186</li>
                   <li>Internet: 3521 438313</li>
-                  <li>Administración: 3521 40130</li>
+                  <li>Administración: 3521 401330</li>
                   <li>Sepelio: 3521 406189</li>
                   <li>Consultorios médicos PFC (turnos): 3521 401387</li>
                 </ul>

@@ -104,8 +104,8 @@ export default function ServiciosPage() {
     },
     Televisión: {
       label: "Soporte Técnico / Administración",
-      phoneDisplay: "3521 40130",
-      phoneHref: "+54352140130",
+      phoneDisplay: "3521 401330",
+      phoneHref: "+543521401330",
     },
     "Programa PFC": {
       label: "Ambulancia PFC / Consultorios médicos (turnos)",

@@ -1190,7 +1190,7 @@ export default function CampingPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <a href="tel:+54352140130">
+                <a href="tel:+543521401330">
                   <Button
                     size="lg"
                     className="bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"

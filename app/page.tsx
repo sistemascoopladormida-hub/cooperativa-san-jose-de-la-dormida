@@ -1529,11 +1529,11 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent className="text-center pt-0">
                   <a 
-                    href="tel:+54352140130" 
+                    href="tel:+543521401330" 
                     className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
-                    3521 40130
+                    3521 401330
                   </a>
                 </CardContent>
               </Card>

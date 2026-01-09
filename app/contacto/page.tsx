@@ -223,8 +223,8 @@ export default function ContactoPage() {
                 </div>
                 <div>
                   <p className="text-red-700 font-semibold text-sm mb-1">Administración</p>
-                  <a href="tel:+54352140130" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
-                    3521 40130
+                  <a href="tel:+543521401330" className="text-red-600 hover:text-red-800 transition-colors text-base font-medium">
+                    3521 401330
                   </a>
                 </div>
                 <div>

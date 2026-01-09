@@ -277,13 +277,13 @@ export default function Footer() {
                   </div>
                 </a>
                 <a 
-                  href="tel:+54352140130" 
+                  href="tel:+543521401330" 
                   className="flex items-center gap-2 text-green-50 hover:text-green-300 transition-colors text-sm group"
                 >
                   <Building2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   <div>
                     <p className="font-semibold">Adm.</p>
-                    <p className="text-xs text-green-100">3521 40130</p>
+                    <p className="text-xs text-green-100">3521 401330</p>
                   </div>
                 </a>
                 <a 

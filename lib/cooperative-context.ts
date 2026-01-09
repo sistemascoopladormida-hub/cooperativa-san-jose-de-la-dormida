@@ -16,7 +16,7 @@ TELÉFONOS DE GUARDIA 24/7:
 - Ambulancia: 3521 406183
 - Eléctrica: 3521 406186
 - Internet: 3521 438313
-- Administración: 3521 40130
+- Administración: 3521 401330
 - Sepelio: 3521 406189
 
 CONSULTORIOS MÉDICOS PFC (TURNOS):
