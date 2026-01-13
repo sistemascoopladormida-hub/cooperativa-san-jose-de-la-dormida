@@ -2,24 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Wrench,
   Star,
   Clock,
   UserCheck,
-  Smile,
   MessageSquare,
   Send,
+  FileText,
+  User,
 } from "lucide-react";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -137,40 +137,37 @@ export default function EncuestaPage() {
     const calificacion = valor ? parseInt(valor) : 0;
 
     return (
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">{label}</Label>
-        <div className="flex items-center justify-center gap-2 sm:gap-4">
+      <div className="space-y-4">
+        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {label}
+        </Label>
+        <div className="flex items-center justify-center gap-3">
           {[1, 2, 3, 4, 5].map((estrella) => (
-            <motion.button
+            <button
               key={estrella}
               type="button"
               onClick={() => onChange(estrella.toString())}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              className="focus:outline-none"
+              className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-1 transition-transform hover:scale-110 active:scale-95"
+              aria-label={`Calificar ${estrella} de 5`}
             >
               <Star
-                className={`h-10 w-10 sm:h-12 sm:w-12 transition-all ${
+                className={`h-8 w-8 sm:h-10 sm:w-10 transition-colors ${
                   estrella <= calificacion
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-gray-200 text-gray-300"
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-gray-200 text-gray-300 dark:fill-gray-700 dark:text-gray-600"
                 }`}
               />
-            </motion.button>
+            </button>
           ))}
         </div>
         {calificacion > 0 && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-sm text-gray-600 dark:text-gray-400"
-          >
+          <p className="text-center text-sm font-medium text-gray-600 dark:text-gray-400">
             {calificacion === 1 && "Muy insatisfecho"}
             {calificacion === 2 && "Insatisfecho"}
             {calificacion === 3 && "Neutro"}
             {calificacion === 4 && "Satisfecho"}
             {calificacion === 5 && "Muy satisfecho"}
-          </motion.p>
+          </p>
         )}
       </div>
     );
@@ -178,29 +175,33 @@ export default function EncuestaPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Cargando encuesta...</p>
-        </motion.div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            Cargando encuesta...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (error && !submitted) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
           <Card className="max-w-md w-full">
-            <CardContent className="p-6 text-center">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Error</h2>
-              <p className="text-gray-600">{error}</p>
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Error
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{error}</p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -211,35 +212,36 @@ export default function EncuestaPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="max-w-md w-full"
           >
-            <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-8 text-center">
+            <Card className="border shadow-lg">
+              <CardContent className="p-10 text-center space-y-6">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                  className="mb-6"
+                  transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                  className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center"
                 >
-                  <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
-                  </div>
+                  <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
                 </motion.div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                  ¡Gracias por tu opinión!
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Tu encuesta ha sido enviada exitosamente. Tu opinión es muy valiosa para nosotros y nos ayuda a mejorar nuestros servicios.
-                </p>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    Gracias por tu opinión
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Tu encuesta ha sido enviada exitosamente. Tu opinión es muy valiosa para nosotros y nos ayuda a mejorar nuestros servicios.
+                  </p>
+                </div>
                 <Button
                   onClick={() => router.push("/")}
-                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  size="lg"
                 >
                   Volver al inicio
                 </Button>
@@ -252,128 +254,155 @@ export default function EncuestaPage() {
     );
   }
 
+  const progress = [
+    respuestas.calificacionGeneral,
+    respuestas.puntualidad,
+    respuestas.profesionalismo,
+    respuestas.resolucionProblema,
+    respuestas.amabilidad,
+  ].filter(Boolean).length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
 
-      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 md:py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto"
-        >
-          <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b text-center p-4 sm:p-6">
-              <div className="flex justify-center mb-4">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-full"
-                >
-                  <Wrench className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600 dark:text-blue-400" />
-                </motion.div>
-              </div>
-              <CardTitle className="text-xl sm:text-2xl md:text-3xl">
-                Encuesta de Satisfacción
+      <div className="container mx-auto px-4 pt-12 pb-8 md:py-12 max-w-4xl">
+        {/* Header de la encuesta */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Encuesta de Satisfacción
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Tu opinión nos ayuda a mejorar nuestros servicios
+          </p>
+        </div>
+
+        {/* Información de la visita */}
+        {encuestaData && (
+          <Card className="mb-8 border shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Información de la visita
               </CardTitle>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2">
-                Tu opinión es muy importante para nosotros
-              </p>
             </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Servicio
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {encuestaData.tipoServicio}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Número de cuenta
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {encuestaData.numeroCuenta}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Titular
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
+                    {encuestaData.titular}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <CardContent className="p-4 sm:p-6 md:p-8">
-              {encuestaData && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400 mb-1">Servicio</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {encuestaData.tipoServicio}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400 mb-1">Número de cuenta</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {encuestaData.numeroCuenta}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400 mb-1">Titular</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 break-words">
-                        {encuestaData.titular}
-                      </p>
-                    </div>
+        {/* Barra de progreso */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Progreso
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {progress} de 5 preguntas
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${(progress / 5) * 100}%` }}
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            />
+          </div>
+        </div>
+
+        {/* Formulario */}
+        <Card className="border shadow-sm">
+          <CardContent className="p-6 md:p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Calificación General */}
+              <div className="space-y-4">
+                <Separator />
+                <ComponenteEstrellas
+                  valor={respuestas.calificacionGeneral}
+                  onChange={(valor) =>
+                    setRespuestas({ ...respuestas, calificacionGeneral: valor })
+                  }
+                  label="Calificación general del servicio *"
+                />
+              </div>
+
+              {/* Tiempo de respuesta */}
+              <div className="space-y-4">
+                <Separator />
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      ¿Cómo evalúas el tiempo de respuesta del técnico? *
+                    </Label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                      Considera el tiempo transcurrido desde tu reclamo hasta la visita
+                    </p>
                   </div>
-                </motion.div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-                {/* Calificación General */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700"
-                >
-                  <ComponenteEstrellas
-                    valor={respuestas.calificacionGeneral}
-                    onChange={(valor) =>
-                      setRespuestas({ ...respuestas, calificacionGeneral: valor })
-                    }
-                    label="Calificación General del Servicio *"
-                  />
-                </motion.div>
-
-                {/* Puntualidad */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-3"
-                >
-                  <Label className="text-base font-semibold flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    ¿El técnico llegó en el horario acordado? *
-                  </Label>
                   <RadioGroup
                     value={respuestas.puntualidad}
                     onValueChange={(valor) =>
                       setRespuestas({ ...respuestas, puntualidad: valor })
                     }
-                    className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   >
                     {[
-                      { valor: "muy_puntual", label: "Muy puntual" },
-                      { valor: "puntual", label: "Puntual" },
-                      { valor: "tarde", label: "Llegó tarde" },
-                      { valor: "muy_tarde", label: "Muy tarde" },
+                      { valor: "muy_rapido", label: "Muy rápido", desc: "Llegó el mismo día o al día siguiente" },
+                      { valor: "adecuado", label: "Tiempo adecuado", desc: "Llegó dentro de 2-3 días" },
+                      { valor: "tardio", label: "Llegó tarde", desc: "Llegó después de 3 días" },
+                      { valor: "muy_tardio", label: "Muy tarde", desc: "Llegó después del plazo esperado" },
                     ].map((opcion) => (
-                      <div key={opcion.valor} className="flex items-center space-x-2">
-                        <RadioGroupItem value={opcion.valor} id={opcion.valor} />
+                      <div
+                        key={opcion.valor}
+                        className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                        onClick={() => setRespuestas({ ...respuestas, puntualidad: opcion.valor })}
+                      >
+                        <RadioGroupItem value={opcion.valor} id={opcion.valor} className="mt-1" />
                         <Label
                           htmlFor={opcion.valor}
-                          className="text-sm cursor-pointer font-normal"
+                          className="text-sm cursor-pointer font-normal text-gray-700 dark:text-gray-300 flex-1"
                         >
-                          {opcion.label}
+                          <div className="font-medium mb-1">{opcion.label}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{opcion.desc}</div>
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
-                </motion.div>
+                </div>
+              </div>
 
-                {/* Profesionalismo */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="space-y-3"
-                >
-                  <Label className="text-base font-semibold flex items-center gap-2">
-                    <UserCheck className="h-5 w-5 text-blue-600" />
+              {/* Profesionalismo */}
+              <div className="space-y-4">
+                <Separator />
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <UserCheck className="h-4 w-4 text-gray-500" />
                     Profesionalismo del técnico *
                   </Label>
                   <RadioGroup
@@ -381,7 +410,7 @@ export default function EncuestaPage() {
                     onValueChange={(valor) =>
                       setRespuestas({ ...respuestas, profesionalismo: valor })
                     }
-                    className="grid grid-cols-2 sm:grid-cols-5 gap-3"
+                    className="grid grid-cols-2 sm:grid-cols-5 gap-4"
                   >
                     {[
                       { valor: "excelente", label: "Excelente" },
@@ -390,28 +419,29 @@ export default function EncuestaPage() {
                       { valor: "regular", label: "Regular" },
                       { valor: "malo", label: "Malo" },
                     ].map((opcion) => (
-                      <div key={opcion.valor} className="flex items-center space-x-2">
+                      <div
+                        key={opcion.valor}
+                        className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                      >
                         <RadioGroupItem value={opcion.valor} id={opcion.valor} />
                         <Label
                           htmlFor={opcion.valor}
-                          className="text-sm cursor-pointer font-normal"
+                          className="text-sm cursor-pointer font-normal text-gray-700 dark:text-gray-300 flex-1"
                         >
                           {opcion.label}
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
-                </motion.div>
+                </div>
+              </div>
 
-                {/* Resolución del problema */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="space-y-3"
-                >
-                  <Label className="text-base font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-blue-600" />
+              {/* Resolución del problema */}
+              <div className="space-y-4">
+                <Separator />
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-gray-500" />
                     ¿Se resolvió el problema? *
                   </Label>
                   <RadioGroup
@@ -419,108 +449,108 @@ export default function EncuestaPage() {
                     onValueChange={(valor) =>
                       setRespuestas({ ...respuestas, resolucionProblema: valor })
                     }
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-4"
                   >
                     {[
                       { valor: "si_completamente", label: "Sí, completamente" },
                       { valor: "si_parcialmente", label: "Sí, parcialmente" },
                       { valor: "no", label: "No" },
                     ].map((opcion) => (
-                      <div key={opcion.valor} className="flex items-center space-x-2">
+                      <div
+                        key={opcion.valor}
+                        className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                      >
                         <RadioGroupItem value={opcion.valor} id={opcion.valor} />
                         <Label
                           htmlFor={opcion.valor}
-                          className="text-sm cursor-pointer font-normal"
+                          className="text-sm cursor-pointer font-normal text-gray-700 dark:text-gray-300 flex-1"
                         >
                           {opcion.label}
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
-                </motion.div>
+                </div>
+              </div>
 
-                {/* Amabilidad */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700"
-                >
-                  <ComponenteEstrellas
-                    valor={respuestas.amabilidad}
-                    onChange={(valor) =>
-                      setRespuestas({ ...respuestas, amabilidad: valor })
-                    }
-                    label="Amabilidad y trato del técnico *"
-                  />
-                </motion.div>
+              {/* Amabilidad */}
+              <div className="space-y-4">
+                <Separator />
+                <ComponenteEstrellas
+                  valor={respuestas.amabilidad}
+                  onChange={(valor) =>
+                    setRespuestas({ ...respuestas, amabilidad: valor })
+                  }
+                  label="Amabilidad y trato del técnico *"
+                />
+              </div>
 
-                {/* Comentarios adicionales */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="space-y-2"
-                >
-                  <Label htmlFor="comentarios" className="text-base font-semibold flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                    Comentarios adicionales (opcional)
+              {/* Comentarios adicionales */}
+              <div className="space-y-4">
+                <Separator />
+                <div className="space-y-3">
+                  <Label htmlFor="comentarios" className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-gray-500" />
+                    Comentarios adicionales
+                    <span className="text-xs font-normal text-gray-500">(opcional)</span>
                   </Label>
                   <Textarea
                     id="comentarios"
-                    placeholder="¿Tienes algún comentario adicional sobre la visita técnica?"
+                    placeholder="Comparte cualquier comentario adicional sobre la visita técnica..."
                     value={respuestas.comentarios}
                     onChange={(e) =>
                       setRespuestas({ ...respuestas, comentarios: e.target.value })
                     }
-                    rows={4}
-                    className="resize-none"
+                    rows={5}
+                    className="resize-none border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
                   />
-                </motion.div>
+                </div>
+              </div>
 
-                {/* Mensaje de error */}
-                <AnimatePresence>
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                    >
-                      <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Botón de envío */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  className="pt-4"
-                >
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300"
+              {/* Mensaje de error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3"
                   >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-5 w-5" />
-                        Enviar Encuesta
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Botón de envío */}
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  disabled={submitting || progress < 5}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  size="lg"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Enviando encuesta...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-5 w-5" />
+                      Enviar encuesta
+                    </>
+                  )}
+                </Button>
+                {progress < 5 && (
+                  <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-3">
+                    Por favor completa todas las preguntas obligatorias para continuar
+                  </p>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
       <Footer />
