@@ -67,6 +67,7 @@ interface Encuesta {
   titular: string;
   telefono: string;
   tipoServicio: string;
+  tecnico: string | null;
   estado: string;
   creadoEn: string;
   enviadoEn: string | null;
@@ -806,6 +807,7 @@ export default function EncuestasDashboardPage() {
                           <TableHead>Titular</TableHead>
                           <TableHead>Cuenta</TableHead>
                           <TableHead>Servicio</TableHead>
+                          <TableHead>Técnico</TableHead>
                           <TableHead>Calificación</TableHead>
                           <TableHead>Tiempo</TableHead>
                           <TableHead>Profesionalismo</TableHead>
@@ -817,7 +819,7 @@ export default function EncuestasDashboardPage() {
                         {encuestasFiltradas.length === 0 ? (
                           <TableRow>
                             <TableCell
-                              colSpan={9}
+                              colSpan={10}
                               className="text-center py-12 text-muted-foreground"
                             >
                               <div className="flex flex-col items-center gap-2">
@@ -850,6 +852,9 @@ export default function EncuestasDashboardPage() {
                                   <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
                                     {getServicioLabel(encuesta.tipoServicio)}
                                   </span>
+                                </TableCell>
+                                <TableCell className="text-sm font-medium">
+                                  {encuesta.tecnico || "-"}
                                 </TableCell>
                                 <TableCell>
                                   {respuestas.calificacionGeneral ? (

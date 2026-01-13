@@ -114,6 +114,7 @@ export async function GET(request: NextRequest) {
       titular: encuesta.titular,
       telefono: encuesta.telefono,
       tipoServicio: encuesta.tipo_servicio,
+      tecnico: encuesta.tecnico || null,
       estado: encuesta.estado,
       creadoEn: encuesta.creado_en,
       enviadoEn: encuesta.enviado_en,

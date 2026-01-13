@@ -30,12 +30,29 @@ export default function VisitasTecnicasPage() {
   const [error, setError] = useState("");
   const [numeroCuenta, setNumeroCuenta] = useState("");
   const [servicio, setServicio] = useState("");
+  const [tecnico, setTecnico] = useState("");
   const [loadingData, setLoadingData] = useState(false);
   const [titular, setTitular] = useState("");
   const [telefono, setTelefono] = useState("");
   const [telefonoEditable, setTelefonoEditable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const TECNICOS = [
+    "CORREA JORGE ANTONIO",
+    "CORREA RAMON HUMBERTO",
+    "BARRERAS CRISTIAN VALENTIN",
+    "VALDEZ MARCELO ARIEL",
+    "CARBALLO LEONARDO FRANCISCO",
+    "BARRERA DIEGO OMAR",
+    "CASAS ERNESTO MARIO",
+    "MALDONADO LUCAS LUCIANO",
+    "VALVERDI MAURO NICOLAS",
+    "MOYANO JOSE LEONARDO",
+    "AMAYA LEONARDO FEDERICO",
+    "NAVARRETE LUIS GONZALO",
+    "FAJARDO NICOLAS",
+  ];
 
   // Verificar autenticación al cargar
   useEffect(() => {
@@ -84,6 +101,7 @@ export default function VisitasTecnicasPage() {
     setAuthenticated(false);
     setNumeroCuenta("");
     setServicio("");
+    setTecnico("");
     setTitular("");
     setTelefono("");
     setTelefonoEditable(false);
@@ -134,7 +152,7 @@ export default function VisitasTecnicasPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!numeroCuenta.trim() || !servicio || !titular || !telefono) {
+    if (!numeroCuenta.trim() || !servicio || !titular || !telefono || !tecnico) {
       setError("Por favor completa todos los campos y busca el número de cuenta");
       return;
     }
@@ -151,6 +169,7 @@ export default function VisitasTecnicasPage() {
           titular: titular,
           telefono: telefono,
           servicio: servicio,
+          tecnico: tecnico,
         }),
       });
 
@@ -160,6 +179,7 @@ export default function VisitasTecnicasPage() {
         setSuccess(true);
         setNumeroCuenta("");
         setServicio("");
+        setTecnico("");
         setTitular("");
         setTelefono("");
         
@@ -608,6 +628,26 @@ export default function VisitasTecnicasPage() {
                   </Select>
                 </div>
 
+                {/* Técnico que realizó la visita */}
+                <div className="space-y-2">
+                  <Label htmlFor="tecnico" className="text-sm sm:text-base font-semibold flex items-center gap-2">
+                    <User className="h-4 w-4 text-blue-600" />
+                    Técnico que realizó la visita *
+                  </Label>
+                  <Select value={tecnico} onValueChange={setTecnico}>
+                    <SelectTrigger id="tecnico" className="h-12 sm:h-14 text-base sm:text-lg">
+                      <SelectValue placeholder="Selecciona el técnico" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TECNICOS.map((nombre) => (
+                        <SelectItem key={nombre} value={nombre}>
+                          {nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Mensajes de error */}
                 <AnimatePresence>
                   {error && (
@@ -669,7 +709,7 @@ export default function VisitasTecnicasPage() {
                 >
                   <Button
                     type="submit"
-                    disabled={submitting || !numeroCuenta.trim() || !servicio || !titular || !telefono.trim()}
+                    disabled={submitting || !numeroCuenta.trim() || !servicio || !titular || !telefono.trim() || !tecnico}
                     className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? (

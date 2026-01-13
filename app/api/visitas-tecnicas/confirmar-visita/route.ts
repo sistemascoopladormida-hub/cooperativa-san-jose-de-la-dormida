@@ -5,10 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
-    const { numeroCuenta, titular, telefono, servicio } = await request.json();
+    const { numeroCuenta, titular, telefono, servicio, tecnico } = await request.json();
 
     // Validar datos requeridos
-    if (!numeroCuenta || !titular || !telefono || !servicio) {
+    if (!numeroCuenta || !titular || !telefono || !servicio || !tecnico) {
       return NextResponse.json(
         { success: false, error: "Faltan datos requeridos" },
         { status: 400 }
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
         titular: titular,
         telefono: telefono,
         tipo_servicio: servicio,
+        tecnico: tecnico,
         url_encuesta: urlEncuesta,
         estado: "pendiente",
         creado_en: new Date().toISOString(),
