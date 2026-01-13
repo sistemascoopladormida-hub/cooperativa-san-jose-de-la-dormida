@@ -33,6 +33,7 @@ export default function VisitasTecnicasPage() {
   const [loadingData, setLoadingData] = useState(false);
   const [titular, setTitular] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [telefonoEditable, setTelefonoEditable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -85,6 +86,7 @@ export default function VisitasTecnicasPage() {
     setServicio("");
     setTitular("");
     setTelefono("");
+    setTelefonoEditable(false);
     setSuccess(false);
   };
 
@@ -111,11 +113,13 @@ export default function VisitasTecnicasPage() {
       if (data.success && data.usuario) {
         setTitular(data.usuario.titular);
         setTelefono(data.usuario.telefono);
+        setTelefonoEditable(true); // Habilitar edición del teléfono cuando se encuentra la cuenta
         setError("");
       } else {
         setError(data.error || "No se encontró usuario con ese número de cuenta");
         setTitular("");
         setTelefono("");
+        setTelefonoEditable(false);
       }
     } catch (error) {
       console.error("Error buscando usuario:", error);
@@ -454,6 +458,7 @@ export default function VisitasTecnicasPage() {
                           setError("");
                           setTitular("");
                           setTelefono("");
+                          setTelefonoEditable(false);
                         }}
                         className="pl-10 h-12 sm:h-14 text-base sm:text-lg"
                         autoComplete="off"
@@ -547,27 +552,35 @@ export default function VisitasTecnicasPage() {
                           </motion.div>
                         )}
 
-                        {/* Información del teléfono */}
-                        {telefono && (
+                        {/* Información del teléfono - Editable */}
+                        {telefonoEditable && (
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
                             className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm"
                           >
-                            <div className="flex items-start gap-3">
-                              <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md mt-0.5">
-                                <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md">
+                                  <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                </div>
+                                <Label htmlFor="telefonoUsuario" className="text-xs text-gray-500 dark:text-gray-400">
+                                  Teléfono del Usuario *
+                                </Label>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
-                                <a
-                                  href={`tel:${telefono}`}
-                                  className="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors break-all"
-                                >
-                                  {telefono}
-                                </a>
-                              </div>
+                              <Input
+                                id="telefonoUsuario"
+                                type="tel"
+                                value={telefono}
+                                onChange={(e) => setTelefono(e.target.value)}
+                                placeholder="Ej: 3521401330"
+                                className="h-12 sm:h-14 text-base sm:text-lg font-semibold"
+                                autoComplete="tel"
+                              />
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Puedes modificar el número si es diferente al del sistema
+                              </p>
                             </div>
                           </motion.div>
                         )}
@@ -656,7 +669,7 @@ export default function VisitasTecnicasPage() {
                 >
                   <Button
                     type="submit"
-                    disabled={submitting || !numeroCuenta.trim() || !servicio || !titular}
+                    disabled={submitting || !numeroCuenta.trim() || !servicio || !titular || !telefono.trim()}
                     className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? (

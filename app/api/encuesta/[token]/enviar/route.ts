@@ -37,7 +37,7 @@ export async function POST(
     // Buscar la encuesta en la base de datos
     const { data: encuesta, error: buscarError } = await supabase
       .from("encuestas_visitas")
-      .select("id, estado")
+      .select("id, estado, numero_cuenta, titular, telefono")
       .eq("token", token)
       .single();
 
@@ -56,13 +56,18 @@ export async function POST(
       );
     }
 
-    // Actualizar la encuesta con las respuestas
+    // Actualizar la encuesta con las respuestas y la información del usuario que respondió
+    // Esto asegura que sabemos quién respondió la encuesta (puede ser diferente si se modificó el teléfono)
     const { error: updateError } = await supabase
       .from("encuestas_visitas")
       .update({
         estado: "completada",
         respuestas: respuestas,
         completada_en: new Date().toISOString(),
+        // Guardar información del usuario que respondió (puede ser diferente si se modificó el teléfono)
+        numero_cuenta: encuesta.numero_cuenta,
+        titular: encuesta.titular,
+        telefono: encuesta.telefono, // Este es el teléfono al que se envió (puede haber sido modificado por el técnico)
       })
       .eq("token", token);
 
