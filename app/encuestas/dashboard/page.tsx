@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,13 +17,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   Loader2,
-  Lock,
   BarChart3,
   Users,
   Star,
@@ -35,10 +42,8 @@ import {
   PieChart,
   Activity,
   Award,
-  Sparkles,
+  MessageSquare,
 } from "lucide-react";
-import Image from "next/image";
-import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import {
   BarChart,
@@ -57,8 +62,6 @@ import {
   AreaChart,
 } from "recharts";
 import { motion } from "framer-motion";
-
-const ADMIN_PASSWORD = "Ingresonoticias2026.";
 
 interface Encuesta {
   id: number;
@@ -106,32 +109,17 @@ const CHART_COLORS = [
 ];
 
 export default function EncuestasDashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [authError, setAuthError] = useState<string | null>(null);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [encuestas, setEncuestas] = useState<Encuesta[]>([]);
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterServicio, setFilterServicio] = useState<string>("all");
+  const [comentarioSeleccionado, setComentarioSeleccionado] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      cargarDatos();
-    }
-  }, [isAuthenticated]);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-
-    if (passwordInput === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setPasswordInput("");
-    } else {
-      setAuthError("Contraseña incorrecta");
-    }
-  };
+    cargarDatos();
+  }, []);
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -242,138 +230,6 @@ export default function EncuestasDashboardPage() {
         ((metricas.resolucion?.si_completamente || 0) / metricas.total) * 100
       )
     : 0;
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 relative overflow-hidden">
-        {/* Logo de fondo */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-5 dark:opacity-10 pointer-events-none">
-          <Image
-            src="/images/logocoopnuevo.png"
-            alt="Logo fondo"
-            width={600}
-            height={600}
-            className="object-contain"
-          />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md relative z-10"
-        >
-          <Card className="shadow-2xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
-            <CardHeader className="text-center pb-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="flex justify-center mb-4"
-              >
-                <div className="relative">
-                  <motion.div
-                    animate={{
-                      rotate: [0, 10, -10, 10, 0],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      repeatDelay: 3,
-                    }}
-                  >
-                    <Image
-                      src="/images/logocoopnuevo.png"
-                      alt="Cooperativa La Dormida"
-                      width={80}
-                      height={80}
-                      className="mx-auto"
-                    />
-                  </motion.div>
-                  <motion.div
-                    className="absolute -top-2 -right-2"
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
-                    <Sparkles className="h-6 w-6 text-yellow-400" />
-                  </motion.div>
-                </div>
-              </motion.div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Acceso al Dashboard
-              </CardTitle>
-              <p className="text-sm text-gray-500 mt-2">
-                Ingresa la contraseña para acceder al panel de métricas de encuestas
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      type="password"
-                      placeholder="Ingresa la contraseña"
-                      value={passwordInput}
-                      onChange={(e) => setPasswordInput(e.target.value)}
-                      className="w-full pl-10 h-12 text-lg"
-                      autoFocus
-                    />
-                  </div>
-                </motion.div>
-                <AnimatePresence>
-                  {authError && (
-                    <motion.p
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="text-sm text-red-500 text-center bg-red-50 dark:bg-red-900/20 p-2 rounded"
-                    >
-                      {authError}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="mr-2"
-                      >
-                        <Lock className="h-5 w-5" />
-                      </motion.div>
-                    ) : (
-                      "Ingresar"
-                    )}
-                  </Button>
-                </motion.div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -798,33 +654,34 @@ export default function EncuestasDashboardPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Fecha</TableHead>
-                          <TableHead>Titular</TableHead>
-                          <TableHead>Cuenta</TableHead>
-                          <TableHead>Servicio</TableHead>
-                          <TableHead>Técnico</TableHead>
-                          <TableHead>Calificación</TableHead>
-                          <TableHead>Tiempo</TableHead>
-                          <TableHead>Profesionalismo</TableHead>
-                          <TableHead>Resolución</TableHead>
-                          <TableHead>Amabilidad</TableHead>
+                        <TableRow className="bg-gray-50 dark:bg-gray-800/50 border-b-2">
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Fecha</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Titular</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Cuenta</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Servicio</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Técnico</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs text-center">Calificación</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Tiempo</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Profesionalismo</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Resolución</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs text-center">Amabilidad</TableHead>
+                          <TableHead className="font-semibold text-gray-900 dark:text-gray-100 py-2 text-xs">Comentarios</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {encuestasFiltradas.length === 0 ? (
                           <TableRow>
                             <TableCell
-                              colSpan={10}
+                              colSpan={11}
                               className="text-center py-12 text-muted-foreground"
                             >
                               <div className="flex flex-col items-center gap-2">
-                                <FileText className="h-12 w-12 text-gray-300" />
-                                <p>No hay encuestas para mostrar</p>
+                                <FileText className="h-12 w-12 text-gray-300 dark:text-gray-600" />
+                                <p className="text-sm font-medium">No hay encuestas para mostrar</p>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -834,69 +691,125 @@ export default function EncuestasDashboardPage() {
                             return (
                               <TableRow
                                 key={encuesta.id}
-                                className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                className="border-b hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors"
                               >
-                                <TableCell className="text-sm font-medium">
-                                  {encuesta.completadaEn
-                                    ? format(
+                                <TableCell className="py-2 align-top">
+                                  <div className="text-xs font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    {encuesta.completadaEn
+                                      ? format(
+                                          new Date(encuesta.completadaEn),
+                                          "dd/MM/yyyy"
+                                        )
+                                      : "-"}
+                                  </div>
+                                  {encuesta.completadaEn && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      {format(
                                         new Date(encuesta.completadaEn),
-                                        "dd/MM/yyyy HH:mm"
-                                      )
-                                    : "-"}
+                                        "HH:mm"
+                                      )}
+                                    </div>
+                                  )}
                                 </TableCell>
-                                <TableCell className="font-medium">
-                                  {encuesta.titular}
+                                <TableCell className="py-2 align-top">
+                                  <div className="text-xs font-medium text-gray-900 dark:text-gray-100 max-w-[150px] truncate" title={encuesta.titular}>
+                                    {encuesta.titular}
+                                  </div>
                                 </TableCell>
-                                <TableCell>{encuesta.numeroCuenta}</TableCell>
-                                <TableCell>
-                                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+                                <TableCell className="py-2 align-top">
+                                  <span className="text-xs font-mono text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                                    {encuesta.numeroCuenta}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="py-2 align-top">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
                                     {getServicioLabel(encuesta.tipoServicio)}
                                   </span>
                                 </TableCell>
-                                <TableCell className="text-sm font-medium">
-                                  {encuesta.tecnico || "-"}
+                                <TableCell className="py-2 align-top">
+                                  <div className="text-xs font-medium text-gray-800 dark:text-gray-200 max-w-[120px] truncate" title={encuesta.tecnico || ""}>
+                                    {encuesta.tecnico || (
+                                      <span className="text-gray-400 italic">-</span>
+                                    )}
+                                  </div>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="py-2 text-center align-top">
                                   {respuestas.calificacionGeneral ? (
-                                    <div className="flex items-center gap-1">
-                                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                                      <span className="font-semibold">
+                                    <div className="flex items-center justify-center gap-1">
+                                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                      <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
                                         {respuestas.calificacionGeneral}
                                       </span>
                                     </div>
                                   ) : (
-                                    "-"
+                                    <span className="text-gray-400 text-xs">-</span>
                                   )}
                                 </TableCell>
-                                <TableCell className="text-sm">
-                                  {respuestas.puntualidad
-                                    ? getTiempoLabel(respuestas.puntualidad)
-                                    : "-"}
+                                <TableCell className="py-2 align-top">
+                                  {respuestas.puntualidad ? (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-nowrap">
+                                      {getTiempoLabel(respuestas.puntualidad)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
                                 </TableCell>
-                                <TableCell className="text-sm">
-                                  {respuestas.profesionalismo
-                                    ? getProfesionalismoLabel(
-                                        respuestas.profesionalismo
-                                      )
-                                    : "-"}
+                                <TableCell className="py-2 align-top">
+                                  {respuestas.profesionalismo ? (
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                      {getProfesionalismoLabel(respuestas.profesionalismo)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
                                 </TableCell>
-                                <TableCell className="text-sm">
-                                  {respuestas.resolucionProblema
-                                    ? getResolucionLabel(
-                                        respuestas.resolucionProblema
-                                      )
-                                    : "-"}
+                                <TableCell className="py-2 align-top">
+                                  {respuestas.resolucionProblema ? (
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
+                                      respuestas.resolucionProblema === "si_completamente"
+                                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                                        : respuestas.resolucionProblema === "si_parcialmente"
+                                        ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
+                                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                                    }`}>
+                                      {getResolucionLabel(respuestas.resolucionProblema)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="py-2 text-center align-top">
                                   {respuestas.amabilidad ? (
-                                    <div className="flex items-center gap-1">
-                                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                                      <span className="font-semibold">
+                                    <div className="flex items-center justify-center gap-1">
+                                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                      <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
                                         {respuestas.amabilidad}
                                       </span>
                                     </div>
                                   ) : (
-                                    "-"
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="py-2 align-top max-w-[180px]">
+                                  {respuestas.comentarios && respuestas.comentarios.trim() ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setComentarioSeleccionado(respuestas.comentarios)}
+                                      className="flex items-start gap-1 w-full text-left hover:opacity-80 transition-opacity cursor-pointer group"
+                                    >
+                                      <MessageSquare className="h-3 w-3 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0 group-hover:text-blue-600 dark:group-hover:text-blue-300" />
+                                      <p className="text-xs text-gray-700 dark:text-gray-300 leading-tight break-words group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" style={{
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        maxHeight: '2rem'
+                                      }}>
+                                        {respuestas.comentarios}
+                                      </p>
+                                    </button>
+                                  ) : (
+                                    <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
                                   )}
                                 </TableCell>
                               </TableRow>
@@ -912,6 +825,29 @@ export default function EncuestasDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Dialog para ver comentario completo */}
+      <Dialog open={!!comentarioSeleccionado} onOpenChange={(open) => !open && setComentarioSeleccionado(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              Comentario del Usuario
+            </DialogTitle>
+            <DialogDescription>
+              Comentario adicional sobre la visita técnica
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {comentarioSeleccionado}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
