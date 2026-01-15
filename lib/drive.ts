@@ -130,9 +130,18 @@ function usesOldStructure(month: string, year: string): boolean {
 }
 
 /**
+ * Capitaliza la primera letra del mes (ej: "septiembre" -> "Septiembre")
+ */
+function capitalizeMonth(month: string): string {
+  if (!month) return month;
+  return month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+}
+
+/**
  * Obtiene el nombre de la carpeta según el mes y tipo
- * Estructura antigua: "facturas-{mes}-{año}" (agosto, septiembre, octubre, diciembre 2025 y todo 2026+)
+ * Estructura antigua: "facturas-{Mes}-{año}" (septiembre, octubre, noviembre, diciembre 2025 y todo 2026+)
  * Estructura nueva: "servicios-{mes}-{año}" o "electricidad-{mes}-{año}" (solo noviembre 2025)
+ * NOTA: Las carpetas ahora están dentro de "Ordenadores > MI PC > Facturas"
  */
 function getFolderName(
   month: string,
@@ -140,8 +149,9 @@ function getFolderName(
   type: "servicios" | "electricidad"
 ): string | null {
   if (usesOldStructure(month, year)) {
-    // Estructura antigua: una sola carpeta "facturas-{mes}-{año}"
-    return `facturas-${month}-${year}`;
+    // Estructura antigua: una sola carpeta "facturas-{Mes}-{año}" (con mayúscula inicial en el mes)
+    const capitalizedMonth = capitalizeMonth(month);
+    return `facturas-${capitalizedMonth}-${year}`;
   } else {
     // Estructura nueva: carpetas separadas por tipo (solo noviembre 2025)
     return `${type}-${month}-${year}`;
@@ -149,16 +159,52 @@ function getFolderName(
 }
 
 /**
- * Busca una carpeta en Google Drive por nombre
- * También intenta variantes con punto en lugar de guion (ej: "facturas-diciembre.2025")
+ * Busca la carpeta padre "Facturas" dentro de "Ordenadores > MI PC > Facturas"
  */
-async function findFolderByName(folderName: string): Promise<string | null> {
+async function findFacturasParentFolder(): Promise<string | null> {
   try {
     const drive = await getDriveClient();
     
+    // Buscar la carpeta "Facturas" (puede haber varias, pero buscamos la que está en la ruta correcta)
+    let response = await drive.files.list({
+      q: `mimeType='application/vnd.google-apps.folder' and name='Facturas' and trashed=false`,
+      fields: "files(id, name)",
+    });
+    
+    if (response.data.files && response.data.files.length > 0) {
+      // Si hay múltiples carpetas "Facturas", intentar encontrar la correcta
+      // Por ahora, devolvemos la primera (asumiendo que solo hay una en esa ubicación)
+      // Si hay problemas, se puede mejorar buscando por la jerarquía completa
+      console.log(`[DRIVE] ✅ Carpeta padre "Facturas" encontrada`);
+      return response.data.files[0].id!;
+    }
+
+    console.log(`[DRIVE] ⚠️ Carpeta padre "Facturas" no encontrada`);
+    return null;
+  } catch (error) {
+    console.error(`[DRIVE] ❌ Error buscando carpeta padre "Facturas":`, error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+/**
+ * Busca una carpeta en Google Drive por nombre dentro de una carpeta padre
+ * También intenta variantes con punto en lugar de guion (ej: "facturas-diciembre.2025")
+ */
+async function findFolderByName(folderName: string, parentFolderId?: string | null): Promise<string | null> {
+  try {
+    const drive = await getDriveClient();
+    
+    // Construir la query: buscar carpeta con el nombre específico
+    // Si se especifica parentFolderId, buscar solo dentro de esa carpeta
+    let query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`;
+    if (parentFolderId) {
+      query += ` and '${parentFolderId}' in parents`;
+    }
+    
     // Intentar primero con el nombre exacto
     let response = await drive.files.list({
-      q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
+      q: query,
       fields: "files(id, name)",
     });
     
@@ -169,8 +215,13 @@ async function findFolderByName(folderName: string): Promise<string | null> {
     // Si no se encuentra, intentar con punto en lugar de guion (fallback para diciembre.2025)
     const variantName = folderName.replace(/-(\d{4})$/, '.$1'); // Reemplaza "-2025" con ".2025"
     if (variantName !== folderName) {
+      let variantQuery = `mimeType='application/vnd.google-apps.folder' and name='${variantName}' and trashed=false`;
+      if (parentFolderId) {
+        variantQuery += ` and '${parentFolderId}' in parents`;
+      }
+      
       response = await drive.files.list({
-        q: `mimeType='application/vnd.google-apps.folder' and name='${variantName}' and trashed=false`,
+        q: variantQuery,
         fields: "files(id, name)",
       });
       
@@ -294,13 +345,21 @@ export async function findInvoiceInDrive(
 
     console.log(`[DRIVE] 🔍 Buscando cuenta ${accountNumber} en ${targetMonth} ${targetYear}`);
 
+    // Primero buscar la carpeta padre "Facturas" dentro de "Ordenadores > MI PC > Facturas"
+    const facturasParentId = await findFacturasParentFolder();
+    if (!facturasParentId) {
+      console.log(`[DRIVE] ⚠️ No se encontró la carpeta padre "Facturas"`);
+      // Continuar de todas formas, por si acaso las carpetas están en otro lugar
+    }
+
     // Determinar qué estructura usar
     const isOldStructure = usesOldStructure(targetMonth, targetYear);
 
     if (isOldStructure) {
-      // Estructura antigua: buscar en carpeta "facturas-{mes}-{año}"
-      const folderName = `facturas-${targetMonth}-${targetYear}`;
-      const folderId = await findFolderByName(folderName);
+      // Estructura antigua: buscar en carpeta "facturas-{Mes}-{año}" dentro de "Facturas" (con mayúscula inicial en el mes)
+      const capitalizedMonth = capitalizeMonth(targetMonth);
+      const folderName = `facturas-${capitalizedMonth}-${targetYear}`;
+      const folderId = await findFolderByName(folderName, facturasParentId);
 
       if (folderId) {
         console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
@@ -336,7 +395,7 @@ export async function findInvoiceInDrive(
         const folderName = getFolderName(targetMonth, targetYear, type);
         if (!folderName) continue;
 
-        const folderId = await findFolderByName(folderName);
+        const folderId = await findFolderByName(folderName, facturasParentId);
 
         if (folderId) {
           console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
@@ -365,10 +424,10 @@ export async function findInvoiceInDrive(
 
     // Si no se encuentra en el mes especificado, buscar en meses anteriores
     // Si el usuario especificó mes/año, solo buscar en ese mes. Si no, buscar hasta 6 meses atrás
-    // (desde agosto 2025 en adelante según las carpetas disponibles)
+    // (desde septiembre 2025 en adelante según las carpetas disponibles)
     if (!month && !year) {
       console.log(`[DRIVE] 🔍 Buscando en meses anteriores...`);
-      // Buscar hasta 6 meses atrás para cubrir desde agosto 2025
+      // Buscar hasta 6 meses atrás para cubrir desde septiembre 2025
       const maxMonthsBack = 6;
       for (let i = 1; i <= maxMonthsBack; i++) {
         const pastDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -380,9 +439,10 @@ export async function findInvoiceInDrive(
         const isPastOldStructure = usesOldStructure(pastMonth, pastYear);
 
         if (isPastOldStructure) {
-          // Estructura antigua: buscar en carpeta "facturas-{mes}-{año}"
-          const folderName = `facturas-${pastMonth}-${pastYear}`;
-          const folderId = await findFolderByName(folderName);
+          // Estructura antigua: buscar en carpeta "facturas-{Mes}-{año}" dentro de "Facturas" (con mayúscula inicial en el mes)
+          const capitalizedPastMonth = capitalizeMonth(pastMonth);
+          const folderName = `facturas-${capitalizedPastMonth}-${pastYear}`;
+          const folderId = await findFolderByName(folderName, facturasParentId);
 
           if (folderId) {
             console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
@@ -413,7 +473,7 @@ export async function findInvoiceInDrive(
             const folderName = getFolderName(pastMonth, pastYear, type);
             if (!folderName) continue;
 
-            const folderId = await findFolderByName(folderName);
+            const folderId = await findFolderByName(folderName, facturasParentId);
 
             if (folderId) {
               console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
