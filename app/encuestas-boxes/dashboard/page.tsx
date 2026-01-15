@@ -175,6 +175,84 @@ export default function EncuestasBoxesDashboardPage() {
       }))
     : [];
 
+  // Datos para gráfico de calificaciones promedio por empleado
+  const datosCalificacionPorEmpleado = metricas?.calificacionPromedioPorEmpleado
+    ? Object.entries(metricas.calificacionPromedioPorEmpleado)
+        .map(([name, value]) => ({
+          name,
+          value: parseFloat(value.toFixed(1)),
+          fill: COLORS.primary,
+        }))
+        .sort((a, b) => b.value - a.value)
+    : [];
+
+  // Datos para gráfico de amabilidad promedio por empleado
+  const datosAmabilidadPorEmpleado = metricas?.amabilidadPromedioPorEmpleado
+    ? Object.entries(metricas.amabilidadPromedioPorEmpleado)
+        .map(([name, value]) => ({
+          name,
+          value: parseFloat(value.toFixed(1)),
+          fill: COLORS.secondary,
+        }))
+        .sort((a, b) => b.value - a.value)
+    : [];
+
+  // Datos para gráfico de tiempo de espera (agregado)
+  const datosTiempoEspera = metricas?.tiempoEsperaPorEmpleado
+    ? Object.entries(metricas.tiempoEsperaPorEmpleado).reduce(
+        (acc, [empleado, tiempos]) => {
+          Object.entries(tiempos).forEach(([tiempo, count]) => {
+            const label = getTiempoEsperaLabel(tiempo);
+            if (!acc[label]) {
+              acc[label] = 0;
+            }
+            acc[label] += count;
+          });
+          return acc;
+        },
+        {} as Record<string, number>
+      )
+    : {};
+
+  const datosTiempoEsperaArray = Object.entries(datosTiempoEspera).map(
+    ([name, value]) => ({
+      name,
+      value,
+      fill:
+        CHART_COLORS[
+          Object.keys(datosTiempoEspera).indexOf(name) % CHART_COLORS.length
+        ],
+    })
+  );
+
+  // Datos para gráfico de resolución (agregado)
+  const datosResolucion = metricas?.resolucionPorEmpleado
+    ? Object.entries(metricas.resolucionPorEmpleado).reduce(
+        (acc, [empleado, resoluciones]) => {
+          Object.entries(resoluciones).forEach(([resolucion, count]) => {
+            const label = getResolucionLabel(resolucion);
+            if (!acc[label]) {
+              acc[label] = 0;
+            }
+            acc[label] += count;
+          });
+          return acc;
+        },
+        {} as Record<string, number>
+      )
+    : {};
+
+  const datosResolucionArray = Object.entries(datosResolucion).map(
+    ([name, value]) => ({
+      name,
+      value,
+      fill:
+        CHART_COLORS[
+          Object.keys(datosResolucion).indexOf(name) % CHART_COLORS.length
+        ],
+    })
+  );
+
   const encuestasFiltradas = encuestas.filter((encuesta) => {
     const matchSearch = encuesta.nombre_empleado
       .toLowerCase()
@@ -482,13 +560,309 @@ export default function EncuestasBoxesDashboardPage() {
                   </CardContent>
                 </Card>
               </motion.div>
+
+              {/* Gráfico de calificaciones promedio por empleado */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Card className="border shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-amber-600" />
+                      Calificación Promedio por Empleado
+                    </CardTitle>
+                    <CardDescription>
+                      Calificación promedio de cada empleado (de 5.0)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {datosCalificacionPorEmpleado.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                          data={datosCalificacionPorEmpleado}
+                          layout="vertical"
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            className="stroke-gray-200 dark:stroke-gray-700"
+                          />
+                          <XAxis
+                            type="number"
+                            domain={[0, 5]}
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
+                          />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={100}
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
+                          />
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value.toFixed(1)}/5.0
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Bar
+                            dataKey="value"
+                            fill={COLORS.warning}
+                            radius={[0, 8, 8, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[300px] text-gray-500">
+                        No hay datos disponibles
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Gráfico de amabilidad promedio por empleado */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                <Card className="border shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-purple-600" />
+                      Amabilidad Promedio por Empleado
+                    </CardTitle>
+                    <CardDescription>
+                      Amabilidad promedio de cada empleado (de 5.0)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {datosAmabilidadPorEmpleado.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                          data={datosAmabilidadPorEmpleado}
+                          layout="vertical"
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            className="stroke-gray-200 dark:stroke-gray-700"
+                          />
+                          <XAxis
+                            type="number"
+                            domain={[0, 5]}
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
+                          />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={100}
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
+                          />
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value.toFixed(1)}/5.0
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Bar
+                            dataKey="value"
+                            fill={COLORS.secondary}
+                            radius={[0, 8, 8, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[300px] text-gray-500">
+                        No hay datos disponibles
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Gráfico de tiempo de espera */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+              >
+                <Card className="border shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Distribución de Tiempo de Espera
+                    </CardTitle>
+                    <CardDescription>
+                      Cantidad de encuestas por tiempo de espera
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {datosTiempoEsperaArray.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={datosTiempoEsperaArray}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {datosTiempoEsperaArray.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={CHART_COLORS[index % CHART_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[300px] text-gray-500">
+                        No hay datos disponibles
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Gráfico de resolución de problemas */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 }}
+              >
+                <Card className="border shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      Resolución de Consultas
+                    </CardTitle>
+                    <CardDescription>
+                      Distribución de resolución de consultas/problemas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {datosResolucionArray.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={datosResolucionArray}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {datosResolucionArray.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={CHART_COLORS[index % CHART_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[300px] text-gray-500">
+                        No hay datos disponibles
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
 
             {/* Tabla de encuestas */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 1.1 }}
             >
               <Card className="border shadow-lg">
                 <CardHeader>
