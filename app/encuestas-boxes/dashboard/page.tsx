@@ -31,7 +31,6 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   Loader2,
@@ -367,16 +366,41 @@ export default function EncuestasBoxesDashboardPage() {
                     {datosPorEmpleado.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={datosPorEmpleado}>
-                          <CartesianGrid strokeDasharray="3 3" />
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
                           <XAxis
                             dataKey="name"
                             angle={-45}
                             textAnchor="end"
                             height={100}
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
                           />
-                          <YAxis />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="value" fill={COLORS.primary} />
+                          <YAxis 
+                            className="text-xs"
+                            tick={{ fill: "currentColor" }}
+                          />
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Bar dataKey="value" fill={COLORS.primary} radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
@@ -427,7 +451,27 @@ export default function EncuestasBoxesDashboardPage() {
                               />
                             ))}
                           </Pie>
-                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                return (
+                                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid gap-2">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-sm font-medium">
+                                          {payload[0].payload.name}
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                          {payload[0].value}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
                         </RechartsPieChart>
                       </ResponsiveContainer>
                     ) : (
