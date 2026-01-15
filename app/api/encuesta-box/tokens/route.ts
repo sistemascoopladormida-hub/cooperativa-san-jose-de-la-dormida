@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const tokensFormateados = (tokens || []).map((token: any) => {
       const empleado = token.empleados_boxes as any;
       const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        process.env.NEXT_PUBLIC_BASE_URL || "https://cooperativaladormida.com";
       const qrUrl = `${baseUrl}/encuesta-box/${token.token}`;
 
       return {

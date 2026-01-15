@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generar la URL completa para el QR
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://cooperativaladormida.com";
     const qrUrl = `${baseUrl}/encuesta-box/${token}`;
 
     return NextResponse.json({
