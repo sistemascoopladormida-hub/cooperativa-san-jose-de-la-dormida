@@ -306,7 +306,7 @@ export default function EncuestasBoxesAdminPage() {
                               <SelectValue placeholder="Selecciona un box" />
                             </SelectTrigger>
                             <SelectContent>
-                              {[1, 2, 3, 4].map((num) => (
+                              {[1, 2, 3, 4, 5].map((num) => (
                                 <SelectItem key={num} value={num.toString()}>
                                   Box {num}
                                 </SelectItem>
