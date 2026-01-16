@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Cloud } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Cloud, Pill } from "lucide-react"
 import { motion } from "framer-motion"
 import WeatherModal from "@/components/clima/weather-modal"
 
@@ -229,6 +229,258 @@ function ServicesCarousel({ services }: { services: Service[] }) {
         ))}
       </motion.div>
     </div>
+  )
+}
+
+// Componente para el Turnero de Farmacias con actualización automática
+function PharmacySchedule() {
+  const [currentDate, setCurrentDate] = useState(new Date())
+
+  // Actualizar la fecha cada minuto para detectar cambios de día
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDate(new Date())
+    }, 60000) // Actualizar cada minuto
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Función para parsear fechas en formato "DD de mes" (ej: "16 de enero")
+  const parsePharmacyDate = (dateString: string): Date => {
+    const months: { [key: string]: number } = {
+      'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
+      'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
+      'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+    }
+
+    const parts = dateString.toLowerCase().trim().split(' de ')
+    if (parts.length !== 2) {
+      // Si el formato no es correcto, retornar fecha inválida
+      return new Date(NaN)
+    }
+
+    const day = parseInt(parts[0])
+    const monthName = parts[1]?.trim()
+    const month = months[monthName] ?? -1
+    
+    if (month === -1 || isNaN(day)) {
+      return new Date(NaN)
+    }
+    
+    // Usar el año actual
+    const year = currentDate.getFullYear()
+    
+    // Crear fecha y normalizar (para evitar problemas con zonas horarias)
+    const date = new Date(year, month, day)
+    date.setHours(12, 0, 0, 0) // Establecer mediodía para evitar problemas de zona horaria
+    
+    return date
+  }
+
+  // Función para comparar si una fecha es hoy
+  const isToday = (dateString: string): boolean => {
+    const pharmacyDate = parsePharmacyDate(dateString)
+    
+    // Verificar si la fecha es válida
+    if (isNaN(pharmacyDate.getTime())) {
+      return false
+    }
+    
+    const today = new Date()
+    today.setHours(12, 0, 0, 0) // Normalizar a mediodía para comparación
+    
+    return (
+      pharmacyDate.getDate() === today.getDate() &&
+      pharmacyDate.getMonth() === today.getMonth() &&
+      pharmacyDate.getFullYear() === today.getFullYear()
+    )
+  }
+
+  const pharmacySchedule = [
+    { date: "16 de enero", pharmacy: "Farmacia Robledo" },
+    { date: "17 de enero", pharmacy: "Farmacia Centro" },
+    { date: "18 de enero", pharmacy: "Farmacia Social" },
+    { date: "19 de enero", pharmacy: "Farmacia Carreño" },
+    { date: "20 de enero", pharmacy: "Farmacia Robledo" },
+    { date: "21 de enero", pharmacy: "Farmacia Centro" },
+  ]
+
+  return (
+    <motion.section 
+      className="py-12 lg:py-16 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100/50 relative overflow-hidden border-y-2 border-pink-200/30"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-5">
+        <motion.div 
+          className="absolute top-0 right-0 w-64 h-64 bg-pink-400 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-0 left-0 w-64 h-64 bg-rose-400 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 rounded-full mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Pill className="w-4 h-4 text-pink-600" />
+            </motion.div>
+            <span className="text-sm font-semibold text-pink-700">Turnero de Farmacias</span>
+          </motion.div>
+          <motion.h2 
+            className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            Farmacias de Turno
+          </motion.h2>
+          <motion.p 
+            className="text-sm text-gray-600"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Consulta qué farmacia está de turno cada día
+          </motion.p>
+        </motion.div>
+
+        {/* Pharmacy Schedule Grid */}
+        <motion.div 
+          className="max-w-5xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          key={currentDate.getTime()} // Forzar re-render cuando cambia la fecha
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            {pharmacySchedule.map((item, index) => {
+              const today = isToday(item.date)
+              const isSocial = item.pharmacy === "Farmacia Social"
+              
+              return (
+                <motion.div
+                  key={`${item.date}-${index}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.4 + index * 0.05 }}
+                  whileHover={{ scale: 1.05, y: -3 }}
+                  className="group"
+                >
+                  <Card 
+                    className={`h-full border-2 transition-all duration-300 ${
+                      today 
+                        ? "border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 shadow-lg ring-2 ring-pink-300/50" 
+                        : isSocial
+                        ? "border-pink-300 bg-white hover:border-pink-400 hover:shadow-md"
+                        : "border-pink-200 bg-white hover:border-pink-300 hover:shadow-md"
+                    }`}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="mb-3 flex justify-center">
+                        <motion.div
+                          className={`p-2.5 rounded-xl ${
+                            today
+                              ? "bg-gradient-to-br from-pink-400 to-rose-500"
+                              : isSocial
+                              ? "bg-gradient-to-br from-pink-200 to-rose-300"
+                              : "bg-gradient-to-br from-pink-100 to-rose-200"
+                          } group-hover:scale-110 transition-transform duration-300`}
+                          whileHover={{ rotate: [0, -10, 10, 0] }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Pill className={`w-5 h-5 ${
+                            today ? "text-white" : "text-pink-600"
+                          }`} />
+                        </motion.div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className={`text-xs font-semibold ${
+                          today ? "text-pink-700" : "text-gray-500"
+                        }`}>
+                          {item.date}
+                        </div>
+                        <div className={`text-sm font-bold leading-tight ${
+                          today ? "text-pink-800" : "text-gray-800"
+                        }`}>
+                          {item.pharmacy}
+                        </div>
+                      </div>
+                      {today && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.5 + index * 0.05 }}
+                          className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-pink-500 text-white text-xs font-semibold rounded-full"
+                        >
+                          <Clock className="w-3 h-3" />
+                          Hoy
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        {/* Info note */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="text-center mt-6"
+        >
+          <p className="text-xs text-gray-600 flex items-center justify-center gap-1">
+            <Heart className="w-3 h-3 text-pink-500" />
+            <span>Información actualizada diariamente</span>
+          </p>
+        </motion.div>
+      </div>
+    </motion.section>
   )
 }
 
@@ -836,6 +1088,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Pharmacy Schedule Section - Compact and Visible with Auto-Update */}
+      <PharmacySchedule />
 
       {/* Services Section - Enhanced with Framer Motion */}
       <motion.section 
