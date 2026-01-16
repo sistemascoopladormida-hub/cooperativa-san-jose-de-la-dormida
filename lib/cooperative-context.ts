@@ -132,20 +132,12 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Segundo vencimiento: 20 de enero
 
 TURNERO DE FARMACIAS:
-- 1 de enero: Farmacia Carreño
-- 2 de enero: Farmacia Social
-- 3 de enero: Farmacia Carreño
-- 4 de enero: Farmacia Robledo
-- 5 de enero: Farmacia Centro
-- 6 de enero: Farmacia Social
-- 7 de enero: Farmacia Carreño
-- 8 de enero: Farmacia Robledo
-- 9 de enero: Farmacia Centro
-- 10 de enero: Farmacia Social
-- 11 de enero: Farmacia Carreño
-- 12 de enero: Farmacia Robledo
-- 13 de enero: Farmacia Centro
-- 14 de enero: Farmacia Social
+- 16 de enero: Farmacia Robledo
+- 17 de enero: Farmacia Centro
+- 18 de enero: Farmacia Social
+- 19 de enero: Farmacia Carreño
+- 20 de enero: Farmacia Robledo
+- 21 de enero: Farmacia Centro
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
