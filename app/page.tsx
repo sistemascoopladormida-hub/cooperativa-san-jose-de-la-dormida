@@ -307,7 +307,7 @@ function PharmacySchedule() {
 
   return (
     <motion.section 
-      className="py-12 lg:py-16 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100/50 relative overflow-hidden border-y-2 border-pink-200/30"
+      className="py-12 lg:py-16 bg-gradient-to-br from-sky-50 via-cyan-50 to-sky-100/50 relative overflow-hidden border-y-2 border-sky-200/30"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -316,7 +316,7 @@ function PharmacySchedule() {
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 
-          className="absolute top-0 right-0 w-64 h-64 bg-pink-400 rounded-full blur-3xl"
+          className="absolute top-0 right-0 w-64 h-64 bg-sky-400 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 20, 0],
@@ -328,7 +328,7 @@ function PharmacySchedule() {
           }}
         />
         <motion.div 
-          className="absolute bottom-0 left-0 w-64 h-64 bg-rose-400 rounded-full blur-3xl"
+          className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-400 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
             x: [0, -20, 0],
@@ -350,7 +350,7 @@ function PharmacySchedule() {
           transition={{ duration: 0.6 }}
         >
           <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 rounded-full mb-4"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-100 rounded-full mb-4"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
@@ -360,9 +360,9 @@ function PharmacySchedule() {
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
-              <Pill className="w-4 h-4 text-pink-600" />
+              <Pill className="w-4 h-4 text-sky-600" />
             </motion.div>
-            <span className="text-sm font-semibold text-pink-700">Turnero de Farmacias</span>
+            <span className="text-sm font-semibold text-sky-700">Turnero de Farmacias</span>
           </motion.div>
           <motion.h2 
             className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
@@ -411,10 +411,10 @@ function PharmacySchedule() {
                   <Card 
                     className={`h-full border-2 transition-all duration-300 ${
                       today 
-                        ? "border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 shadow-lg ring-2 ring-pink-300/50" 
+                        ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50" 
                         : isSocial
-                        ? "border-pink-300 bg-white hover:border-pink-400 hover:shadow-md"
-                        : "border-pink-200 bg-white hover:border-pink-300 hover:shadow-md"
+                        ? "border-sky-300 bg-white hover:border-sky-400 hover:shadow-md"
+                        : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
                     }`}
                   >
                     <CardContent className="p-4 text-center">
@@ -422,27 +422,27 @@ function PharmacySchedule() {
                         <motion.div
                           className={`p-2.5 rounded-xl ${
                             today
-                              ? "bg-gradient-to-br from-pink-400 to-rose-500"
+                              ? "bg-gradient-to-br from-sky-400 to-cyan-500"
                               : isSocial
-                              ? "bg-gradient-to-br from-pink-200 to-rose-300"
-                              : "bg-gradient-to-br from-pink-100 to-rose-200"
+                              ? "bg-gradient-to-br from-sky-200 to-cyan-300"
+                              : "bg-gradient-to-br from-sky-100 to-cyan-200"
                           } group-hover:scale-110 transition-transform duration-300`}
                           whileHover={{ rotate: [0, -10, 10, 0] }}
                           transition={{ duration: 0.5 }}
                         >
                           <Pill className={`w-5 h-5 ${
-                            today ? "text-white" : "text-pink-600"
+                            today ? "text-white" : "text-sky-600"
                           }`} />
                         </motion.div>
                       </div>
                       <div className="space-y-1.5">
                         <div className={`text-xs font-semibold ${
-                          today ? "text-pink-700" : "text-gray-500"
+                          today ? "text-sky-700" : "text-gray-500"
                         }`}>
                           {item.date}
                         </div>
                         <div className={`text-sm font-bold leading-tight ${
-                          today ? "text-pink-800" : "text-gray-800"
+                          today ? "text-sky-800" : "text-gray-800"
                         }`}>
                           {item.pharmacy}
                         </div>
@@ -452,7 +452,7 @@ function PharmacySchedule() {
                           initial={{ opacity: 0, scale: 0 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.5 + index * 0.05 }}
-                          className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-pink-500 text-white text-xs font-semibold rounded-full"
+                          className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-sky-500 text-white text-xs font-semibold rounded-full"
                         >
                           <Clock className="w-3 h-3" />
                           Hoy
@@ -475,7 +475,7 @@ function PharmacySchedule() {
           className="text-center mt-6"
         >
           <p className="text-xs text-gray-600 flex items-center justify-center gap-1">
-            <Heart className="w-3 h-3 text-pink-500" />
+            <Heart className="w-3 h-3 text-sky-500" />
             <span>Información actualizada diariamente</span>
           </p>
         </motion.div>
