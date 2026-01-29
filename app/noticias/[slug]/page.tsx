@@ -236,30 +236,46 @@ export default async function NoticiaIndividual({ params }: Props) {
               <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 uppercase tracking-wide">
                 <ArrowRight className="w-4 h-4 text-coop-green" /> Noticias relacionadas
               </h2>
-              <ul className="space-y-3">
-                {related.map((r) => (
-                  <li key={r.slug}>
-                    <Link
-                      href={`/noticias/${r.slug}`}
-                      className="group block"
-                    >
-                      <p className="text-sm font-medium text-gray-800 group-hover:text-coop-blue transition-colors">
-                        {r.title}
-                      </p>
-                      <p className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-                        <span>
-                          {new Date(r.date).toLocaleDateString("es-AR")}
-                        </span>
-                        {r.readTime && (
-                          <>
-                            <span className="w-1 h-1 rounded-full bg-gray-300" />
-                            <span>{r.readTime}</span>
-                          </>
+              <ul className="space-y-4">
+                {related.map((r) => {
+                  const relatedImage = "images" in r && r.images?.length ? r.images[0] : r.image
+                  return (
+                    <li key={r.slug}>
+                      <Link
+                        href={`/noticias/${r.slug}`}
+                        className="group flex gap-3"
+                      >
+                        {relatedImage && (
+                          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                            <Image
+                              src={relatedImage}
+                              alt={r.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-200"
+                              sizes="80px"
+                            />
+                          </div>
                         )}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-800 group-hover:text-coop-blue transition-colors line-clamp-2">
+                            {r.title}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center gap-2 mt-1">
+                            <span>
+                              {new Date(r.date).toLocaleDateString("es-AR")}
+                            </span>
+                            {r.readTime && (
+                              <>
+                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                <span>{r.readTime}</span>
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           )}
