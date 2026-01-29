@@ -24,13 +24,20 @@ type DbNewsPost = {
   author: string
   category: string
   image_url: string | null
+  image_urls: string[] | null
   read_time: string | null
   tags: string[] | null
 }
 
-type FullNewsPost = NewsPost
+type FullNewsPost = NewsPost & { images: string[] }
 
 function mapDbToNewsPost(dbPost: DbNewsPost): FullNewsPost {
+  const images =
+    dbPost.image_urls && dbPost.image_urls.length > 0
+      ? dbPost.image_urls
+      : dbPost.image_url
+        ? [dbPost.image_url]
+        : []
   return {
     id: dbPost.id,
     slug: dbPost.slug,
@@ -40,7 +47,8 @@ function mapDbToNewsPost(dbPost: DbNewsPost): FullNewsPost {
     date: dbPost.date,
     author: dbPost.author,
     category: dbPost.category,
-    image: dbPost.image_url ?? undefined,
+    image: images[0],
+    images,
     readTime: dbPost.read_time ?? undefined,
     tags: dbPost.tags ?? undefined,
   }
@@ -77,12 +85,17 @@ export default async function NoticiaIndividual({ params }: Props) {
     }
   } else {
     // 2) Fallback al contenido estático existente
-    post =
+    const staticPost =
       slug === staticFeaturedNews.slug
         ? staticFeaturedNews
         : staticNews.find((n) => n.slug === slug)
 
-    if (!post) return notFound()
+    if (!staticPost) return notFound()
+
+    post = {
+      ...staticPost,
+      images: staticPost.image ? [staticPost.image] : [],
+    }
 
     related = staticNews
       .filter((n) => n.category === post!.category && n.slug !== post!.slug)
@@ -90,6 +103,8 @@ export default async function NoticiaIndividual({ params }: Props) {
   }
 
   if (!post) return notFound()
+
+  const images = "images" in post && Array.isArray(post.images) ? post.images : (post.image ? [post.image] : [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -144,15 +159,17 @@ export default async function NoticiaIndividual({ params }: Props) {
               )}
             </div>
 
-            <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/20">
-              <Image
-                src={post.image || "/placeholder.svg"}
-                alt={post.title}
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 420px, 100vw"
-              />
-            </div>
+            {images.length > 0 && (
+              <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/20">
+                <Image
+                  src={images[0] || "/placeholder.svg"}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 420px, 100vw"
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -160,6 +177,24 @@ export default async function NoticiaIndividual({ params }: Props) {
       {/* Contenido y relacionadas */}
       <main className="container mx-auto px-4 py-10 lg:py-14 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
         <article className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:p-8">
+          {images.length > 1 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Galería de imágenes</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {images.map((src, idx) => (
+                  <div key={src} className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                    <Image
+                      src={src}
+                      alt={`${post.title} - imagen ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 640px) 33vw, 50vw"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="prose prose-lg max-w-none prose-headings:scroll-mt-24 prose-a:text-coop-green">
             <p className="whitespace-pre-line leading-relaxed text-gray-800">
               {post.content}

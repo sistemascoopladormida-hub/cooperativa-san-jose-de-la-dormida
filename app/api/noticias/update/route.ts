@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     const category = formData.get("category") as string | null
     const readTime = formData.get("readTime") as string | null
     const tagsRaw = formData.get("tags") as string | null
-    const imageFile = formData.get("image") as File | null
+    const imageFiles = formData.getAll("image") as (File | null)[]
+    const imageUrlsJson = formData.get("image_urls") as string | null
     const deleteImage = formData.get("deleteImage") === "true"
 
     if (!title || !excerpt || !content || !date || !author || !category) {
@@ -54,21 +55,35 @@ export async function POST(request: NextRequest) {
         .map((t) => t.trim())
         .filter((t) => t.length > 0) ?? []
 
-    // Obtener la noticia actual para ver si tiene imagen
+    // Obtener la noticia actual (image_url e image_urls)
     const { data: currentPost } = await supabase
       .from("news_posts")
-      .select("image_url")
+      .select("image_url, image_urls")
       .eq("id", id)
       .single()
 
-    let imageUrl: string | null = currentPost?.image_url || null
-    const oldImageUrl = currentPost?.image_url
+    let keptUrls: string[] = []
+    if (imageUrlsJson) {
+      try {
+        const parsed = JSON.parse(imageUrlsJson) as string[]
+        keptUrls = Array.isArray(parsed) ? parsed : []
+      } catch {
+        keptUrls = currentPost?.image_urls ?? (currentPost?.image_url ? [currentPost.image_url] : [])
+      }
+    } else if (deleteImage) {
+      keptUrls = []
+    } else {
+      keptUrls = currentPost?.image_urls ?? (currentPost?.image_url ? [currentPost.image_url] : [])
+    }
 
-    // Si se sube una nueva imagen
-    if (imageFile && imageFile.size > 0) {
+    const validImageFiles = imageFiles.filter((f): f is File => f instanceof File && f.size > 0)
+    const newUrls: string[] = []
+
+    for (let i = 0; i < validImageFiles.length; i++) {
+      const imageFile = validImageFiles[i]
       const buffer = Buffer.from(await imageFile.arrayBuffer())
       const fileExt = imageFile.name.split(".").pop() || "jpg"
-      const fileName = `${slug}-${Date.now()}.${fileExt}`
+      const fileName = `${slug}-${Date.now()}-${i}.${fileExt}`
       const filePath = `news/${fileName}`
 
       const { error: uploadError } = await supabase.storage
@@ -88,42 +103,29 @@ export async function POST(request: NextRequest) {
       const {
         data: { publicUrl },
       } = supabase.storage.from("news-images").getPublicUrl(filePath)
+      newUrls.push(publicUrl)
+    }
 
-      imageUrl = publicUrl
+    const finalImageUrls = [...keptUrls, ...newUrls]
+    const imageUrl = finalImageUrls.length > 0 ? finalImageUrls[0] : null
 
-      // Eliminar la imagen anterior si existe
-      if (oldImageUrl) {
-        try {
-          const urlParts = oldImageUrl.split("/")
-          const filePathIndex = urlParts.findIndex((part) => part === "news")
-          if (filePathIndex !== -1) {
-            const oldFilePath = urlParts.slice(filePathIndex).join("/")
-            await supabase.storage.from("news-images").remove([oldFilePath])
-          }
-        } catch (storageError) {
-          console.warn("No se pudo eliminar la imagen anterior del storage:", storageError)
+    // Eliminar del storage las imágenes que ya no están en la lista
+    const oldUrls = currentPost?.image_urls ?? (currentPost?.image_url ? [currentPost.image_url] : [])
+    for (const oldUrl of oldUrls) {
+      if (finalImageUrls.includes(oldUrl)) continue
+      try {
+        const urlParts = oldUrl.split("/")
+        const filePathIndex = urlParts.findIndex((part) => part === "news")
+        if (filePathIndex !== -1) {
+          const oldFilePath = urlParts.slice(filePathIndex).join("/")
+          await supabase.storage.from("news-images").remove([oldFilePath])
         }
-      }
-    } else if (deleteImage) {
-      // Si se solicita eliminar la imagen
-      imageUrl = null
-
-      // Eliminar la imagen del storage
-      if (oldImageUrl) {
-        try {
-          const urlParts = oldImageUrl.split("/")
-          const filePathIndex = urlParts.findIndex((part) => part === "news")
-          if (filePathIndex !== -1) {
-            const oldFilePath = urlParts.slice(filePathIndex).join("/")
-            await supabase.storage.from("news-images").remove([oldFilePath])
-          }
-        } catch (storageError) {
-          console.warn("No se pudo eliminar la imagen del storage:", storageError)
-        }
+      } catch (storageError) {
+        console.warn("No se pudo eliminar imagen del storage:", storageError)
       }
     }
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       slug,
       title,
       excerpt,
@@ -132,6 +134,7 @@ export async function POST(request: NextRequest) {
       author,
       category,
       image_url: imageUrl,
+      image_urls: finalImageUrls.length > 0 ? finalImageUrls : null,
       read_time: readTime || null,
       tags: tags.length > 0 ? tags : null,
     }

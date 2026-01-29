@@ -35,6 +35,7 @@ type NewsPost = {
   author: string
   category: string
   image_url: string | null
+  image_urls: string[] | null
   read_time: string | null
   tags: string[] | null
 }
@@ -54,7 +55,7 @@ export default function NoticiasAdminPage(): JSX.Element {
   const [category, setCategory] = useState("")
   const [readTime, setReadTime] = useState("")
   const [tags, setTags] = useState("")
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -77,9 +78,8 @@ export default function NoticiasAdminPage(): JSX.Element {
   const [editCategory, setEditCategory] = useState("")
   const [editReadTime, setEditReadTime] = useState("")
   const [editTags, setEditTags] = useState("")
-  const [editImageFile, setEditImageFile] = useState<File | null>(null)
-  const [editImageUrl, setEditImageUrl] = useState<string | null>(null)
-  const [deleteImage, setDeleteImage] = useState(false)
+  const [editImageUrls, setEditImageUrls] = useState<string[]>([])
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([])
 
   const handleAuth = (e: FormEvent) => {
     e.preventDefault()
@@ -145,7 +145,7 @@ export default function NoticiasAdminPage(): JSX.Element {
       formData.append("category", category)
       if (readTime) formData.append("readTime", readTime)
       if (tags) formData.append("tags", tags)
-      if (imageFile) formData.append("image", imageFile)
+      imageFiles.forEach((file) => formData.append("image", file))
 
       const res = await fetch("/api/noticias/create", {
         method: "POST",
@@ -169,7 +169,7 @@ export default function NoticiasAdminPage(): JSX.Element {
       setCategory("")
       setReadTime("")
       setTags("")
-      setImageFile(null)
+      setImageFiles([])
       const fileInput = document.getElementById("image") as HTMLInputElement | null
       if (fileInput) fileInput.value = ""
 
@@ -195,8 +195,8 @@ export default function NoticiasAdminPage(): JSX.Element {
     setEditCategory(post.category)
     setEditReadTime(post.read_time || "")
     setEditTags(post.tags?.join(", ") || "")
-    setEditImageUrl(post.image_url)
-    setDeleteImage(false)
+    setEditImageUrls(post.image_urls ?? (post.image_url ? [post.image_url] : []))
+    setEditImageFiles([])
     setIsEditing(true)
   }
 
@@ -221,8 +221,8 @@ export default function NoticiasAdminPage(): JSX.Element {
       formData.append("category", editCategory)
       if (editReadTime) formData.append("readTime", editReadTime)
       if (editTags) formData.append("tags", editTags)
-      if (editImageFile) formData.append("image", editImageFile)
-      if (deleteImage) formData.append("deleteImage", "true")
+      formData.append("image_urls", JSON.stringify(editImageUrls))
+      editImageFiles.forEach((file) => formData.append("image", file))
 
       const res = await fetch("/api/noticias/update", {
         method: "POST",
@@ -462,20 +462,48 @@ export default function NoticiasAdminPage(): JSX.Element {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="image">Imagen principal (opcional)</Label>
+                      <Label>Imágenes (opcional, múltiples)</Label>
                       <Input
                         id="image"
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null
-                          setImageFile(file)
+                          const files = Array.from(e.target.files ?? [])
+                          setImageFiles((prev) => [...prev, ...files])
+                          e.target.value = ""
                         }}
                       />
                       <p className="text-xs text-gray-500">
-                        Se recomienda una imagen en formato 1080x1350px (vertical 4:5). Se sube al
-                        Storage de Supabase.
+                        Podés subir varias imágenes. Se recomienda formato 1080x1350px (vertical 4:5). Se suben al Storage de Supabase.
                       </p>
+                      {imageFiles.length > 0 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+                          {imageFiles.map((file, idx) => (
+                            <div key={`${file.name}-${idx}`} className="relative group">
+                              <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                <Image
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-1 right-1 h-7 w-7 opacity-90 group-hover:opacity-100"
+                                onClick={() => setImageFiles((prev) => prev.filter((_, i) => i !== idx))}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                              <span className="block text-xs text-gray-500 mt-1 truncate" title={file.name}>{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {submitError && (
@@ -540,10 +568,10 @@ export default function NoticiasAdminPage(): JSX.Element {
                         <Card key={post.id} className="hover:shadow-md transition-shadow">
                           <CardContent className="p-6">
                             <div className="flex flex-col md:flex-row gap-4">
-                              {post.image_url && (
+                              {(post.image_url ?? (post.image_urls && post.image_urls[0])) && (
                                 <div className="relative w-full md:w-32 h-32 flex-shrink-0">
                                   <Image
-                                    src={post.image_url}
+                                    src={post.image_url ?? post.image_urls![0]}
                                     alt={post.title}
                                     fill
                                     className="object-cover rounded"
@@ -710,47 +738,71 @@ export default function NoticiasAdminPage(): JSX.Element {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="edit-image">Imagen principal</Label>
-                        {editImageUrl && !deleteImage && (
-                          <div className="relative w-full h-48 mb-2">
-                            <Image
-                              src={editImageUrl}
-                              alt="Imagen actual"
-                              fill
-                              className="object-cover rounded"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="absolute top-2 right-2"
-                              onClick={() => setDeleteImage(true)}
-                            >
-                              <Trash2 className="w-3 h-3 mr-1" />
-                              Eliminar imagen
-                            </Button>
+                        <Label>Imágenes (múltiples)</Label>
+                        {editImageUrls.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                            {editImageUrls.map((url, idx) => (
+                              <div key={url} className="relative group">
+                                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                  <Image
+                                    src={url}
+                                    alt={`Imagen ${idx + 1}`}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute top-1 right-1 h-7 w-7 opacity-90 group-hover:opacity-100"
+                                  onClick={() => setEditImageUrls((prev) => prev.filter((_, i) => i !== idx))}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
                           </div>
-                        )}
-                        {deleteImage && (
-                          <Alert>
-                            <AlertDescription>
-                              La imagen será eliminada al guardar. Puedes subir una nueva imagen
-                              abajo.
-                            </AlertDescription>
-                          </Alert>
                         )}
                         <Input
                           id="edit-image"
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={(e) => {
-                            const file = e.target.files?.[0] ?? null
-                            setEditImageFile(file)
-                            if (file) setDeleteImage(false)
+                            const files = Array.from(e.target.files ?? [])
+                            setEditImageFiles((prev) => [...prev, ...files])
+                            e.target.value = ""
                           }}
                         />
+                        {editImageFiles.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+                            {editImageFiles.map((file, idx) => (
+                              <div key={`${file.name}-${idx}`} className="relative group">
+                                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                  <Image
+                                    src={URL.createObjectURL(file)}
+                                    alt={file.name}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute top-1 right-1 h-7 w-7 opacity-90 group-hover:opacity-100"
+                                  onClick={() => setEditImageFiles((prev) => prev.filter((_, i) => i !== idx))}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <p className="text-xs text-gray-500">
-                          Se recomienda una imagen en formato 1080x1350px (vertical 4:5).
+                          Podés quitar imágenes con la X o agregar más. Se recomienda formato 1080x1350px (vertical 4:5).
                         </p>
                       </div>
 

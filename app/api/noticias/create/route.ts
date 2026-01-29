@@ -14,6 +14,7 @@ export const runtime = "nodejs"
 //   author      text
 //   category    text
 //   image_url   text
+//   image_urls  text[] (opcional, múltiples imágenes)
 //   read_time   text
 //   tags        text[] (opcional)
 //   created_at  timestamptz default now()
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     const category = formData.get("category") as string | null
     const readTime = formData.get("readTime") as string | null
     const tagsRaw = formData.get("tags") as string | null
-    const imageFile = formData.get("image") as File | null
+    const imageFiles = formData.getAll("image") as (File | null)[]
 
     if (!title || !excerpt || !content || !date || !author || !category) {
       return NextResponse.json(
@@ -54,12 +55,14 @@ export async function POST(request: NextRequest) {
         .map((t) => t.trim())
         .filter((t) => t.length > 0) ?? []
 
-    let imageUrl: string | null = null
+    const imageUrls: string[] = []
+    const validImageFiles = imageFiles.filter((f): f is File => f instanceof File && f.size > 0)
 
-    if (imageFile) {
+    for (let i = 0; i < validImageFiles.length; i++) {
+      const imageFile = validImageFiles[i]
       const buffer = Buffer.from(await imageFile.arrayBuffer())
       const fileExt = imageFile.name.split(".").pop() || "jpg"
-      const fileName = `${slug}-${Date.now()}.${fileExt}`
+      const fileName = `${slug}-${Date.now()}-${i}.${fileExt}`
       const filePath = `news/${fileName}`
 
       const { error: uploadError } = await supabase.storage
@@ -79,9 +82,10 @@ export async function POST(request: NextRequest) {
       const {
         data: { publicUrl },
       } = supabase.storage.from("news-images").getPublicUrl(filePath)
-
-      imageUrl = publicUrl
+      imageUrls.push(publicUrl)
     }
+
+    const imageUrl = imageUrls.length > 0 ? imageUrls[0] : null
 
     const { data, error } = await supabase
       .from("news_posts")
@@ -94,6 +98,7 @@ export async function POST(request: NextRequest) {
         author,
         category,
         image_url: imageUrl,
+        image_urls: imageUrls.length > 0 ? imageUrls : null,
         read_time: readTime,
         tags,
       })
