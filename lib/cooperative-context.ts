@@ -108,14 +108,14 @@ COOPONLINE - PLATAFORMA DE PAGO:
 
 ESTADO DE FACTURAS Y BOLETAS:
 - FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV):
-  * Ya están disponibles todas las facturas del período de diciembre
+  * Ya están disponibles todas las facturas del período de enero
   * Disponibles para retirar en los boxes de atención al público de la cooperativa
   * Fueron enviadas a las bandejas de correo electrónico de los socios
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
   * Período: Diciembre
   * Vencimientos:
-    - Primer vencimiento: 12 de enero
-    - Segundo vencimiento: 20 de enero
+    - Primer vencimiento: 10 de febrero
+    - Segundo vencimiento: 20 de febrero
   * Medios de pago habilitados:
     - Caja de cobro (Efectivo, Tarjetas de crédito y débito)
     - App CoopOnline
