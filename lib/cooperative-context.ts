@@ -122,21 +122,22 @@ ESTADO DE FACTURAS Y BOLETAS:
     - IMPORTANTE: El pago mediante transferencia se encuentra INHABILITADO
 
 - FACTURAS/BOLETAS DE ENERGÍA ELÉCTRICA:
-  * Ya están disponibles todas las facturas del período de diciembre
+  * Ya están disponibles todas las facturas del período de enero
   * Disponibles para retirar en los boxes de atención al público de la cooperativa
   * Fueron enviadas a las bandejas de correo electrónico de los socios
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
-  * Período: Diciembre
+  * Período: Enero
   * Vencimientos:
-    - Primer vencimiento: 12 de enero
-    - Segundo vencimiento: 20 de enero
+    - Primer vencimiento: 10 de febrero
+    - Segundo vencimiento: 20 de febrero
 
 TURNERO DE FARMACIAS:
-- 27 de enero: Farmacia carreño
-- 28 de enero: Farmacia robledo
-- 29 de enero: Farmacia centro
-- 30 de enero: Farmacia social
-- 31 de enero: Farmacia carreño
+- 2 de febrero: Farmacia centro
+- 3 de febrero: Farmacia social
+- 4 de febrero: Farmacia carreño
+- 5 de febrero: Farmacia robledo
+- 6 de febrero: Farmacia centro
+- 7 de febrero: Farmacia social
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
