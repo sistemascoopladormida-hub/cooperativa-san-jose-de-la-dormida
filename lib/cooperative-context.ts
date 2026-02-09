@@ -25,7 +25,7 @@ CONSULTORIOS MÉDICOS PFC (TURNOS):
 SERVICIOS OFRECIDOS:
 1. Electricidad:
    - Suministro eléctrico confiable las 24 horas del día
-   - Tarifas preferenciales para socios
+   - Plan de financiamiento Colectivo (PFC)
    - Atención técnica 24/7
    - Medidores inteligentes
    - Para conocer las tarifas específicas de electricidad, consulta el cuadro tarifario oficial de ERSeP

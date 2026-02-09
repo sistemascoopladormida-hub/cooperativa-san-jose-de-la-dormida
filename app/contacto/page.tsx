@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
+import GoogleMapsNeighborhood from "@/components/google-maps-neighborhood"
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-react"
 
 export default function ContactoPage() {
@@ -71,9 +72,9 @@ export default function ContactoPage() {
       <section className="bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Reclamos</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Contacto</h1>
             <p className="text-xl text-green-100">
-              Canal exclusivo para ingresar tus reclamos y problemas con los servicios de la cooperativa.
+              Estamos aquí para ayudarte. Contactanos por cualquier medio y te responderemos a la brevedad.
             </p>
           </div>
         </div>
@@ -248,24 +249,38 @@ export default function ContactoPage() {
           </div>
         </div>
 
-        {/* Map Section */}
+        {/* Map Section - Google Maps Neighborhood Discovery */}
         <div className="mt-12">
           <Card>
             <CardHeader>
-              <CardTitle>Nuestra Ubicación</CardTitle>
-              <CardDescription>Visítanos en nuestras oficinas centrales</CardDescription>
+              <CardTitle>Nuestra Ubicación y Lugares Cercanos</CardTitle>
+              <CardDescription>
+                Explora nuestra ubicación y descubre lugares de interés cercanos
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 lg:h-96 rounded-lg overflow-hidden w-full">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4083.952033554102!2d-63.95051042443432!3d-30.35400197476918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x943221a8da44c6a3%3A0x182c8f6bd4ec1f8a!2sCooperativa%20El%C3%A9ctrica%20de%20San%20Jos%C3%A9%20de%20La%20Dormida!5e1!3m2!1ses!2sar!4v1765809953275!5m2!1ses!2sar"
-                  className="w-full h-full"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
+              <div className="h-[600px] lg:h-[800px] rounded-lg overflow-hidden w-full border border-gray-200">
+                <GoogleMapsNeighborhood
+                  apiKey="AIzaSyBDDeE3hzw3WrydS4RSz6ACs1lBktjba_0"
+                  center={{ lat: -30.3542084, lng: -63.94768569999999 }}
+                  mapRadius={2000}
+                  pois={[
+                    { placeId: "ChIJXzYhEk4hMpQRz-rNbsZX7Xc" },
+                    { placeId: "ChIJhzMO-BUgMpQRK2z-JCrQarg" },
+                    { placeId: "ChIJcafsc9IhMpQRWNyMlsjNYj8" },
+                    { placeId: "ChIJOxdoNhggMpQR51JpNMZ2Eu8" },
+                    { placeId: "ChIJ4094fyIgMpQRAGr3g6QRW80" },
+                    { placeId: "ChIJLYsBwRcgMpQRdjwF0nD1rB4" },
+                    { placeId: "ChIJ79xVjBEhMpQR5wLdpOV-BMY" },
+                    { placeId: "ChIJaRhapUghMpQRGBR-_4repfM" },
+                    { placeId: "ChIJyWh8flYhMpQRP6i5PWL0tGY" },
+                    { placeId: "ChIJs_-hwIIhMpQRUbGboQCavrs" },
+                    { placeId: "ChIJPbZyjRggMpQRtyzfx4WP2vc" },
+                    { placeId: "ChIJd4L5hhggMpQRlDLJcSLkLkg" },
+                    { placeId: "ChIJvwIkQF0hMpQR-IT9he1wc3M" },
+                    { placeId: "ChIJv62w9JchMpQRx4iBMT7U_Gs" },
+                  ]}
+                  centerMarker={{ icon: "circle" }}
                 />
               </div>
             </CardContent>
