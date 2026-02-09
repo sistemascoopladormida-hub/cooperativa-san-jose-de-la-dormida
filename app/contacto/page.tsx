@@ -25,6 +25,8 @@ export default function ContactoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -291,7 +293,7 @@ export default function ContactoPage() {
             <CardContent>
               <div className="h-[600px] lg:h-[800px] rounded-lg overflow-hidden w-full border border-gray-200">
                 <GoogleMapsNeighborhood
-                  apiKey="AIzaSyBDDeE3hzw3WrydS4RSz6ACs1lBktjba_0"
+                  apiKey={googleMapsApiKey || ""}
                   center={{ lat: -30.3542084, lng: -63.94768569999999 }}
                   mapRadius={2000}
                   pois={[
