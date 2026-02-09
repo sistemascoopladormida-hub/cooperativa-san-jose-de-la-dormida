@@ -9,8 +9,19 @@ Ubicación: Av. Perón 557 - CP 5244, Córdoba, San José de la Dormida
 
 CONTACTO:
 - Teléfono: 3521-401330
-- Email: sistemas@cooperativaladormida.com
-- Horarios de atención: Lunes a Viernes de 7:00 a 13:00
+- Horarios de atención: Lunes a Viernes de 7:00 a 12:00
+
+CORREOS ELECTRÓNICOS PROFESIONALES:
+- Sistemas: sistemas@cooperativaladormida.com
+- Secretaría/RRHH: secretaria-rrhh@cooperativaladormida.com
+- Tesorería: tesoreria@cooperativaladormida.com
+- Compras: compras@cooperativaladormida.com
+- Farmacia: farmacia@cooperativaladormida.com
+- Red Eléctrica: redelectrica@cooperativaladormida.com
+- Reclamos: admin-reclamos@cooperativaladormida.com
+- Consultorios: consultorios@cooperativaladormida.com
+- Canal: canal@cooperativaladormida.com
+- Internet/Cable: internet-cable@cooperativaladormida.com
 
 TELÉFONOS DE GUARDIA 24/7:
 - Ambulancia: 3521 406183

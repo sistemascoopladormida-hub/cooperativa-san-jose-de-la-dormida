@@ -52,8 +52,19 @@ export default function ContactoPage() {
     },
     {
       icon: Mail,
-      title: "Email",
-      details: ["sistemascoopladormida@gmail.com"],
+      title: "Correos Electrónicos",
+      details: [
+        "Sistemas: sistemas@cooperativaladormida.com",
+        "Secretaría/RRHH: secretaria-rrhh@cooperativaladormida.com",
+        "Tesorería: tesoreria@cooperativaladormida.com",
+        "Compras: compras@cooperativaladormida.com",
+        "Farmacia: farmacia@cooperativaladormida.com",
+        "Red Eléctrica: redelectrica@cooperativaladormida.com",
+        "Reclamos: admin-reclamos@cooperativaladormida.com",
+        "Consultorios: consultorios@cooperativaladormida.com",
+        "Canal: canal@cooperativaladormida.com",
+        "Internet/Cable: internet-cable@cooperativaladormida.com",
+      ],
       color: "text-purple-600",
     },
     {
@@ -186,11 +197,30 @@ export default function ContactoPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {info.details.map((detail, detailIndex) => (
-                    <p key={detailIndex} className="text-gray-600">
-                      {detail}
-                    </p>
-                  ))}
+                  {info.title === "Correos Electrónicos" ? (
+                    <div className="space-y-2">
+                      {info.details.map((detail, detailIndex) => {
+                        const [label, email] = detail.split(": ")
+                        return (
+                          <div key={detailIndex} className="text-gray-600">
+                            <span className="font-medium">{label}:</span>{" "}
+                            <a
+                              href={`mailto:${email}`}
+                              className="text-coop-blue hover:text-coop-green hover:underline transition-colors"
+                            >
+                              {email}
+                            </a>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    info.details.map((detail, detailIndex) => (
+                      <p key={detailIndex} className="text-gray-600">
+                        {detail}
+                      </p>
+                    ))
+                  )}
                 </CardContent>
               </Card>
             ))}

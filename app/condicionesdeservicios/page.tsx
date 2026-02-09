@@ -68,7 +68,7 @@ export default function CondicionesServiciosPage() {
                 <p className="text-gray-700"><strong>Domicilio:</strong> Av. Perón 557 - CP 5244, San José de la Dormida, Córdoba, Argentina</p>
                 <p className="text-gray-700"><strong>Teléfono:</strong> 3521-401330</p>
                 <p className="text-gray-700 text-sm mt-1"><strong>Consultorios médicos PFC (turnos):</strong> 3521 401387</p>
-                <p className="text-gray-700"><strong>Email:</strong> sistemascoopladormida@gmail.com</p>
+                <p className="text-gray-700"><strong>Email:</strong> sistemas@cooperativaladormida.com</p>
                 <p className="text-gray-700"><strong>Horario de atención:</strong> Lunes a Viernes de 7:00 a 12:00</p>
                 <p className="text-gray-700"><strong>Teléfonos de guardia 24/7:</strong></p>
                 <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
@@ -419,7 +419,7 @@ export default function CondicionesServiciosPage() {
                   <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
                     <li>Formulario de contacto en el sitio web</li>
                     <li>Personalmente en la oficina de la Cooperativa</li>
-                    <li>Por correo electrónico a: sistemascoopladormida@gmail.com</li>
+                    <li>Por correo electrónico a: admin-reclamos@cooperativaladormida.com</li>
                     <li>Por teléfono al: 3521-401330</li>
                   </ul>
                 </div>
@@ -555,11 +555,42 @@ export default function CondicionesServiciosPage() {
                     <p className="text-sm text-gray-500 mt-1">Lun-Vie: 7:00 - 12:00</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                  <Mail className="h-5 w-5 text-coop-green mt-1" />
-                  <div>
-                    <p className="font-semibold text-gray-800">Email</p>
-                    <p className="text-sm text-gray-700">sistemascoopladormida@gmail.com</p>
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg md:col-span-2">
+                  <Mail className="h-5 w-5 text-coop-green mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800 mb-2">Correos Electrónicos</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                      <a href="mailto:sistemas@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Sistemas: sistemas@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:secretaria-rrhh@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Secretaría/RRHH: secretaria-rrhh@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:tesoreria@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Tesorería: tesoreria@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:compras@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Compras: compras@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:farmacia@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Farmacia: farmacia@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:redelectrica@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Red Eléctrica: redelectrica@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:admin-reclamos@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Reclamos: admin-reclamos@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:consultorios@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Consultorios: consultorios@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:canal@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Canal: canal@cooperativaladormida.com
+                      </a>
+                      <a href="mailto:internet-cable@cooperativaladormida.com" className="text-coop-blue hover:text-coop-green hover:underline">
+                        Internet/Cable: internet-cable@cooperativaladormida.com
+                      </a>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">

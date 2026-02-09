@@ -1,8 +1,28 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram, AlertCircle, PhoneCall, Heart, Zap, Wifi, Building2, FileText } from "lucide-react"
+import { useState } from "react"
+import { Phone, Mail, MapPin, Clock, Facebook, Instagram, AlertCircle, PhoneCall, Heart, Zap, Wifi, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react"
 
 export default function Footer() {
+  const [showAllEmails, setShowAllEmails] = useState(false)
+
+  const emails = [
+    { label: "Sistemas", email: "sistemas@cooperativaladormida.com" },
+    { label: "Secretaría/RRHH", email: "secretaria-rrhh@cooperativaladormida.com" },
+    { label: "Tesorería", email: "tesoreria@cooperativaladormida.com" },
+    { label: "Compras", email: "compras@cooperativaladormida.com" },
+    { label: "Farmacia", email: "farmacia@cooperativaladormida.com" },
+    { label: "Red Eléctrica", email: "redelectrica@cooperativaladormida.com" },
+    { label: "Reclamos", email: "admin-reclamos@cooperativaladormida.com" },
+    { label: "Consultorios", email: "consultorios@cooperativaladormida.com" },
+    { label: "Canal", email: "canal@cooperativaladormida.com" },
+    { label: "Internet/Cable", email: "internet-cable@cooperativaladormida.com" },
+  ]
+
+  const displayedEmails = showAllEmails ? emails : emails.slice(0, 4)
+
   return (
     <footer className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white overflow-hidden">
       {/* Background decoration */}
@@ -209,11 +229,41 @@ export default function Footer() {
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
                   <Mail className="w-5 h-5 text-coop-orange" />
                 </div>
-                <div>
-                  <p className="text-green-50 font-medium">Email</p>
-                  <a href="mailto:sistemascoopladormida@gmail.com" className="text-green-100 text-sm hover:text-coop-orange transition-colors break-all">
-                    sistemascoopladormida@gmail.com
-                  </a>
+                <div className="flex-1">
+                  <p className="text-green-50 font-medium mb-3">Correos Electrónicos</p>
+                  <div className="space-y-2 text-xs">
+                    {displayedEmails.map((item, index) => (
+                      <div key={index} className="flex flex-col">
+                        <span className="text-green-200/80 font-medium text-[10px] uppercase tracking-wide mb-0.5">
+                          {item.label}
+                        </span>
+                        <a
+                          href={`mailto:${item.email}`}
+                          className="text-green-100 hover:text-coop-orange transition-colors break-all leading-tight"
+                        >
+                          {item.email}
+                        </a>
+                      </div>
+                    ))}
+                    {emails.length > 4 && (
+                      <button
+                        onClick={() => setShowAllEmails(!showAllEmails)}
+                        className="flex items-center gap-1 text-green-200 hover:text-coop-orange transition-colors mt-2 text-[10px] font-medium uppercase tracking-wide"
+                      >
+                        {showAllEmails ? (
+                          <>
+                            <ChevronUp className="w-3 h-3" />
+                            Ver menos
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-3 h-3" />
+                            Ver todos ({emails.length - 4} más)
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-start space-x-3 group">
