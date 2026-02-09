@@ -9,8 +9,8 @@ Ubicación: Av. Perón 557 - CP 5244, Córdoba, San José de la Dormida
 
 CONTACTO:
 - Teléfono: 3521-401330
-- Email: sistemascoopladormida@gmail.com
-- Horarios de atención: Lunes a Viernes de 7:00 a 12:00
+- Email: sistemas@cooperativaladormida.com
+- Horarios de atención: Lunes a Viernes de 7:00 a 13:00
 
 TELÉFONOS DE GUARDIA 24/7:
 - Ambulancia: 3521 406183
@@ -132,12 +132,13 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Segundo vencimiento: 20 de febrero
 
 TURNERO DE FARMACIAS:
-- 2 de febrero: Farmacia centro
-- 3 de febrero: Farmacia social
-- 4 de febrero: Farmacia carreño
-- 5 de febrero: Farmacia robledo
-- 6 de febrero: Farmacia centro
-- 7 de febrero: Farmacia social
+- 8 de febrero: Farmacia carreño
+- 9 de febrero: Farmacia Robledo
+- 10 de febrero: Farmacia Centro
+- 11 de febrero: Farmacia Social
+- 12 de febrero: Farmacia Carreño
+- 13 de febrero: Farmacia Robledo
+- 14 de febrero: Farmacia Centro
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
