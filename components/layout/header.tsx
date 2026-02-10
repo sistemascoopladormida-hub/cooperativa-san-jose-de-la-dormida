@@ -41,7 +41,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/servicios", label: "Servicios", icon: Zap },
     { href: "/camping", label: "Camping", icon: Trees },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
-    { href: "/autoridades", label: "Autoridades", icon: Users },
+    { href: "/revista", label: "Revista", icon: FileText },
     { href: "/contacto", label: "Contacto", icon: Phone },
     { href: "/asociarse", label: "Asociarse", icon: UserPlus },
 
@@ -54,7 +54,6 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/reclamos", label: "Reclamos", icon: MessageSquare },
     { href: "/beneficios", label: "Beneficios", icon: Gift },
     { href: "/farmacia", label: "Farmacia", icon: Heart },
-    { href: "/autoridades", label: "Autoridades", icon: Users },
   ]
 
   const menuItems = isLoggedIn ? privateMenuItems : publicMenuItems
