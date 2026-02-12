@@ -1,6 +1,10 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { detectInvoiceRequest, detectAddressOrNameInsteadOfAccount } from "@/lib/invoice-detector";
+import {
+  isNewServiceRequest,
+  NEW_SERVICE_DERIVATION_MESSAGE,
+} from "@/lib/service-request-detector";
 import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
 import { sendDocumentMessage, sendImageMessage } from "@/lib/whatsapp";
 import { sendTextMessage } from "./whatsapp-messages";
@@ -484,7 +488,28 @@ export async function processTextMessage(
     return;
   }
 
-  // 2. Verificar si es solicitud de factura
+  // 2. Verificar si es solicitud de alta de servicio (Internet, luz, TV, etc.)
+  // Debe derivarse a Administración, NO al flujo de facturas
+  if (isNewServiceRequest(text)) {
+    console.log(
+      "[WEBHOOK] Solicitud de alta de servicio detectada, derivando a Administración"
+    );
+    await sendTextMessage(from, NEW_SERVICE_DERIVATION_MESSAGE);
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(
+        conversationId,
+        "assistant",
+        NEW_SERVICE_DERIVATION_MESSAGE
+      );
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+    return;
+  }
+
+  // 3. Verificar si es solicitud de factura
   const handledInvoice = await handleInvoiceRequest(
     from,
     text,
@@ -494,7 +519,7 @@ export async function processTextMessage(
     return;
   }
 
-  // 3. Procesar como mensaje normal del chatbot
+  // 4. Procesar como mensaje normal del chatbot
   const chatbotResponse = await getChatbotResponse(
     from,
     text,

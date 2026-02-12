@@ -5,6 +5,10 @@ import {
   detectInvoiceRequest,
   detectAddressOrNameInsteadOfAccount,
 } from "@/lib/invoice-detector";
+import {
+  isNewServiceRequest,
+  NEW_SERVICE_DERIVATION_MESSAGE,
+} from "@/lib/service-request-detector";
 import { findInvoiceInDrive } from "@/lib/drive";
 import { getOrCreateConversation, saveMessage } from "@/lib/conversations";
 
@@ -40,6 +44,14 @@ export async function POST(request: NextRequest) {
         console.error("[CHAT] Error guardando conversación web:", error);
       }
     };
+
+    // 0) Solicitud de alta de servicio (Internet, luz, TV, etc.) → derivar a Administración
+    if (isNewServiceRequest(lastUserMessage)) {
+      await logWebMessages(lastUserMessage, NEW_SERVICE_DERIVATION_MESSAGE);
+      return NextResponse.json({
+        response: NEW_SERVICE_DERIVATION_MESSAGE,
+      });
+    }
 
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
     // Primero verificar si es una pregunta informativa sobre facturas (no procesarla como solicitud)
