@@ -102,15 +102,20 @@ export async function POST(request: NextRequest) {
       const currentYear = invoiceRequest.year;
       const currentType = invoiceRequest.type;
 
-      // Si detectamos una solicitud de factura (por palabras clave o mes) pero no hay número de cuenta,
-      // buscar en mensajes anteriores (últimos 10 mensajes del usuario) si hay un número de cuenta reciente
+      // Si no hay número de cuenta en el mensaje actual, buscar en mensajes anteriores cuando:
+      // - hay mes/año, o palabras de factura, o "Enviamela"/"Dale" (continuación de solicitud previa)
+      const isInvoiceContinuation =
+        /\b(?:enviamela|envíamela|mandamela|dale|sí\s+dale)\b/i.test(
+          lastUserMessage
+        );
       if (
         !invoiceRequest.accountNumber &&
         (invoiceRequest.month ||
           invoiceRequest.year ||
           /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(
             lastUserMessage
-          ))
+          ) ||
+          isInvoiceContinuation)
       ) {
         // Buscar número de cuenta en mensajes anteriores del usuario
         for (

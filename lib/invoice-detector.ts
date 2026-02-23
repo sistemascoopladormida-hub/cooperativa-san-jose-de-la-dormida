@@ -31,6 +31,9 @@ export function detectInvoiceRequest(
     /(?:factura|boleta)\s*(?:de|del|número|numero|nro)?\s*:?\s*(\d{3,4})\b/i,
     /(?:cuenta|socio)\s*:?\s*(\d{3,4})\b/i,
     /(\d{3,4})\s*(?:es\s*)?(?:mi|el|la)\s*(?:número|numero|nro|cuenta|factura|boleta)/i,
+    // "cuenta numero 1979", "boleta de la cuenta numero 1979"
+    /(?:cuenta|factura|boleta).*?(?:numero|número|nro)\s*(\d{3,4})\b/i,
+    /(?:numero|número|nro)\s+(\d{3,4})\b/i,
   ];
 
   let accountNumbers: string[] = [];
@@ -324,13 +327,15 @@ export function detectAddressOrNameInsteadOfAccount(
   }
   
   // Palabras clave que indican solicitud REAL de factura (no preguntas)
+  // Incluye respuestas de continuación: "Enviamela", "Dale", "Sí enviámela"
   const invoiceRequestKeywords = [
     "pasar", "enviar", "mandar", "dar", "entregar", "enviarme", "mandarme",
     "necesito", "quiero", "quiero que", "me gustaría", "me gustaria",
     "podrían", "podrian", "pueden", "me pueden", "me podrían", "me podrian",
     "podrías", "podrias", "puedes", "me puedes", "podrías", "podrias",
     "dame", "dame la", "pásame", "pasame", "envíame", "envíame",
-    "solicito", "solicitar"
+    "solicito", "solicitar",
+    "enviamela", "envíamela", "mandamela", "mandámela", "dale", "sí dale"
   ];
   
   // Verificar si hay solicitud REAL de factura (no solo menciona la palabra "factura")
@@ -346,14 +351,13 @@ export function detectAddressOrNameInsteadOfAccount(
     return { isAddressOrName: false, hasInvoiceRequest: false };
   }
   
-  // Palabras clave que indican dirección
+  // Palabras clave que indican dirección (excluir "la", "el", "los", "las" - demasiado comunes en "la boleta", "la cuenta")
   const addressKeywords = [
     "dpto", "depto", "departamento", "apartamento", "apto",
     "calle", "avenida", "av", "ruta", "km", "barrio",
     "domicilio", "dirección", "direccion", "dire", "vive", "vivo",
     "pasaje", "pas", "pje", "casa", "villa", "manzana", "mza", "lote", "lt",
-    "sector", "sect", "los", "las", "el", "la", "san", "jose",
-    "inmigrantes", "pajon", "valle", "dormida", "toledo"
+    "sector", "sect", "san jose", "inmigrantes", "pajon", "valle", "dormida", "toledo"
   ];
   
   // Patrones para detectar nombres propios (dos o más palabras con mayúscula inicial)

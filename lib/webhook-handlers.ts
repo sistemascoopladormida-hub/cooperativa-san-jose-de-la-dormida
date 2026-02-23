@@ -22,9 +22,16 @@ import { getChatbotResponse } from "@/lib/chatbot";
 const WHATSAPP_API_VERSION = "v22.0";
 
 /**
- * Detecta si el usuario pregunta dónde está el número de cuenta
+ * Detecta si el usuario pregunta dónde está el número de cuenta.
+ * NO debe coincidir cuando el usuario ya proporcionó un número de cuenta (ej: "boleta cuenta 1979").
  */
 function isAccountNumberQuestion(text: string): boolean {
+  // Si el mensaje ya contiene un número de cuenta (3-4 dígitos, no año 20XX), es una solicitud, no una pregunta
+  const hasAccountNumber = /\b(\d{3,4})\b/.test(text) &&
+    !/\b20\d{2}\b/.test(text); // Excluir años 2000-2099
+  if (hasAccountNumber) {
+    return false;
+  }
   const accountNumberQuestionPattern =
     /(dónde|donde|donde está|dónde está|ubicación|ubicacion|encontrar|buscar|no encuentro|no lo encuentro|no sé|no se|no lo veo|no lo ve|dónde lo encuentro|donde lo encuentro|dónde lo busco|donde lo busco|dónde está el número|donde esta el numero|dónde está el numero|donde esta el número|número de cuenta|numero de cuenta|cuenta).*(número|numero|cuenta|factura)/i;
   return accountNumberQuestionPattern.test(text);
@@ -190,12 +197,12 @@ async function handleInvoiceRequest(
   let conversationContext: string[] = [];
   try {
     const conversationId = await getOrCreateConversation(from);
-    const recentMessages = await getRecentMessages(conversationId, 5); // Últimos 5 mensajes
+    const recentMessages = await getRecentMessages(conversationId, 10); // Últimos 10 mensajes (para capturar número en conversaciones previas)
     
     // Extraer todos los números de cuenta mencionados en los mensajes anteriores del usuario
     const previousAccountNumbers = new Set<string>();
     for (const msg of recentMessages) {
-      if (msg.sender === "user") {
+      if (msg.role === "user") {
         const prevRequest = detectInvoiceRequest(msg.content);
         for (const num of prevRequest.accountNumbers) {
           previousAccountNumbers.add(num);
