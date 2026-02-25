@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
+/** Límite máximo de facturas que un usuario puede solicitar por mes (web y WhatsApp) */
+export const MAX_INVOICES_PER_MONTH = 5;
+
 /**
  * Obtiene el mes y año actual en formato para la consulta
  */
@@ -14,7 +17,7 @@ export function getCurrentMonthYear(): { month: string; year: string } {
  * Registra una solicitud de factura exitosa en Supabase
  */
 export async function recordInvoiceRequest(
-  phoneNumber: string,
+  userIdentifier: string,
   accountNumber: string,
   fileName: string,
   month?: string,
@@ -27,7 +30,7 @@ export async function recordInvoiceRequest(
     const requestYear = year || currentYear;
 
     const { error } = await supabase.from("invoice_requests").insert({
-      phone_number: phoneNumber,
+      phone_number: userIdentifier,
       account_number: accountNumber,
       file_name: fileName,
       month: requestMonth,
@@ -39,7 +42,7 @@ export async function recordInvoiceRequest(
       console.error("[WEBHOOK] Error registrando solicitud de factura:", error);
     } else {
       console.log(
-        `[WEBHOOK] ✅ Solicitud de factura registrada: ${phoneNumber} -> ${accountNumber} (${requestMonth}/${requestYear})`
+        `[INVOICES] ✅ Solicitud de factura registrada: ${userIdentifier} -> ${accountNumber} (${requestMonth}/${requestYear})`
       );
     }
   } catch (error) {
@@ -48,10 +51,22 @@ export async function recordInvoiceRequest(
 }
 
 /**
- * Obtiene el conteo de facturas enviadas a un número de teléfono en el mes actual
+ * Verifica si el usuario puede solicitar más facturas este mes.
+ * @param userIdentifier - Número de teléfono (WhatsApp) o "WEB-{sessionId}" (chat web)
+ */
+export async function canRequestMoreInvoices(
+  userIdentifier: string
+): Promise<boolean> {
+  const count = await getInvoiceRequestCountThisMonth(userIdentifier);
+  return count < MAX_INVOICES_PER_MONTH;
+}
+
+/**
+ * Obtiene el conteo de facturas enviadas a un usuario en el mes actual.
+ * @param userIdentifier - Número de teléfono (WhatsApp) o "WEB-{sessionId}" (chat web)
  */
 export async function getInvoiceRequestCountThisMonth(
-  phoneNumber: string
+  userIdentifier: string
 ): Promise<number> {
   try {
     const { month, year } = getCurrentMonthYear();
@@ -59,7 +74,7 @@ export async function getInvoiceRequestCountThisMonth(
     const { count, error } = await supabase
       .from("invoice_requests")
       .select("*", { count: "exact", head: true })
-      .eq("phone_number", phoneNumber)
+      .eq("phone_number", userIdentifier)
       .eq("month", month)
       .eq("year", year);
 

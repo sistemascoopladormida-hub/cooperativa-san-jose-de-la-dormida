@@ -11,6 +11,12 @@ import {
 } from "@/lib/service-request-detector";
 import { findInvoiceInDrive } from "@/lib/drive";
 import { getOrCreateConversation, saveMessage } from "@/lib/conversations";
+import {
+  canRequestMoreInvoices,
+  recordInvoiceRequest,
+  getInvoiceRequestCountThisMonth,
+  MAX_INVOICES_PER_MONTH,
+} from "@/lib/invoices";
 
 export const runtime = "nodejs";
 
@@ -228,6 +234,23 @@ export async function POST(request: NextRequest) {
           invoiceRequest.confidence = "medium";
         }
 
+        // Verificar límite de facturas por mes (máximo 5)
+        const webUserIdentifier = sessionId ? `WEB-${sessionId}` : "WEB-anonymous";
+        const canRequest = await canRequestMoreInvoices(webUserIdentifier);
+        if (!canRequest) {
+          const currentCount = await getInvoiceRequestCountThisMonth(webUserIdentifier);
+          const limitResponse =
+            `⚠️ Has alcanzado el límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes (solicitudes este mes: ${currentCount}).\n\n` +
+            `Para solicitar más facturas, por favor contacta con nuestra oficina de administración al 3521-401330.\n\n` +
+            `¿Tienes alguna otra consulta? Estoy aquí para ayudarte 😊`;
+
+          await logWebMessages(lastUserMessage, limitResponse);
+
+          return NextResponse.json({
+            response: limitResponse,
+          });
+        }
+
         // Buscar la factura en Google Drive (igual que en WhatsApp)
         // Pasar el tipo de factura detectado para buscar primero en la carpeta correcta
         console.log(`[CHAT] 🔍 Buscando factura:`, {
@@ -252,6 +275,16 @@ export async function POST(request: NextRequest) {
             invoice.fileId
           )}&fileName=${encodeURIComponent(invoice.fileName)}`;
 
+          // Registrar la solicitud de factura para el límite mensual
+          await recordInvoiceRequest(
+            webUserIdentifier,
+            invoiceRequest.accountNumber,
+            invoice.fileName,
+            invoiceRequest.month,
+            invoiceRequest.year
+          );
+
+          const invoiceCountAfter = await getInvoiceRequestCountThisMonth(webUserIdentifier);
           let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.\n\n`;
 
           if (invoiceRequest.month) {
@@ -263,8 +296,13 @@ export async function POST(request: NextRequest) {
           confirmationMessage += `📄 Archivo: ${invoice.fileName}\n\n`;
           confirmationMessage +=
             `💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:\n` +
-            `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n` +
-            `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
+            `https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login\n\n`;
+
+          if (invoiceCountAfter >= 2) {
+            confirmationMessage += `⚠️ *Recordatorio:* Hay un límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes. Esta es tu factura número ${invoiceCountAfter} de este mes.\n\n`;
+          }
+
+          confirmationMessage += `¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
 
           await logWebMessages(lastUserMessage, confirmationMessage);
 

@@ -16,6 +16,8 @@ import {
 import {
   getInvoiceRequestCountThisMonth,
   recordInvoiceRequest,
+  canRequestMoreInvoices,
+  MAX_INVOICES_PER_MONTH,
 } from "@/lib/invoices";
 import { getChatbotResponse } from "@/lib/chatbot";
 
@@ -299,6 +301,29 @@ async function handleInvoiceRequest(
     invoiceRequest.confidence = "medium";
   }
 
+  // Verificar límite de facturas por mes (máximo 5)
+  const canRequest = await canRequestMoreInvoices(from);
+  if (!canRequest) {
+    const currentCount = await getInvoiceRequestCountThisMonth(from);
+    const limitMessage =
+      `⚠️ Has alcanzado el límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes (solicitudes este mes: ${currentCount}).\n\n` +
+      `Para solicitar más facturas, por favor contacta con nuestra oficina de administración al 3521-401330.\n\n` +
+      `¿Tienes alguna otra consulta? Estoy aquí para ayudarte 😊`;
+
+    await sendTextMessage(from, limitMessage);
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(conversationId, "assistant", limitMessage);
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+    console.log(
+      `[WEBHOOK] ⚠️ Usuario ${from} bloqueado: límite de ${MAX_INVOICES_PER_MONTH} facturas alcanzado (${currentCount} este mes)`
+    );
+    return true;
+  }
+
   // Es una solicitud de factura - Intentar buscar con TODOS los números mencionados
   console.log(
     `[WEBHOOK] Buscando factura para cuentas: ${combinedAccountNumbers.join(", ")}, mes: ${invoiceRequest.month || "no especificado"}, año: ${
@@ -398,16 +423,9 @@ async function handleInvoiceRequest(
       confirmationMessage += `\n\n💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
       confirmationMessage += `\nhttps://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login`;
 
-      // Notificar desde la segunda factura sobre el límite de 10 por mes
+      // Notificar desde la segunda factura sobre el límite de 5 por mes
       if (invoiceCountAfter >= 2) {
-        if (invoiceCountAfter <= 10) {
-          confirmationMessage += `\n\n⚠️ *Recordatorio importante:* Hay un límite máximo de 10 facturas por mes por usuario. Esta es tu factura número ${invoiceCountAfter} de este mes. Por favor, usa esta herramienta con cuidado y no abuses de ella, ya que de lo contrario tu acceso será restringido.`;
-        } else {
-          confirmationMessage += `\n\n⚠️ *Nota importante:* Has superado el límite de 10 facturas por mes (solicitudes: ${invoiceCountAfter}). Para evitar abusos, tus próximas solicitudes de facturas serán atendidas de forma personal. Por favor, contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387 si necesitas más facturas.`;
-          console.log(
-            `[WEBHOOK] ⚠️ Usuario ${from} ha superado el límite de 10 facturas por mes (total este mes: ${invoiceCountAfter})`
-          );
-        }
+        confirmationMessage += `\n\n⚠️ *Recordatorio:* Hay un límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes. Esta es tu factura número ${invoiceCountAfter} de este mes.`;
       }
 
       confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
@@ -461,7 +479,7 @@ async function handleInvoiceRequest(
         error.stack
       );
     }
-    const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.`;
+    const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina de administración al 3521-401330.`;
 
     await sendTextMessage(from, errorMessage);
 
