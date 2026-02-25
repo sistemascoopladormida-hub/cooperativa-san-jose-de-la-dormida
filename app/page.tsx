@@ -297,12 +297,14 @@ function PharmacySchedule() {
   }
 
   const pharmacySchedule = [
-    { date: "9 de febrero", pharmacy: "Farmacia Robledo" },
-    { date: "10 de febrero", pharmacy: "Farmacia Centro" },
-    { date: "11 de febrero", pharmacy: "Farmacia Social" },
-    { date: "12 de febrero", pharmacy: "Farmacia Carreño" },
-    { date: "13 de febrero", pharmacy: "Farmacia Robledo" },
-    { date: "14 de febrero", pharmacy: "Farmacia Centro" },
+    { date: "23 de febrero", pharmacy: "Farmacia Social" },
+    { date: "24 de febrero", pharmacy: "Farmacia Carreño" },
+    { date: "25 de febrero", pharmacy: "Farmacia Robledo" },
+    { date: "26 de febrero", pharmacy: "Farmacia Centro" },
+    { date: "27 de febrero", pharmacy: "Farmacia Social" },
+    { date: "28 de febrero", pharmacy: "Farmacia Carreño" },
+    { date: "29 de febrero", pharmacy: "Farmacia Robledo" },
+    { date: "1 de marzo", pharmacy: "Farmacia Centro" },
   ]
 
   return (

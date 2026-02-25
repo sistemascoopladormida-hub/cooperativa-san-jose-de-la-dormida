@@ -150,7 +150,7 @@ TURNERO DE FARMACIAS:
 - 27 de febrero: Farmacia Social
 - 28 de febrero: Farmacia Carreño
 - 29 de febrero: Farmacia Robledo
-- 30 de febrero: Farmacia Centro
+- 1 de marzo: Farmacia Centro
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
