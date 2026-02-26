@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Maximize2, BookOpen } from "lucide-react"
 
 export default function RevistaPage() {
-  const revistaUrl = "https://online.fliphtml5.com/revistacooperativaladormida/revista/"
+  const revistaUrl = "https://online.fliphtml5.com/revistacooperativaladormida/REVISTA-FEB-2026/"
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100">
@@ -70,7 +70,7 @@ export default function RevistaPage() {
           <CardHeader className="border-b border-gray-100 pb-4">
             <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-coop-blue" />
-              Revista Cooperativa La Dormida
+              REVISTA FEB 2026
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               Usá las flechas o controles del visor para pasar de página. También podés hacer zoom
@@ -78,24 +78,17 @@ export default function RevistaPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0 bg-gray-50">
-            <div className="relative w-full bg-gray-200">
-              {/* Relación de aspecto responsiva */}
-              <div style={{ paddingTop: "min(80vh, max(60%, 324px))" }} />
+            <div className="relative w-full h-0" style={{ paddingTop: "max(60%, 324px)" }}>
               <iframe
                 id="revista-iframe"
-                style={{
-                  position: "absolute",
-                  border: "none",
-                  width: "100%",
-                  height: "100%",
-                  left: 0,
-                  top: 0,
-                }}
+                className="absolute left-0 top-0 w-full h-full border-0"
                 src={revistaUrl}
-                title="Revista Cooperativa La Dormida"
+                title="REVISTA FEB 2026"
                 scrolling="no"
                 frameBorder="0"
                 allowFullScreen
+                allowTransparency
+                seamless
               />
             </div>
           </CardContent>
