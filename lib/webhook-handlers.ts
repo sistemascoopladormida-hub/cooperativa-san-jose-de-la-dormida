@@ -172,6 +172,54 @@ async function sendAccountNumberImage(
 }
 
 /**
+ * Detecta si el usuario pide que le envíen la factura/boleta por WhatsApp.
+ * Caso típico: usuarios que responden encuestas de Meta y piden recibir la factura por WhatsApp.
+ */
+function isInvoiceViaWhatsAppRequest(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const hasInvoiceWord = /\b(factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(lower);
+  const hasWhatsAppRef = /\b(whatsapp|por\s+whatsapp|en\s+whatsapp)\b/i.test(lower);
+  const hasSendRequest = /\b(enviar|enviarme|envíenme|envienme|mandar|mandarme|recibir|que\s+me\s+envíen|que\s+me\s+manden)\b/i.test(lower);
+
+  // Pide factura/boleta Y menciona WhatsApp (con o sin verbo de envío)
+  return (hasInvoiceWord && hasWhatsAppRef) || (hasSendRequest && hasInvoiceWord && hasWhatsAppRef);
+}
+
+/**
+ * Maneja la solicitud de recibir factura por WhatsApp (ej: desde encuestas de Meta).
+ * Responde que están trabajando en habilitar esa opción.
+ */
+async function handleInvoiceViaWhatsAppRequest(
+  from: string,
+  text: string,
+  whatsappMessageId: string
+): Promise<boolean> {
+  if (!isInvoiceViaWhatsAppRequest(text)) {
+    return false;
+  }
+
+  const response =
+    `Gracias por tu interés. 🙏\n\n` +
+    `Estamos trabajando para poder enviar las facturas por WhatsApp. Te avisaremos cuando esta opción esté disponible.\n\n` +
+    `Mientras tanto, puedes:\n` +
+    `• Retirar tus facturas en los boxes de atención al público\n` +
+    `• Revisar tu correo electrónico (las enviamos por email)\n` +
+    `• Solicitar tu factura desde el chatbot de nuestra web con tu número de cuenta\n\n` +
+    `¿Alguna otra consulta? Estoy aquí para ayudarte 😊`;
+
+  await sendTextMessage(from, response);
+  try {
+    const conversationId = await getOrCreateConversation(from);
+    await saveMessage(conversationId, "user", text, whatsappMessageId);
+    await saveMessage(conversationId, "assistant", response);
+  } catch (dbError) {
+    console.error("Error guardando en BD:", dbError);
+  }
+  console.log("[WEBHOOK] Usuario pidió factura por WhatsApp (encuesta Meta): respuesta enviada");
+  return true;
+}
+
+/**
  * Maneja una solicitud de factura
  */
 async function handleInvoiceRequest(
@@ -531,6 +579,16 @@ export async function processTextMessage(
     } catch (dbError) {
       console.error("Error guardando en BD:", dbError);
     }
+    return;
+  }
+
+  // 2.5. Verificar si pide factura por WhatsApp (ej: desde encuestas de Meta)
+  const handledInvoiceViaWhatsApp = await handleInvoiceViaWhatsAppRequest(
+    from,
+    text,
+    whatsappMessageId
+  );
+  if (handledInvoiceViaWhatsApp) {
     return;
   }
 
