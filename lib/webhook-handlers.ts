@@ -1,10 +1,18 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { detectInvoiceRequest, detectAddressOrNameInsteadOfAccount } from "@/lib/invoice-detector";
+import {
+  detectInvoiceRequest,
+  detectAddressOrNameInsteadOfAccount,
+  hasInvoiceRequestIntent,
+} from "@/lib/invoice-detector";
 import {
   isNewServiceRequest,
   NEW_SERVICE_DERIVATION_MESSAGE,
 } from "@/lib/service-request-detector";
+import {
+  isServiceOutageComplaint,
+  SERVICE_OUTAGE_RESPONSE,
+} from "@/lib/service-outage-detector";
 import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
 import { sendDocumentMessage, sendImageMessage } from "@/lib/whatsapp";
 import { sendTextMessage } from "./whatsapp-messages";
@@ -227,6 +235,15 @@ async function handleInvoiceRequest(
   text: string,
   whatsappMessageId: string
 ): Promise<boolean> {
+  // Si no hay intención explícita de factura (ej: "hola", "te desconfiguraste"),
+  // NO procesar como factura → dejar que el chatbot responda de forma humana
+  if (!hasInvoiceRequestIntent(text)) {
+    console.log(
+      `[WEBHOOK] Sin intención de factura en mensaje: "${text.substring(0, 50)}..." → derivando a chatbot`
+    );
+    return false;
+  }
+
   // Primero verificar si el usuario está enviando dirección/nombre en lugar de número de cuenta
   const addressOrNameCheck = detectAddressOrNameInsteadOfAccount(text);
   
@@ -575,6 +592,27 @@ export async function processTextMessage(
         conversationId,
         "assistant",
         NEW_SERVICE_DERIVATION_MESSAGE
+      );
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+    return;
+  }
+
+  // 2.3. Verificar si es RECLAMO por corte de servicio (cable, luz, internet)
+  // NO es solicitud de factura - el usuario reporta un problema con su dirección
+  if (isServiceOutageComplaint(text)) {
+    console.log(
+      "[WEBHOOK] Reclamo por corte de servicio detectado, derivando a guardia/reclamos"
+    );
+    await sendTextMessage(from, SERVICE_OUTAGE_RESPONSE);
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(
+        conversationId,
+        "assistant",
+        SERVICE_OUTAGE_RESPONSE
       );
     } catch (dbError) {
       console.error("Error guardando en BD:", dbError);

@@ -4,11 +4,16 @@ import { cooperativeContext } from "@/lib/cooperative-context";
 import {
   detectInvoiceRequest,
   detectAddressOrNameInsteadOfAccount,
+  hasInvoiceRequestIntent,
 } from "@/lib/invoice-detector";
 import {
   isNewServiceRequest,
   NEW_SERVICE_DERIVATION_MESSAGE,
 } from "@/lib/service-request-detector";
+import {
+  isServiceOutageComplaint,
+  SERVICE_OUTAGE_RESPONSE,
+} from "@/lib/service-outage-detector";
 import { findInvoiceInDrive } from "@/lib/drive";
 import { getOrCreateConversation, saveMessage } from "@/lib/conversations";
 import {
@@ -59,8 +64,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // 0.5) Reclamo por corte de servicio (cable, luz, internet) → NO es solicitud de factura
+    if (isServiceOutageComplaint(lastUserMessage)) {
+      await logWebMessages(lastUserMessage, SERVICE_OUTAGE_RESPONSE);
+      return NextResponse.json({
+        response: SERVICE_OUTAGE_RESPONSE,
+      });
+    }
+
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
-    // Primero verificar si es una pregunta informativa sobre facturas (no procesarla como solicitud)
+    // Solo procesar como factura si hay INTENCIÓN EXPLÍCITA (no "hola", "te desconfiguraste", etc.)
+    const hasInvoiceIntent = hasInvoiceRequestIntent(lastUserMessage);
     const isInformationalQuestion =
       /(?:están|estan|está|esta|disponible|cuando|cuándo|hay|existen)/i.test(
         lastUserMessage
@@ -70,7 +84,7 @@ export async function POST(request: NextRequest) {
         lastUserMessage
       );
 
-    if (!isInformationalQuestion) {
+    if (hasInvoiceIntent && !isInformationalQuestion) {
       // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
       const addressOrNameCheck =
         detectAddressOrNameInsteadOfAccount(lastUserMessage);

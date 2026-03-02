@@ -62,30 +62,34 @@ export async function canRequestMoreInvoices(
 }
 
 /**
- * Obtiene el conteo de facturas enviadas a un usuario en el mes actual.
+ * Obtiene el conteo de facturas enviadas a un usuario en el mes actual (calendario).
+ * El límite se reinicia automáticamente cada 1° de mes.
+ * Cuenta por fecha de solicitud (requested_at), no por período de la factura.
  * @param userIdentifier - Número de teléfono (WhatsApp) o "WEB-{sessionId}" (chat web)
  */
 export async function getInvoiceRequestCountThisMonth(
   userIdentifier: string
 ): Promise<number> {
   try {
-    const { month, year } = getCurrentMonthYear();
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const { count, error } = await supabase
       .from("invoice_requests")
       .select("*", { count: "exact", head: true })
       .eq("phone_number", userIdentifier)
-      .eq("month", month)
-      .eq("year", year);
+      .gte("requested_at", startOfMonth.toISOString())
+      .lt("requested_at", startOfNextMonth.toISOString());
 
     if (error) {
-      console.error("[WEBHOOK] Error obteniendo conteo de facturas:", error);
+      console.error("[INVOICES] Error obteniendo conteo de facturas:", error);
       return 0;
     }
 
     return count || 0;
   } catch (error) {
-    console.error("[WEBHOOK] Error en getInvoiceRequestCountThisMonth:", error);
+    console.error("[INVOICES] Error en getInvoiceRequestCountThisMonth:", error);
     return 0;
   }
 }

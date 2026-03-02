@@ -185,10 +185,11 @@ export function detectInvoiceRequest(
           return false;
         }
         
-        // Verificar si hay un patrón de dirección: palabra (nombre de calle/pasaje) seguida de número
-        // Ejemplo: "pasaje toledo 515", "calle san martin 123"
-        const addressPattern = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,4})\b/i;
-        const addressMatch = message.match(addressPattern);
+        // Verificar si hay un patrón de dirección: calle/pasaje + nombre(s) + número
+        // Ejemplos: "pasaje toledo 515", "calle san martin 123", "calle eva perón 621"
+        const addressPatternSingle = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,4})\b/i;
+        const addressPatternMulti = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[\wáéíóúñ\s]+\s+(\d{3,4})\b/i;
+        const addressMatch = message.match(addressPatternSingle) || message.match(addressPatternMulti);
         if (addressMatch && addressMatch[1] === num) {
           console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de dirección (patrón calle/pasaje)`);
           return false;
@@ -286,6 +287,78 @@ export function detectInvoiceRequest(
     type,
     confidence,
   };
+}
+
+/**
+ * Detecta si el mensaje tiene INTENCIÓN EXPLÍCITA de solicitar una factura.
+ * Mensajes como "hola", "gracias", "te desconfiguraste" NO deben procesarse como factura
+ * aunque haya números de cuenta en el contexto de conversación.
+ */
+export function hasInvoiceRequestIntent(message: string): boolean {
+  const trimmed = message.trim();
+  if (!trimmed) return false;
+
+  const lower = trimmed.toLowerCase();
+
+  // Mensajes que NUNCA son solicitud de factura (saludos, quejas, etc.)
+  const nonInvoicePhrases = [
+    /^hola\s*!?\.?$/i,
+    /^hola\s*,\s*$/i,
+    /^buenos?\s*(días|dias|tardes|noches)\s*!?\.?$/i,
+    /^buenas?\s*(días|dias|tardes|noches)\s*!?\.?$/i,
+    /^gracias\s*!?\.?$/i,
+    /^te\s+desconfiguraste[\s!.]*$/i,
+    /^ok\s*!?\.?$/i,
+    /^sí\s*!?\.?$/i,
+    /^si\s*!?\.?$/i,
+    /^no\s*!?\.?$/i,
+    /^chau\s*!?\.?$/i,
+    /^adiós\s*!?\.?$/i,
+    /^de\s+nada\s*!?\.?$/i,
+    /^genial\s*!?\.?$/i,
+    /^perfecto\s*!?\.?$/i,
+    /^entendido\s*!?\.?$/i,
+  ];
+
+  if (nonInvoicePhrases.some((p) => p.test(trimmed))) {
+    return false;
+  }
+
+  // Palabras clave de factura explícitas
+  const hasInvoiceKeyword = /\b(?:factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(
+    trimmed
+  );
+
+  // Continuación explícita: "enviamela", "dale" (cuando pide enviar factura)
+  const hasContinuationKeyword =
+    /\b(?:enviamela|envíamela|mandamela|mandámela|sí\s+dale|si\s+dale|dale)\b/i.test(
+      trimmed
+    ) && trimmed.split(/\s+/).length <= 3; // Solo si es mensaje corto
+
+  // "cuenta X" o "número X" con número de 3-4 dígitos
+  const hasAccountWithNumber =
+    /(?:cuenta|numero|número|nro)\s*:?\s*\d{3,4}\b/i.test(trimmed) ||
+    /\b\d{3,4}\s*(?:es\s+)?(?:mi|el|la)\s*(?:cuenta|factura|boleta)/i.test(
+      trimmed
+    );
+
+  // Mensaje es SOLO un número de 3-4 dígitos (continuación enviando cuenta)
+  const isOnlyAccountNumber = /^\d{3,4}\s*!?\.?$/.test(trimmed);
+
+  // Solicitud explícita: quiero/necesito + factura/boleta/cuenta
+  const hasExplicitRequest =
+    /\b(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|pasame|podrías|podrias|puedes)\b/i.test(
+      trimmed
+    ) &&
+    /\b(?:factura|boleta|recibo|cuenta)\b/i.test(trimmed);
+
+  return (
+    hasInvoiceKeyword ||
+    (hasContinuationKeyword && trimmed.length < 50) ||
+    hasAccountWithNumber ||
+    isOnlyAccountNumber ||
+    hasExplicitRequest
+  );
 }
 
 /**
