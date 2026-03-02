@@ -40,6 +40,14 @@ export function detectInvoiceRequest(
   let accountNumber: string | null = null;
   let confidence: "high" | "medium" | "low" = "low";
 
+  // Helper: excluir números que son parte de DNI (29.981.483 o 29981483)
+  const isPartOfDni = (num: string): boolean => {
+    const dniWithDots = message.match(/\d{1,2}\.\d{3}\.\d{3}/g) || [];
+    if (dniWithDots.some((d) => d.includes(num))) return true;
+    const longSeq = message.match(/\d{7,8}/g) || [];
+    return longSeq.some((s) => s.includes(num));
+  };
+
   // Buscar TODOS los números de cuenta con patrones de alta confianza
   const foundHighConfidenceNumbers = new Set<string>();
   for (const pattern of highConfidencePatterns) {
@@ -47,8 +55,7 @@ export function detectInvoiceRequest(
     for (const match of matches) {
       if (match && match[1]) {
         const number = match[1].trim();
-        // Validar que sea un número de cuenta válido (3-4 dígitos solamente)
-        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
+        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
           foundHighConfidenceNumbers.add(number);
           confidence = "high";
         }
@@ -77,8 +84,7 @@ export function detectInvoiceRequest(
       for (const match of matches) {
         if (match && match[1]) {
           const number = match[1].trim();
-          // Solo aceptar números de 3-4 dígitos para confianza media (número de cuenta)
-          if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number)) {
+          if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
             foundMediumConfidenceNumbers.add(number);
             confidence = "medium";
           }
@@ -113,6 +119,25 @@ export function detectInvoiceRequest(
       ];
       
       const filteredNumbers = nonYearNumbers.filter((num) => {
+        // Excluir números que son parte de un DNI (formato XX.XXX.XXX ej: 29.981.483)
+        // El DNI NO es el número de cuenta - evita enviar facturas incorrectas
+        const dniWithDotsPattern = /\d{1,2}\.\d{3}\.\d{3}/g;
+        const dniMatches = message.match(dniWithDotsPattern) || [];
+        for (const dni of dniMatches) {
+          if (dni.includes(num)) {
+            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: es parte de un DNI (${dni})`);
+            return false;
+          }
+        }
+        // Excluir números dentro de secuencias de 7-8 dígitos (DNI sin puntos)
+        const longDigitSequence = message.match(/\d{7,8}/g) || [];
+        for (const seq of longDigitSequence) {
+          if (seq.includes(num)) {
+            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: es parte de secuencia larga (${seq}), probable DNI`);
+            return false;
+          }
+        }
+
         // Obtener el contexto alrededor del número
         const numIndex = message.toLowerCase().indexOf(num.toLowerCase());
         if (numIndex === -1) return true;
@@ -380,6 +405,46 @@ function isInformationalQuestion(message: string): boolean {
   ];
   
   return informationalPatterns.some(pattern => pattern.test(message));
+}
+
+/**
+ * Detecta si el usuario pide AYUDA para encontrar/obtener el número de cuenta.
+ * Ej: "cómo hago para tener el número de cuenta", "dónde encuentro el número"
+ */
+export function isAccountNumberHelpQuestion(text: string): boolean {
+  const dniPattern = /\d{1,2}\.\d{3}\.\d{3}/;
+  const hasValidAccountNumber =
+    /\b(\d{3,4})\b/.test(text) &&
+    !/\b20\d{2}\b/.test(text) &&
+    !dniPattern.test(text);
+  if (hasValidAccountNumber) return false;
+
+  const helpPatterns = [
+    /cómo\s+hago\s+para\s+(?:tener|obtener|conseguir|saber)/i,
+    /cómo\s+(?:obtengo|obtener|conseguir|tener|saber)\s+(?:el\s+)?(?:número|numero|nro)\s+de\s+cuenta/i,
+    /(?:dónde|donde)\s+(?:está|esta|encontrar|busco|encuentro)\s+(?:el\s+)?(?:número|numero|nro)\s+de\s+cuenta/i,
+    /(?:dónde|donde)\s+(?:está|esta)\s+el\s+(?:número|numero|nro)\s+de\s+cuenta/i,
+    /(?:ubicación|ubicacion|encontrar|buscar)\s+.*(?:número|numero|cuenta|factura|boleta)/i,
+    /no\s+(?:encuentro|lo\s+encuentro|sé|se|lo\s+veo)\s+.*(?:número|numero|cuenta|factura)/i,
+    /(?:número|numero|nro)\s+de\s+cuenta\s+de\s+(?:la\s+)?(?:boleta|factura)/i,
+    /(?:cómo|como)\s+.*(?:número|numero|cuenta)\s+.*(?:boleta|factura|luz|internet|cable)/i,
+  ];
+  return helpPatterns.some((p) => p.test(text));
+}
+
+/**
+ * Detecta si el usuario indica que la factura enviada es incorrecta.
+ */
+export function isWrongInvoiceFeedback(text: string): boolean {
+  const patterns = [
+    /esa\s+no\s+es\s+mi\s+(?:boleta|factura)/i,
+    /no\s+es\s+mi\s+(?:boleta|factura)/i,
+    /esa\s+(?:boleta|factura)\s+no\s+es\s+(?:mía|mia)/i,
+    /(?:boleta|factura)\s+incorrecta/i,
+    /(?:me\s+)?enviaron\s+(?:la\s+)?(?:boleta|factura)\s+equivocada/i,
+    /no\s+es\s+la\s+correcta/i,
+  ];
+  return patterns.some((p) => p.test(text.trim()));
 }
 
 /**

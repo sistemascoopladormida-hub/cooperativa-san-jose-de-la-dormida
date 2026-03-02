@@ -5,6 +5,8 @@ import {
   detectInvoiceRequest,
   detectAddressOrNameInsteadOfAccount,
   hasInvoiceRequestIntent,
+  isAccountNumberHelpQuestion,
+  isWrongInvoiceFeedback,
 } from "@/lib/invoice-detector";
 import {
   isNewServiceRequest,
@@ -69,6 +71,36 @@ export async function POST(request: NextRequest) {
       await logWebMessages(lastUserMessage, SERVICE_OUTAGE_RESPONSE);
       return NextResponse.json({
         response: SERVICE_OUTAGE_RESPONSE,
+      });
+    }
+
+    // 0.6) Usuario pide AYUDA para encontrar el número de cuenta → mostrar imagen
+    if (isAccountNumberHelpQuestion(lastUserMessage)) {
+      const helpResponse =
+        `📋 El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+        `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+        `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+        `Es un número de 3 a 4 dígitos (no es el DNI ni la matrícula antigua).`;
+      await logWebMessages(lastUserMessage, helpResponse);
+      return NextResponse.json({
+        response: helpResponse,
+        showImage: "ubicacion de numero de cuenta",
+      });
+    }
+
+    // 0.7) Usuario dice que la factura enviada es incorrecta → mostrar imagen de ayuda
+    if (isWrongInvoiceFeedback(lastUserMessage)) {
+      const wrongInvoiceResponse =
+        `Lamento que te hayamos enviado una factura incorrecta. 😔\n\n` +
+        `El número de cuenta tiene *3 a 4 dígitos* (no es el DNI ni la matrícula antigua).\n\n` +
+        `📋 En la imagen puedes ver dónde encontrarlo en tu factura:\n\n` +
+        `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+        `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+        `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`;
+      await logWebMessages(lastUserMessage, wrongInvoiceResponse);
+      return NextResponse.json({
+        response: wrongInvoiceResponse,
+        showImage: "ubicacion de numero de cuenta",
       });
     }
 

@@ -4,6 +4,8 @@ import {
   detectInvoiceRequest,
   detectAddressOrNameInsteadOfAccount,
   hasInvoiceRequestIntent,
+  isAccountNumberHelpQuestion,
+  isWrongInvoiceFeedback,
 } from "@/lib/invoice-detector";
 import {
   isNewServiceRequest,
@@ -32,22 +34,6 @@ import { getChatbotResponse } from "@/lib/chatbot";
 const WHATSAPP_API_VERSION = "v22.0";
 
 /**
- * Detecta si el usuario pregunta dónde está el número de cuenta.
- * NO debe coincidir cuando el usuario ya proporcionó un número de cuenta (ej: "boleta cuenta 1979").
- */
-function isAccountNumberQuestion(text: string): boolean {
-  // Si el mensaje ya contiene un número de cuenta (3-4 dígitos, no año 20XX), es una solicitud, no una pregunta
-  const hasAccountNumber = /\b(\d{3,4})\b/.test(text) &&
-    !/\b20\d{2}\b/.test(text); // Excluir años 2000-2099
-  if (hasAccountNumber) {
-    return false;
-  }
-  const accountNumberQuestionPattern =
-    /(dónde|donde|donde está|dónde está|ubicación|ubicacion|encontrar|buscar|no encuentro|no lo encuentro|no sé|no se|no lo veo|no lo ve|dónde lo encuentro|donde lo encuentro|dónde lo busco|donde lo busco|dónde está el número|donde esta el numero|dónde está el numero|donde esta el número|número de cuenta|numero de cuenta|cuenta).*(número|numero|cuenta|factura)/i;
-  return accountNumberQuestionPattern.test(text);
-}
-
-/**
  * Maneja la pregunta sobre dónde está el número de cuenta
  */
 async function handleAccountNumberQuestion(
@@ -55,7 +41,7 @@ async function handleAccountNumberQuestion(
   text: string,
   whatsappMessageId: string
 ): Promise<boolean> {
-  if (!isAccountNumberQuestion(text)) {
+  if (!isAccountNumberHelpQuestion(text)) {
     return false;
   }
 
@@ -605,6 +591,23 @@ export async function processTextMessage(
     } catch (dbError) {
       console.error("Error guardando en BD:", dbError);
     }
+    return;
+  }
+
+  // 2.2. Verificar si el usuario dice que la factura enviada es incorrecta
+  if (isWrongInvoiceFeedback(text)) {
+    console.log("[WEBHOOK] Usuario indica que la factura enviada es incorrecta. Enviando ayuda.");
+    await sendAccountNumberImage(
+      from,
+      text,
+      whatsappMessageId,
+      `Lamento que te hayamos enviado una factura incorrecta. 😔\n\n` +
+        `El número de cuenta tiene *3 a 4 dígitos* (no es el DNI ni la matrícula antigua).\n\n` +
+        `📋 En la imagen puedes ver dónde encontrarlo en tu factura:\n\n` +
+        `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+        `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+        `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`
+    );
     return;
   }
 
