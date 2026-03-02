@@ -122,22 +122,22 @@ export async function POST(request: NextRequest) {
       const currentYear = invoiceRequest.year;
       const currentType = invoiceRequest.type;
 
-      // Si no hay número de cuenta en el mensaje actual, buscar en mensajes anteriores cuando:
-      // - hay mes/año, o palabras de factura, o "Enviamela"/"Dale" (continuación de solicitud previa)
+      // Solo usar número de mensajes anteriores cuando es una CONTINUACIÓN clara:
+      // - "y la de noviembre?" (tiene mes, ya dio el número antes)
+      // - "enviamela" / "dale" (continuación explícita)
+      // NO usar contexto cuando: "hola quiero mi boleta" sin número → pedir el número
+      const hasNumberInCurrentMessage = !!invoiceRequest.accountNumber;
       const isInvoiceContinuation =
         /\b(?:enviamela|envíamela|mandamela|dale|sí\s+dale)\b/i.test(
           lastUserMessage
         );
+      const hasMonthOrTypeInCurrent = !!(invoiceRequest.month || invoiceRequest.type);
+
       if (
-        !invoiceRequest.accountNumber &&
-        (invoiceRequest.month ||
-          invoiceRequest.year ||
-          /\b(?:factura|boleta|recibo|mes\s+pasado|del\s+mes)\b/i.test(
-            lastUserMessage
-          ) ||
-          isInvoiceContinuation)
+        !hasNumberInCurrentMessage &&
+        (hasMonthOrTypeInCurrent || isInvoiceContinuation)
       ) {
-        // Buscar número de cuenta en mensajes anteriores del usuario
+        // Solo buscar en mensajes anteriores si hay mes/tipo (continuación) o "enviamela"/"dale"
         for (
           let i = messages.length - 1;
           i >= Math.max(0, messages.length - 10);
@@ -155,37 +155,45 @@ export async function POST(request: NextRequest) {
               console.log(
                 `[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`
               );
-              // Usar el número de cuenta del mensaje anterior
               invoiceRequest.accountNumber = previousRequest.accountNumber;
-              // PRIORIZAR el mes/año/tipo del mensaje actual si existe (el usuario lo especificó explícitamente)
-              // Solo usar el del mensaje anterior si el actual no tiene mes/año/tipo
               if (currentMonth) {
                 invoiceRequest.month = currentMonth;
-                console.log(`[CHAT] 📅 Usando mes del mensaje actual: ${currentMonth}`);
               } else if (previousRequest.month) {
                 invoiceRequest.month = previousRequest.month;
               }
-              
               if (currentYear) {
                 invoiceRequest.year = currentYear;
-                console.log(`[CHAT] 📅 Usando año del mensaje actual: ${currentYear}`);
               } else if (previousRequest.year) {
                 invoiceRequest.year = previousRequest.year;
               }
-              
               if (currentType) {
                 invoiceRequest.type = currentType;
-                console.log(`[CHAT] 🔌 Usando tipo del mensaje actual: ${currentType}`);
               } else if (previousRequest.type) {
                 invoiceRequest.type = previousRequest.type;
               }
-              
-              // Mantener confianza alta ya que el número de cuenta fue validado anteriormente
               invoiceRequest.confidence = "high";
               break;
             }
           }
         }
+      }
+
+      // Si quiere factura pero NO proporcionó número (ni en mensaje actual ni en anteriores)
+      // → pedir el número en lugar de enviar factura incorrecta
+      if (!invoiceRequest.accountNumber) {
+        const response =
+          `📋 Para poder enviarte tu factura/boleta, necesito tu número de cuenta.\n\n` +
+          `El número de cuenta aparece en dos lugares de tu factura:\n\n` +
+          `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+          `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+          `Es un número de 3 a 4 dígitos. Por favor, enviámelo para poder ayudarte. 😊`;
+
+        await logWebMessages(lastUserMessage, response);
+
+        return NextResponse.json({
+          response,
+          showImage: "ubicacion de numero de cuenta",
+        });
       }
 
       // Si el usuario especificó un mes pero no un año, inferir el año correcto

@@ -289,20 +289,46 @@ async function handleInvoiceRequest(
     JSON.stringify(invoiceRequest)
   );
 
-  // Combinar números del mensaje actual con el contexto
+  // IMPORTANTE: Solo usar números del CONTEXTO cuando el usuario está continuando
+  // (ej: "y la de noviembre?" después de "factura 1234").
+  // Si el mensaje actual NO tiene número (ej: "hola quiero mi boleta"), NO usar contexto
+  // → pedir el número de cuenta para evitar enviar facturas incorrectas.
+  const hasNumberInCurrentMessage = invoiceRequest.accountNumbers.length > 0;
+  const hasMonthOrTypeInCurrentMessage = !!(invoiceRequest.month || invoiceRequest.type);
+
   const allAccountNumbers = new Set<string>();
   for (const num of invoiceRequest.accountNumbers) {
     allAccountNumbers.add(num);
   }
-  for (const num of conversationContext) {
-    allAccountNumbers.add(num);
+  // Solo agregar contexto si: hay número en mensaje actual O (hay mes/tipo Y contexto reciente)
+  if (hasNumberInCurrentMessage) {
+    // Mensaje actual tiene número → usar también contexto por si mencionó varios
+    for (const num of conversationContext) {
+      allAccountNumbers.add(num);
+    }
+  } else if (hasMonthOrTypeInCurrentMessage && conversationContext.length > 0) {
+    // Continuación: "y la de noviembre?" después de haber dado el número antes
+    for (const num of conversationContext) {
+      allAccountNumbers.add(num);
+    }
   }
+  // Si no hay número en mensaje actual y no hay mes/tipo → NO usar contexto
+
   const combinedAccountNumbers = Array.from(allAccountNumbers);
-  
   console.log(`[WEBHOOK] 🔢 Números de cuenta a intentar:`, combinedAccountNumbers);
 
   if (combinedAccountNumbers.length === 0) {
-    return false;
+    // Pedir número de cuenta en lugar de fallar silenciosamente
+    console.log(
+      `[WEBHOOK] ⚠️ Usuario quiere factura pero no proporcionó número de cuenta. Enviando ayuda.`
+    );
+    await sendAccountNumberImage(
+      from,
+      text,
+      whatsappMessageId,
+      `📋 Para poder enviarte tu factura/boleta, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. Por favor, enviámelo para poder ayudarte. 😊`
+    );
+    return true;
   }
 
   // Actualizar invoiceRequest con todos los números combinados
@@ -341,25 +367,8 @@ async function handleInvoiceRequest(
     console.log(`[WEBHOOK] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
   }
 
-  // Si tenemos números del contexto o del mensaje actual, intentar buscar primero
-  // Solo mostrar imagen de ayuda si realmente no hay números válidos para intentar
   const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
-  
-  // Si la confianza es baja Y NO hay mes/tipo Y no hay números del contexto, enviar imagen explicativa
-  // Pero si hay números del contexto o del mensaje actual, intentar buscar primero
-  if (combinedAccountNumbers.length === 0 && invoiceRequest.confidence === "low" && !hasMonthOrType) {
-    console.log(
-      `[WEBHOOK] ⚠️ Confianza baja y no hay números de cuenta detectados. Enviando imagen de ayuda.`
-    );
-    await sendAccountNumberImage(
-      from,
-      text,
-      whatsappMessageId,
-      `📋 No estoy seguro de haber identificado correctamente tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
-    );
-    return true;
-  }
-  
+
   // Si la confianza es baja pero hay números para intentar, subir la confianza a media para intentar buscar
   if (combinedAccountNumbers.length > 0 && invoiceRequest.confidence === "low" && hasMonthOrType) {
     console.log(`[WEBHOOK] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
