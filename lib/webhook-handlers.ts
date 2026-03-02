@@ -22,7 +22,12 @@ import {
   getOrCreateConversation,
   saveMessage,
   getRecentMessages,
+  updateWhatsappOptIn,
 } from "@/lib/conversations";
+import {
+  isActivacionFactura,
+  ACTIVACION_FACTURAS_RESPONSE,
+} from "@/lib/activacion-facturas";
 import {
   getInvoiceRequestCountThisMonth,
   recordInvoiceRequest,
@@ -563,6 +568,33 @@ export async function processTextMessage(
   text: string,
   whatsappMessageId: string
 ): Promise<void> {
+  // 0. "Activar facturas" - Opt-in (funciona igual si viene de plantilla o se escribe manual)
+  if (isActivacionFactura(text)) {
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await updateWhatsappOptIn(from, true);
+      await saveMessage(
+        conversationId,
+        "user",
+        "Activar facturas",
+        whatsappMessageId,
+        "activacion_facturas"
+      );
+      await sendTextMessage(from, ACTIVACION_FACTURAS_RESPONSE);
+      await saveMessage(
+        conversationId,
+        "assistant",
+        ACTIVACION_FACTURAS_RESPONSE,
+        undefined,
+        "activacion_facturas"
+      );
+      console.log("[WEBHOOK] ✅ Activación facturas procesada para:", from);
+    } catch (err) {
+      console.error("[WEBHOOK] Error en activación facturas:", err);
+    }
+    return;
+  }
+
   // 1. Verificar si pregunta sobre número de cuenta
   const handledAccountQuestion = await handleAccountNumberQuestion(
     from,

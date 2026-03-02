@@ -140,6 +140,18 @@ Mensajes visibles en /conversaciones con badge "Activación facturas"
 
 ---
 
+## 🧪 Cómo probar (antes de que Meta apruebe la plantilla)
+
+El mensaje que envía el botón de la plantilla es **idéntico** a escribir "Activar facturas" manualmente. Por eso podés probar así:
+
+1. Enviá **"Activar facturas"** al número de WhatsApp del asistente.
+2. Deberías recibir la respuesta de confirmación.
+3. En `/conversaciones` deberías ver el badge "Facturas" y los mensajes marcados como "Activación facturas".
+
+Cuando Meta apruebe la plantilla, el botón hará exactamente lo mismo: enviará el texto "Activar facturas" al webhook.
+
+---
+
 ## ✅ Consideraciones
 
 - **Optional chaining:** Uso de `?.` para eventos variables de Meta
