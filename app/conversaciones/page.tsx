@@ -20,6 +20,7 @@ import {
   Sparkles,
   ArrowLeft,
   Bot,
+  FileCheck,
 } from "lucide-react";
 
 interface Conversation {
@@ -29,6 +30,8 @@ interface Conversation {
   updated_at: string;
   message_count: number;
   last_message_at?: string;
+  whatsapp_opt_in?: boolean;
+  fecha_opt_in?: string;
 }
 
 interface Message {
@@ -38,6 +41,7 @@ interface Message {
   content: string;
   whatsapp_message_id?: string;
   created_at: string;
+  message_source?: "chatbot" | "activacion_facturas";
 }
 
 interface ConversationDetail {
@@ -158,9 +162,12 @@ export default function ConversacionesPage() {
     }
   };
 
-  const filteredConversations = conversations.filter((conv) =>
-    conv.phone_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredConversations = conversations.filter((conv) => {
+    const term = searchTerm.toLowerCase();
+    const matchPhone = conv.phone_number.toLowerCase().includes(term);
+    const matchFacturas = term && (term.includes("factura") || term.includes("opt")) && conv.whatsapp_opt_in === true;
+    return matchPhone || matchFacturas;
+  });
 
   // Página de login
   if (authenticated === false) {
@@ -427,7 +434,7 @@ export default function ConversacionesPage() {
                 <div className="relative mt-4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Buscar por número o tipo..."
+                    placeholder="Buscar por número, tipo o facturas..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
@@ -464,6 +471,7 @@ export default function ConversacionesPage() {
                         {filteredConversations.map((conv, index) => {
                           const isWebConversation =
                             conv.phone_number.startsWith("WEB-");
+                          const hasOptIn = conv.whatsapp_opt_in === true;
                           const displayName = isWebConversation
                             ? `Chat Web (${conv.phone_number.replace(
                                 /^WEB-/,
@@ -506,7 +514,18 @@ export default function ConversacionesPage() {
                                 <motion.div
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
+                                  className="flex items-center gap-1"
                                 >
+                                  {hasOptIn && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                                      title="Facturas activadas"
+                                    >
+                                      <FileCheck className="h-3 w-3 mr-0.5" />
+                                      Facturas
+                                    </Badge>
+                                  )}
                                   <Badge
                                     variant="secondary"
                                     className={
@@ -638,8 +657,14 @@ export default function ConversacionesPage() {
                                 message.role === "user"
                                   ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm"
                                   : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm border border-gray-200 dark:border-gray-600"
-                              }`}
+                              } ${message.message_source === "activacion_facturas" ? "ring-2 ring-green-400/50" : ""}`}
                             >
+                              {message.message_source === "activacion_facturas" && (
+                                <Badge variant="secondary" className="mb-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs">
+                                  <FileCheck className="h-3 w-3 mr-1" />
+                                  Activación facturas
+                                </Badge>
+                              )}
                               <div className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed break-words">
                                 {message.content}
                               </div>

@@ -33,20 +33,56 @@ export async function getOrCreateConversation(
 }
 
 /**
+ * Marca una conversación con opt-in de facturas por WhatsApp
+ */
+export async function updateWhatsappOptIn(
+  phoneNumber: string,
+  optIn: boolean = true
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from("conversations")
+      .update({
+        whatsapp_opt_in: optIn,
+        fecha_opt_in: optIn ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("phone_number", phoneNumber);
+
+    if (error) {
+      console.error("[CONVERSATIONS] Error actualizando opt-in:", error);
+    }
+  } catch (err) {
+    console.error("[CONVERSATIONS] Error en updateWhatsappOptIn:", err);
+  }
+}
+
+/**
  * Guarda un mensaje en Supabase y actualiza la fecha de actualización de la conversación
  */
 export async function saveMessage(
   conversationId: number,
   role: "user" | "assistant",
   content: string,
-  whatsappMessageId?: string
+  whatsappMessageId?: string,
+  messageSource?: "chatbot" | "activacion_facturas"
 ): Promise<void> {
-  const { error: messageError } = await supabase.from("messages").insert({
+  const insertData: Record<string, unknown> = {
     conversation_id: conversationId,
     role,
     content,
     whatsapp_message_id: whatsappMessageId,
-  });
+  };
+  if (messageSource) {
+    insertData.message_source = messageSource;
+  }
+  let { error: messageError } = await supabase.from("messages").insert(insertData);
+  // Si falla por columna message_source inexistente, reintentar sin ella
+  if (messageError?.message?.includes("message_source") && messageSource) {
+    delete insertData.message_source;
+    const retry = await supabase.from("messages").insert(insertData);
+    messageError = retry.error;
+  }
 
   if (messageError) {
     console.error("Error guardando mensaje:", messageError);
