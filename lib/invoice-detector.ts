@@ -1,3 +1,10 @@
+/** Normaliza typos comunes que impiden detectar solicitudes de factura */
+function normalizeForInvoiceDetection(text: string): string {
+  return text
+    .replace(/\bcuebta\b/gi, "cuenta")
+    .replace(/\bcunta\b/gi, "cuenta");
+}
+
 /**
  * Detecta si el mensaje contiene una solicitud de factura y extrae el número de cuenta
  * También detecta si se menciona un mes específico
@@ -51,7 +58,7 @@ export function detectInvoiceRequest(
   // Buscar TODOS los números de cuenta con patrones de alta confianza
   const foundHighConfidenceNumbers = new Set<string>();
   for (const pattern of highConfidencePatterns) {
-    const matches = [...message.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+    const matches = [...normalizedMessage.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
     for (const match of matches) {
       if (match && match[1]) {
         const number = match[1].trim();
@@ -80,7 +87,7 @@ export function detectInvoiceRequest(
 
     const foundMediumConfidenceNumbers = new Set<string>();
     for (const pattern of mediumConfidencePatterns) {
-      const matches = [...message.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+      const matches = [...normalizedMessage.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
       for (const match of matches) {
         if (match && match[1]) {
           const number = match[1].trim();
@@ -102,7 +109,7 @@ export function detectInvoiceRequest(
   // PERO excluir años (20XX) y números que parezcan ser parte de direcciones
   if (!accountNumber) {
     // Buscar todos los números de 3-4 dígitos (número de cuenta válido)
-    const allNumbers = message.match(/\b(\d{3,4})\b/g);
+    const allNumbers = normalizedMessage.match(/\b(\d{3,4})\b/g);
     if (allNumbers) {
       // Filtrar años (20XX)
       const nonYearNumbers = allNumbers.filter(
@@ -260,11 +267,14 @@ export function detectInvoiceRequest(
     type = "electricidad";
   }
 
-  // Detectar mes - mejorar para capturar "mes pasado", "del mes", etc.
+  // Detectar mes(es) - captura "enero y febrero", "enero, febrero", etc.
   const monthPattern =
-    /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i;
-  const monthMatch = message.match(monthPattern);
-  let month = monthMatch ? monthMatch[1].toLowerCase() : undefined;
+    /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/gi;
+  const monthMatches = normalizedMessage.match(monthPattern);
+  const months = monthMatches
+    ? [...new Set(monthMatches.map((m) => m.toLowerCase()))]
+    : [];
+  let month = months[0]; // Primer mes para retrocompatibilidad
 
   // Si no se encontró mes específico, verificar si dice "mes pasado" o similar
   if (!month) {
@@ -308,6 +318,7 @@ export function detectInvoiceRequest(
     accountNumbers: accountNumbers.length > 0 ? accountNumbers : (accountNumber ? [accountNumber] : []),
     accountNumber,
     month,
+    months,
     year,
     type,
     confidence,
@@ -320,7 +331,8 @@ export function detectInvoiceRequest(
  * aunque haya números de cuenta en el contexto de conversación.
  */
 export function hasInvoiceRequestIntent(message: string): boolean {
-  const trimmed = message.trim();
+  const normalized = normalizeForInvoiceDetection(message);
+  const trimmed = normalized.trim();
   if (!trimmed) return false;
 
   const lower = trimmed.toLowerCase();

@@ -251,24 +251,33 @@ async function handleInvoiceRequest(
     return true;
   }
   
-  // Obtener el contexto de la conversación para números mencionados anteriormente
+  // Obtener el contexto de la conversación (números y meses de mensajes anteriores)
   let conversationContext: string[] = [];
+  let contextMonths: string[] = [];
   try {
     const conversationId = await getOrCreateConversation(from);
-    const recentMessages = await getRecentMessages(conversationId, 10); // Últimos 10 mensajes (para capturar número en conversaciones previas)
+    const recentMessages = await getRecentMessages(conversationId, 10);
     
-    // Extraer todos los números de cuenta mencionados en los mensajes anteriores del usuario
     const previousAccountNumbers = new Set<string>();
+    const previousMonths = new Set<string>();
     for (const msg of recentMessages) {
       if (msg.role === "user") {
         const prevRequest = detectInvoiceRequest(msg.content);
         for (const num of prevRequest.accountNumbers) {
           previousAccountNumbers.add(num);
         }
+        if (prevRequest.months?.length) {
+          for (const m of prevRequest.months) {
+            previousMonths.add(m);
+          }
+        } else if (prevRequest.month) {
+          previousMonths.add(prevRequest.month);
+        }
       }
     }
     conversationContext = Array.from(previousAccountNumbers);
-    console.log(`[WEBHOOK] 📝 Contexto de conversación: números mencionados anteriormente:`, conversationContext);
+    contextMonths = Array.from(previousMonths);
+    console.log(`[WEBHOOK] 📝 Contexto: números=`, conversationContext, `meses=`, contextMonths);
   } catch (error) {
     console.error("[WEBHOOK] Error obteniendo contexto de conversación:", error);
   }
@@ -291,19 +300,20 @@ async function handleInvoiceRequest(
   for (const num of invoiceRequest.accountNumbers) {
     allAccountNumbers.add(num);
   }
-  // Solo agregar contexto si: hay número en mensaje actual O (hay mes/tipo Y contexto reciente)
   if (hasNumberInCurrentMessage) {
-    // Mensaje actual tiene número → usar también contexto por si mencionó varios
     for (const num of conversationContext) {
       allAccountNumbers.add(num);
     }
   } else if (hasMonthOrTypeInCurrentMessage && conversationContext.length > 0) {
-    // Continuación: "y la de noviembre?" después de haber dado el número antes
     for (const num of conversationContext) {
       allAccountNumbers.add(num);
     }
   }
-  // Si no hay número en mensaje actual y no hay mes/tipo → NO usar contexto
+
+  // Meses: usar del mensaje actual o del contexto (ej: "factura enero y febrero" → usuario envía "7981")
+  const currentMonths = invoiceRequest.months ?? (invoiceRequest.month ? [invoiceRequest.month] : []);
+  const combinedMonths =
+    currentMonths.length > 0 ? currentMonths : contextMonths;
 
   const combinedAccountNumbers = Array.from(allAccountNumbers);
   console.log(`[WEBHOOK] 🔢 Números de cuenta a intentar:`, combinedAccountNumbers);
@@ -389,115 +399,92 @@ async function handleInvoiceRequest(
     return true;
   }
 
-  // Es una solicitud de factura - Intentar buscar con TODOS los números mencionados
+  // Meses a buscar: si no hay ninguno, usar mes actual
+  const monthsToSearch =
+    combinedMonths.length > 0
+      ? combinedMonths
+      : [invoiceRequest.month || undefined].filter(Boolean);
+  const effectiveMonths =
+    monthsToSearch.length > 0
+      ? monthsToSearch
+      : [undefined]; // undefined = mes actual en findInvoiceInDrive
+
   console.log(
-    `[WEBHOOK] Buscando factura para cuentas: ${combinedAccountNumbers.join(", ")}, mes: ${invoiceRequest.month || "no especificado"}, año: ${
+    `[WEBHOOK] Buscando factura para cuentas: ${combinedAccountNumbers.join(", ")}, meses: ${effectiveMonths.join(", ") || "actual"}, año: ${
       invoiceRequest.year || "no especificado"
-    }, confianza: ${invoiceRequest.confidence}`
+    }`
   );
 
   try {
-    let invoice = null;
-    let lastAccountNumberAttempted = "";
-    
-    // Intentar buscar con cada número de cuenta hasta encontrar una factura
+    const invoicesFound: Array<{
+      invoice: Awaited<ReturnType<typeof findInvoiceInDrive>>;
+      month?: string;
+    }> = [];
+
     for (const accountNum of combinedAccountNumbers) {
-      lastAccountNumberAttempted = accountNum;
-      console.log(`[WEBHOOK] 🔍 Intentando buscar factura con número de cuenta: ${accountNum}`);
-      console.log(`[WEBHOOK] 🔍 Parámetros de búsqueda:`, {
-        accountNumber: accountNum,
-        month: invoiceRequest.month,
-        year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
-        type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
-      });
-      
-      invoice = await findInvoiceInDrive(
-        accountNum,
-        invoiceRequest.month,
-        invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
-        invoiceRequest.type
-      );
-      
-      if (invoice) {
-        console.log(
-          `[WEBHOOK] ✅ Factura encontrada con número de cuenta ${accountNum}: ${invoice.fileName} (${invoice.type})`
+      for (const targetMonth of effectiveMonths) {
+        const invoice = await findInvoiceInDrive(
+          accountNum,
+          targetMonth ?? undefined,
+          invoiceRequest.year,
+          invoiceRequest.type
         );
-        break; // Si encontramos una factura, dejar de buscar
-      } else {
-        console.log(
-          `[WEBHOOK] ❌ No se encontró factura con número de cuenta ${accountNum}`
-        );
+        if (invoice) {
+          const alreadyAdded = invoicesFound.some(
+            (i) => i.invoice.fileName === invoice.fileName
+          );
+          if (!alreadyAdded) {
+            invoicesFound.push({ invoice, month: targetMonth ?? undefined });
+          }
+        }
       }
+      if (invoicesFound.length > 0) break;
     }
 
-    if (invoice) {
-      console.log(`[WEBHOOK] ✅ Factura encontrada, descargando PDF...`);
-      // Descargar el PDF
-      const pdfBuffer = await downloadPDFFromDrive(invoice.fileId);
-      console.log(
-        `[WEBHOOK] PDF descargado, tamaño: ${pdfBuffer.length} bytes`
-      );
+    if (invoicesFound.length > 0) {
+      let invoiceCountBefore = await getInvoiceRequestCountThisMonth(from);
+      const fileNames: string[] = [];
 
-      // Enviar el PDF por WhatsApp
-      const typeLabel =
-        invoice.type === "servicios" ? "servicios" : "energía eléctrica";
-      const caption = `Tu factura de ${typeLabel} - ${invoice.fileName}`;
+      for (const { invoice, month } of invoicesFound) {
+        const pdfBuffer = await downloadPDFFromDrive(invoice.fileId);
+        const typeLabel =
+          invoice.type === "servicios" ? "servicios" : "energía eléctrica";
+        const caption = `Tu factura de ${typeLabel} - ${invoice.fileName}`;
 
-      console.log(`[WEBHOOK] Enviando documento por WhatsApp...`);
-      const docResult = await sendDocumentMessage(
-        from,
-        pdfBuffer,
-        invoice.fileName,
-        caption
-      );
-      console.log(
-        `[WEBHOOK] Resultado envío documento:`,
-        docResult.success ? "✅ Éxito" : `❌ Error: ${docResult.error}`
-      );
-
-      // Obtener conteo de facturas del mes actual ANTES de registrar esta nueva
-      const invoiceCountBefore =
-        await getInvoiceRequestCountThisMonth(from);
-      console.log(
-        `[WEBHOOK] Total de facturas enviadas a ${from} este mes (antes de esta): ${invoiceCountBefore}`
-      );
-
-      // Registrar la solicitud de factura solo si se envió exitosamente
-      if (docResult.success) {
-        await recordInvoiceRequest(
+        const docResult = await sendDocumentMessage(
           from,
-          invoiceRequest.accountNumber,
+          pdfBuffer,
           invoice.fileName,
-          invoiceRequest.month,
-          invoiceRequest.year
+          caption
         );
+
+        if (docResult.success) {
+          await recordInvoiceRequest(
+            from,
+            invoiceRequest.accountNumber,
+            invoice.fileName,
+            month,
+            invoiceRequest.year
+          );
+          fileNames.push(invoice.fileName);
+        }
       }
 
-      // El conteo después de registrar será invoiceCountBefore + 1
-      const invoiceCountAfter =
-        invoiceCountBefore + (docResult.success ? 1 : 0);
-
-      // Enviar mensaje de confirmación
-      let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.`;
-      if (invoiceRequest.month) {
-        confirmationMessage += `\n\n📅 Período: ${
-          invoiceRequest.month
-        }${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
+      const invoiceCountAfter = await getInvoiceRequestCountThisMonth(from);
+      let confirmationMessage = `✅ Te he enviado ${fileNames.length > 1 ? "tus facturas" : "tu factura"}.`;
+      if (combinedMonths.length > 0) {
+        confirmationMessage += `\n\n📅 Período: ${combinedMonths.join(", ")}${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
       }
-      confirmationMessage += `\n\n📄 Archivo: ${invoice.fileName}`;
-      confirmationMessage += `\n\n💳 Puedes pagar esta factura desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
+      confirmationMessage += `\n\n📄 Archivos: ${fileNames.join(", ")}`;
+      confirmationMessage += `\n\n💳 Puedes pagar desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
       confirmationMessage += `\nhttps://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login`;
-
-      // Notificar desde la segunda factura sobre el límite de 5 por mes
       if (invoiceCountAfter >= 2) {
         confirmationMessage += `\n\n⚠️ *Recordatorio:* Hay un límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes. Esta es tu factura número ${invoiceCountAfter} de este mes.`;
       }
-
-      confirmationMessage += `\n\n¿Tienes alguna otra consulta sobre tu factura o algún otro servicio? Estoy aquí para ayudarte 😊`;
+      confirmationMessage += `\n\n¿Tienes alguna otra consulta? Estoy aquí para ayudarte 😊`;
 
       await sendTextMessage(from, confirmationMessage);
 
-      // Guardar en historial
       try {
         const conversationId = await getOrCreateConversation(from);
         await saveMessage(conversationId, "user", text, whatsappMessageId);
