@@ -117,6 +117,13 @@ COOPONLINE - PLATAFORMA DE PAGO:
   4. Seleccionar la factura y proceder con el pago
 - IMPORTANTE: El número de titular y número de cuenta aparecen en las facturas físicas o PDFs
 
+UBICACIÓN DEL NÚMERO DE TITULAR (O NÚMERO DE ASOCIADO) EN LA FACTURA:
+- El número de titular (también llamado número de asociado o código titular) se encuentra en la parte superior de la boleta/factura
+- Está ubicado JUSTO DEL LADO DERECHO del nombre del titular, ENTRE PARÉNTESIS
+- Ejemplo: Si aparece "Juan Pérez (12345)", el número de titular es 12345
+- Es el código que identifica la cuenta del socio en la cooperativa
+- Se usa junto con el número de cuenta para pagar en CoopOnline
+
 ESTADO DE FACTURAS Y BOLETAS:
 - FACTURAS/BOLETAS DE SERVICIOS (P.F.C, Internet, WiFi, Cable, TV):
   * Ya están disponibles todas las facturas del período de enero
@@ -256,4 +263,11 @@ INSTRUCCIONES PARA EL ASISTENTE:
   * "Aparece en todas las facturas recientes, tanto de servicios como de electricidad"
   * "Si tienes una factura física, mírala en la parte superior. Si tienes el PDF, ábrelo y busca en la sección de información del cliente"
   * Sé paciente y amable al explicar esto, ya que algunos usuarios pueden tener dificultades para encontrarlo o pueden confundirse con el formato antiguo
+- Cuando un usuario pregunte por el NÚMERO DE TITULAR o NÚMERO DE ASOCIADO (o "cuál es mi número de titular"):
+  * Explica que el número de titular se encuentra en la parte superior de la factura/boleta
+  * Está ubicado JUSTO DEL LADO DERECHO del nombre del titular, ENTRE PARÉNTESIS
+  * Ejemplo: "Juan Pérez (12345)" → el número de titular es 12345
+  * Es el código que identifica su cuenta en la cooperativa
+  * Se usa junto con el número de cuenta para pagar en CoopOnline
+  * NUNCA digas que no tienes acceso a información personal - el usuario debe buscarlo en su propia factura, y tú puedes explicarle dónde encontrarlo
 `;
