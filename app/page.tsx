@@ -310,7 +310,83 @@ function PharmacySchedule() {
     { date: "11 de marzo", pharmacy: "Farmacia Social" },
     { date: "12 de marzo", pharmacy: "Farmacia Carreño" },
     { date: "13 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "14 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "15 de marzo", pharmacy: "Farmacia Social" },
+    { date: "16 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "17 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "18 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "19 de marzo", pharmacy: "Farmacia Social" },
+    { date: "20 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "21 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "22 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "23 de marzo", pharmacy: "Farmacia Social" },
+    { date: "24 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "25 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "26 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "27 de marzo", pharmacy: "Farmacia Social" },
+    { date: "28 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "29 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "30 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "31 de marzo", pharmacy: "Farmacia Social" },
   ]
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStart = useRef({ x: 0, scrollLeft: 0 })
+
+  const checkScrollButtons = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+      setCanScrollLeft(scrollLeft > 5)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5)
+    }
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(checkScrollButtons, 100)
+    const el = scrollRef.current
+    if (el) {
+      el.addEventListener("scroll", checkScrollButtons)
+      window.addEventListener("resize", checkScrollButtons)
+    }
+    return () => {
+      clearTimeout(timer)
+      el?.removeEventListener("scroll", checkScrollButtons)
+      window.removeEventListener("resize", checkScrollButtons)
+    }
+  }, [pharmacySchedule.length])
+
+  // Scroll al día de hoy al cargar
+  const todayRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      todayRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return
+    const cardWidth = 140
+    const gap = 12
+    const delta = (cardWidth + gap) * (direction === "left" ? -3 : 3)
+    scrollRef.current.scrollBy({ left: delta, behavior: "smooth" })
+  }
+
+  const onDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!scrollRef.current) return
+    setIsDragging(true)
+    const x = "touches" in e ? e.touches[0].clientX : e.clientX
+    dragStart.current = { x, scrollLeft: scrollRef.current.scrollLeft }
+  }
+  const onDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !scrollRef.current) return
+    const x = "touches" in e ? e.touches[0].clientX : e.clientX
+    scrollRef.current.scrollLeft = dragStart.current.scrollLeft - (x - dragStart.current.x)
+  }
+  const onDragEnd = () => setIsDragging(false)
 
   return (
     <motion.section 
@@ -391,85 +467,127 @@ function PharmacySchedule() {
           </motion.p>
         </motion.div>
 
-        {/* Pharmacy Schedule Grid */}
+        {/* Pharmacy Schedule - Scroll horizontal */}
         <motion.div 
           className="max-w-5xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          key={currentDate.getTime()} // Forzar re-render cuando cambia la fecha
+          key={currentDate.getTime()}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-            {pharmacySchedule.map((item, index) => {
-              const today = isToday(item.date)
-              const isSocial = item.pharmacy === "Farmacia Social"
-              
-              return (
-                <motion.div
-                  key={`${item.date}-${index}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.4 + index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  className="group"
-                >
-                  <Card 
-                    className={`h-full border-2 transition-all duration-300 ${
-                      today 
-                        ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50" 
-                        : isSocial
-                        ? "border-sky-300 bg-white hover:border-sky-400 hover:shadow-md"
-                        : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
-                    }`}
+          <div className="relative">
+            {/* Botones de navegación */}
+            {canScrollLeft && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => scroll("left")}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border border-sky-200 hover:bg-sky-50 transition-colors"
+                aria-label="Anterior"
+              >
+                <ChevronLeft className="w-5 h-5 text-sky-600" />
+              </motion.button>
+            )}
+            {canScrollRight && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => scroll("right")}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border border-sky-200 hover:bg-sky-50 transition-colors"
+                aria-label="Siguiente"
+              >
+                <ChevronRight className="w-5 h-5 text-sky-600" />
+              </motion.button>
+            )}
+
+            <div
+              ref={scrollRef}
+              className={`flex gap-3 overflow-x-auto pb-4 px-1 scroll-smooth snap-x snap-mandatory hide-scrollbar select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onMouseLeave={onDragEnd}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragMove}
+              onTouchEnd={onDragEnd}
+            >
+              {pharmacySchedule.map((item, index) => {
+                const today = isToday(item.date)
+                const isSocial = item.pharmacy === "Farmacia Social"
+                
+                return (
+                  <motion.div
+                    key={`${item.date}-${index}`}
+                    ref={today ? todayRef : undefined}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, margin: "-20px" }}
+                    transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.5) }}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    className="flex-shrink-0 w-[130px] sm:w-[140px] snap-center"
                   >
-                    <CardContent className="p-4 text-center">
-                      <div className="mb-3 flex justify-center">
-                        <motion.div
-                          className={`p-2.5 rounded-xl ${
-                            today
-                              ? "bg-gradient-to-br from-sky-400 to-cyan-500"
-                              : isSocial
-                              ? "bg-gradient-to-br from-sky-200 to-cyan-300"
-                              : "bg-gradient-to-br from-sky-100 to-cyan-200"
-                          } group-hover:scale-110 transition-transform duration-300`}
-                          whileHover={{ rotate: [0, -10, 10, 0] }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          <Pill className={`w-5 h-5 ${
-                            today ? "text-white" : "text-sky-600"
-                          }`} />
-                        </motion.div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className={`text-xs font-semibold ${
-                          today ? "text-sky-700" : "text-gray-500"
-                        }`}>
-                          {item.date}
+                    <Card 
+                      className={`h-full border-2 transition-all duration-300 ${
+                        today 
+                          ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50" 
+                          : isSocial
+                          ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
+                          : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
+                      }`}
+                    >
+                      <CardContent className="p-3 sm:p-4 text-center">
+                        <div className="mb-2 flex justify-center">
+                          <motion.div
+                            className={`p-2 rounded-xl ${
+                              today
+                                ? "bg-gradient-to-br from-sky-400 to-cyan-500"
+                                : isSocial
+                                ? "bg-gradient-to-br from-amber-400 to-amber-600"
+                                : "bg-gradient-to-br from-sky-100 to-cyan-200"
+                            } group-hover:scale-110 transition-transform duration-300`}
+                            whileHover={{ rotate: [0, -8, 8, 0] }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <Pill className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                              today || isSocial ? "text-white" : "text-sky-600"
+                            }`} />
+                          </motion.div>
                         </div>
-                        <div className={`text-sm font-bold leading-tight ${
-                          today ? "text-sky-800" : "text-gray-800"
-                        }`}>
-                          {item.pharmacy}
+                        <div className="space-y-1">
+                          <div className={`text-xs font-semibold ${
+                            today ? "text-sky-700" : isSocial ? "text-amber-800" : "text-gray-500"
+                          }`}>
+                            {item.date}
+                          </div>
+                          <div className={`text-xs sm:text-sm font-bold leading-tight ${
+                            today ? "text-sky-800" : isSocial ? "text-amber-900" : "text-gray-800"
+                          }`}>
+                            {item.pharmacy}
+                          </div>
+                          {isSocial && (
+                            <span className="inline-block mt-1 px-1.5 py-0.5 text-[10px] font-semibold bg-amber-500/90 text-white rounded-full">
+                              Cooperativa
+                            </span>
+                          )}
                         </div>
-                      </div>
-                      {today && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.5 + index * 0.05 }}
-                          className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-sky-500 text-white text-xs font-semibold rounded-full"
-                        >
-                          <Clock className="w-3 h-3" />
-                          Hoy
-                        </motion.div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )
-            })}
+                        {today && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3 }}
+                            className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-sky-500 text-white text-xs font-semibold rounded-full"
+                          >
+                            <Clock className="w-3 h-3" />
+                            Hoy
+                          </motion.div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </motion.div>
 

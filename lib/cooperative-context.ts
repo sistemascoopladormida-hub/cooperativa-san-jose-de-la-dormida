@@ -163,6 +163,24 @@ TURNERO DE FARMACIAS:
 - 11 de marzo: Farmacia Social
 - 12 de marzo: Farmacia Carreño
 - 13 de marzo: Farmacia Robledo
+- 14 de marzo: Farmacia Centro
+- 15 de marzo: Farmacia Social
+- 16 de marzo: Farmacia Carreño
+- 17 de marzo: Farmacia Robledo
+- 18 de marzo: Farmacia Centro
+- 19 de marzo: Farmacia Social
+- 20 de marzo: Farmacia Carreño
+- 21 de marzo: Farmacia Robledo
+- 22 de marzo: Farmacia Centro
+- 23 de marzo: Farmacia Social
+- 24 de marzo: Farmacia Carreño
+- 25 de marzo: Farmacia Robledo
+- 26 de marzo: Farmacia Centro
+- 27 de marzo: Farmacia Social
+- 28 de marzo: Farmacia Carreño
+- 29 de marzo: Farmacia Robledo
+- 30 de marzo: Farmacia Centro
+- 31 de marzo: Farmacia Social
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
