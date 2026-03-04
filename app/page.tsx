@@ -297,14 +297,19 @@ function PharmacySchedule() {
   }
 
   const pharmacySchedule = [
-    { date: "23 de febrero", pharmacy: "Farmacia Social" },
-    { date: "24 de febrero", pharmacy: "Farmacia Carreño" },
-    { date: "25 de febrero", pharmacy: "Farmacia Robledo" },
-    { date: "26 de febrero", pharmacy: "Farmacia Centro" },
-    { date: "27 de febrero", pharmacy: "Farmacia Social" },
-    { date: "28 de febrero", pharmacy: "Farmacia Carreño" },
-    { date: "29 de febrero", pharmacy: "Farmacia Robledo" },
-    { date: "1 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "1 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "2 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "3 de marzo", pharmacy: "Farmacia Social" },
+    { date: "4 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "5 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "6 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "7 de marzo", pharmacy: "Farmacia Social" },
+    { date: "8 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "9 de marzo", pharmacy: "Farmacia Robledo" },
+    { date: "10 de marzo", pharmacy: "Farmacia Centro" },
+    { date: "11 de marzo", pharmacy: "Farmacia Social" },
+    { date: "12 de marzo", pharmacy: "Farmacia Carreño" },
+    { date: "13 de marzo", pharmacy: "Farmacia Robledo" },
   ]
 
   return (
