@@ -17,11 +17,13 @@ export function detectInvoiceRequest(
   accountNumbers: string[]; // Múltiples números de cuenta
   accountNumber: string | null; // El primero para retrocompatibilidad
   month?: string;
+  months?: string[];
   year?: string;
   type?: "servicios" | "electricidad";
   confidence: "high" | "medium" | "low";
 } {
-  const lowerMessage = message.toLowerCase();
+  const normalizedMessage = normalizeForInvoiceDetection(message);
+  const lowerMessage = normalizedMessage.toLowerCase();
 
   // Rechazar formato antiguo de matrícula (XX-XXXX-X o similar con guiones)
   const oldMatriculaPattern = /\b\d{1,2}[-–—]\d{3,4}[-–—]?[A-Z]?\b/i;
