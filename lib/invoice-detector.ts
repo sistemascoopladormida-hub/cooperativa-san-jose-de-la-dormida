@@ -376,7 +376,7 @@ export function hasInvoiceRequestIntent(message: string): boolean {
 
   // "cuenta X" o "número X" con número de 3-4 dígitos
   const hasAccountWithNumber =
-    /(?:cuenta|numero|número|nro)\s*:?\s*\d{3,4}\b/i.test(trimmed) ||
+    /(?:cuenta|numero|número|nro|socio)\s*(?:de\s+cuenta|de\s+socio)?\s*(?::|es)?\s*\d{3,4}\b/i.test(trimmed) ||
     /\b\d{3,4}\s*(?:es\s+)?(?:mi|el|la)\s*(?:cuenta|factura|boleta)/i.test(
       trimmed
     );
