@@ -48,6 +48,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+    <head>
+    <meta name="facebook-domain-verification" content="0nxwl112pm8f3hnhrf96zrsmnou8lx" />
+    </head>
       <body className={inter.className}>
         {children}
         <Chatbot />
