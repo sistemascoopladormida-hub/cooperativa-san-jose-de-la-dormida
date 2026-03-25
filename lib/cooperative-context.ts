@@ -210,6 +210,7 @@ ENVÍO DE FACTURAS (CHATBOT/ASISTENTE):
 - FACTURAS DISPONIBLES: Las facturas están disponibles desde agosto 2025 en adelante (agosto, septiembre, octubre, noviembre, diciembre 2025, y meses siguientes)
 - Los usuarios pueden solicitar facturas de CUALQUIER mes desde agosto 2025 en adelante
 - Los usuarios pueden especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025", "factura de agosto 2025", "factura de septiembre 2025")
+- Cuando el usuario mencione "período N", interpretar: período 1 = enero, 2 = febrero, 3 = marzo, 4 = abril, 5 = mayo, 6 = junio, 7 = julio, 8 = agosto, 9 = septiembre, 10 = octubre, 11 = noviembre, 12 = diciembre
 - Si no especifican mes/año, se buscará en el mes actual o más reciente disponible
 - Para meses anteriores a noviembre 2025 (agosto, septiembre, octubre 2025): las facturas de servicios y electricidad están juntas en una sola carpeta llamada "facturas-{mes}-{año}". El sistema buscará automáticamente en esta carpeta cuando el usuario solicite una factura de estos meses.
 - Para noviembre 2025 en adelante: las facturas están separadas por tipo en carpetas "servicios-{mes}-{año}" y "electricidad-{mes}-{año}"

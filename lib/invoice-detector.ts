@@ -273,9 +273,37 @@ export function detectInvoiceRequest(
   const monthPattern =
     /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/gi;
   const monthMatches = normalizedMessage.match(monthPattern);
-  const months = monthMatches
+  const monthsFromName = monthMatches
     ? [...new Set(monthMatches.map((m) => m.toLowerCase()))]
     : [];
+
+  // Detectar período numérico:
+  // período 1=enero, 2=febrero, ..., 12=diciembre
+  const monthNamesByPeriod = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ] as const;
+  const periodPattern = /(?:periodo|período)\s*(?:n[°ºo]\.?\s*)?(0?[1-9]|1[0-2])\b/gi;
+  const monthsFromPeriod = [
+    ...new Set(
+      [...normalizedMessage.matchAll(periodPattern)].map((match) => {
+        const period = Number(match[1]);
+        return monthNamesByPeriod[period - 1];
+      })
+    ),
+  ];
+
+  const months = [...new Set([...monthsFromName, ...monthsFromPeriod])];
   let month = months[0]; // Primer mes para retrocompatibilidad
 
   // Si no se encontró mes específico, verificar si dice "mes pasado" o similar

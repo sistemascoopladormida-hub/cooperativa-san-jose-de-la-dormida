@@ -6,6 +6,22 @@ import {
   saveMessage,
 } from "@/lib/conversations";
 
+function sanitizeInvoicePromiseResponse(response: string): string {
+  const hasInvoicePromisePattern =
+    /(estoy\s+buscando\s+tu\s+factura|tu\s+factura\s+est[aá]\s+en\s+camino|te\s+la\s+enviar[eé]\s+de\s+inmediato|un\s+momento,\s*por\s+favor)/i.test(
+      response
+    );
+
+  if (!hasInvoicePromisePattern) {
+    return response;
+  }
+
+  return (
+    `Para procesar tu factura correctamente, envíame tu número de cuenta (3 o 4 dígitos). ` +
+    `Si quieres un mes específico, también puedes indicarlo por nombre o por período (período 1 = enero, 2 = febrero, ..., 12 = diciembre).`
+  );
+}
+
 // Inicializar OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -50,9 +66,10 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
       max_tokens: 500,
     });
 
-    const response =
+    const rawResponse =
       completion.choices[0]?.message?.content ||
       "Lo siento, no pude generar una respuesta en este momento.";
+    const response = sanitizeInvoicePromiseResponse(rawResponse);
 
     // Guardar mensajes en Supabase
     try {
