@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   Bot,
   FileCheck,
+  Send,
 } from "lucide-react";
 
 interface Conversation {
@@ -59,6 +60,10 @@ export default function ConversacionesPage() {
     useState<ConversationDetail | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingConversations, setLoadingConversations] = useState(false);
+  const [manualReply, setManualReply] = useState("");
+  const [sendingManualReply, setSendingManualReply] = useState(false);
+  const [manualReplyError, setManualReplyError] = useState("");
+  const [manualReplySuccess, setManualReplySuccess] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -162,12 +167,51 @@ export default function ConversacionesPage() {
     }
   };
 
+  const handleManualReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedConversation) return;
+
+    const phoneNumber = selectedConversation.conversation.phone_number;
+    const message = manualReply.trim();
+    if (!message) return;
+
+    setManualReplyError("");
+    setManualReplySuccess("");
+    setSendingManualReply(true);
+
+    try {
+      const response = await fetch("/api/conversaciones/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber, message }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "No se pudo enviar el mensaje");
+      }
+
+      setManualReply("");
+      setManualReplySuccess("Mensaje enviado correctamente");
+      await loadConversationDetail(phoneNumber);
+      await loadConversations();
+    } catch (error: any) {
+      setManualReplyError(error?.message || "Error al enviar el mensaje");
+    } finally {
+      setSendingManualReply(false);
+      setTimeout(() => setManualReplySuccess(""), 2500);
+    }
+  };
+
   const filteredConversations = conversations.filter((conv) => {
     const term = searchTerm.toLowerCase();
     const matchPhone = conv.phone_number.toLowerCase().includes(term);
     const matchFacturas = term && (term.includes("factura") || term.includes("opt")) && conv.whatsapp_opt_in === true;
     return matchPhone || matchFacturas;
   });
+  const isSelectedWebConversation = !!selectedConversation?.conversation.phone_number.startsWith(
+    "WEB-"
+  );
 
   // Página de login
   if (authenticated === false) {
@@ -720,6 +764,47 @@ export default function ConversacionesPage() {
                   </div>
                 )}
               </CardContent>
+              {selectedConversation && (
+                <div className="border-t border-gray-200 dark:border-gray-700 p-3 md:p-4 bg-white/80 dark:bg-gray-800/80">
+                  {isSelectedWebConversation ? (
+                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      Esta conversación es del chat web. El envío manual por esta
+                      pantalla está habilitado solo para WhatsApp.
+                    </p>
+                  ) : (
+                    <form
+                      onSubmit={handleManualReply}
+                      className="flex flex-col gap-2"
+                    >
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Escribe una respuesta manual para el usuario..."
+                          value={manualReply}
+                          onChange={(e) => setManualReply(e.target.value)}
+                          disabled={sendingManualReply}
+                          maxLength={2000}
+                        />
+                        <Button
+                          type="submit"
+                          disabled={sendingManualReply || !manualReply.trim()}
+                          className="shrink-0"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {sendingManualReply ? "Enviando..." : "Enviar"}
+                        </Button>
+                      </div>
+                      {manualReplyError && (
+                        <p className="text-xs text-red-500">{manualReplyError}</p>
+                      )}
+                      {manualReplySuccess && (
+                        <p className="text-xs text-green-600">
+                          {manualReplySuccess}
+                        </p>
+                      )}
+                    </form>
+                  )}
+                </div>
+              )}
             </Card>
           </motion.div>
         </div>
