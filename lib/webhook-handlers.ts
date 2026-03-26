@@ -300,11 +300,7 @@ async function handleInvoiceRequest(
   for (const num of invoiceRequest.accountNumbers) {
     allAccountNumbers.add(num);
   }
-  if (hasNumberInCurrentMessage) {
-    for (const num of conversationContext) {
-      allAccountNumbers.add(num);
-    }
-  } else if (hasMonthOrTypeInCurrentMessage && conversationContext.length > 0) {
+  if (!hasNumberInCurrentMessage && hasMonthOrTypeInCurrentMessage && conversationContext.length > 0) {
     for (const num of conversationContext) {
       allAccountNumbers.add(num);
     }
@@ -615,19 +611,26 @@ export async function processTextMessage(
 
   // 2.2. Verificar si el usuario dice que la factura enviada es incorrecta
   if (isWrongInvoiceFeedback(text)) {
-    console.log("[WEBHOOK] Usuario indica que la factura enviada es incorrecta. Enviando ayuda.");
-    await sendAccountNumberImage(
-      from,
-      text,
-      whatsappMessageId,
-      `Lamento que te hayamos enviado una factura incorrecta. 😔\n\n` +
-        `El número de cuenta tiene *3 a 4 dígitos* (no es el DNI ni la matrícula antigua).\n\n` +
-        `📋 En la imagen puedes ver dónde encontrarlo en tu factura:\n\n` +
-        `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
-        `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
-        `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`
-    );
-    return;
+    const retryRequest = detectInvoiceRequest(text);
+    if (retryRequest.accountNumbers.length > 0) {
+      console.log(
+        "[WEBHOOK] Usuario reporta factura incorrecta pero envía cuenta válida. Reintentando búsqueda de factura."
+      );
+    } else {
+      console.log("[WEBHOOK] Usuario indica que la factura enviada es incorrecta. Enviando ayuda.");
+      await sendAccountNumberImage(
+        from,
+        text,
+        whatsappMessageId,
+        `Lamento que te hayamos enviado una factura incorrecta. 😔\n\n` +
+          `El número de cuenta tiene *3 a 4 dígitos* (no es el DNI ni la matrícula antigua).\n\n` +
+          `📋 En la imagen puedes ver dónde encontrarlo en tu factura:\n\n` +
+          `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
+          `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
+          `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`
+      );
+      return;
+    }
   }
 
   // 2.3. Verificar si es RECLAMO por corte de servicio (cable, luz, internet)

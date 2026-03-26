@@ -59,6 +59,25 @@ export function detectInvoiceRequest(
 
   // Buscar TODOS los números de cuenta con patrones de alta confianza
   const foundHighConfidenceNumbers = new Set<string>();
+
+  // Prioridad máxima: formatos explícitos de cuenta/socio (evita tomar el año como cuenta)
+  const explicitAccountPatterns = [
+    /(?:mi\s+)?(?:cuenta|socio)\s*(?:de\s+cuenta|de\s+socio)?\s*(?::|es)?\s*(\d{3,4})\b/gi,
+    /(?:número|numero|nro)\s*(?:de\s+)?(?:cuenta|socio)\s*(?::|es)?\s*(\d{3,4})\b/gi,
+  ];
+  for (const pattern of explicitAccountPatterns) {
+    const matches = [...normalizedMessage.matchAll(pattern)];
+    for (const match of matches) {
+      if (match && match[1]) {
+        const number = match[1].trim();
+        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
+          foundHighConfidenceNumbers.add(number);
+          confidence = "high";
+        }
+      }
+    }
+  }
+
   for (const pattern of highConfidencePatterns) {
     const matches = [...normalizedMessage.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
     for (const match of matches) {
