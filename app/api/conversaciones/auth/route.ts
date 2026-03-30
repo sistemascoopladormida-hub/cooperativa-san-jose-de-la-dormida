@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const ADMIN_PASSWORD = "Coop2025";
+const ADMIN_PASSWORD = process.env.ADMIN_CONVERSACIONES_PASSWORD;
 
 export async function POST(request: NextRequest) {
   try {
+    if (!ADMIN_PASSWORD) {
+      return NextResponse.json(
+        { success: false, error: "Configuración de contraseña faltante" },
+        { status: 500 }
+      );
+    }
+
     const { password } = await request.json();
 
     if (password === ADMIN_PASSWORD) {

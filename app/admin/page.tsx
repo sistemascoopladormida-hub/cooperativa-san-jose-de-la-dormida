@@ -33,6 +33,14 @@ interface AdminSection {
   gradient: string;
 }
 
+const ADMIN_NOTICIAS_PASSWORD =
+  process.env.NEXT_PUBLIC_ADMIN_NOTICIAS_PASSWORD ?? "";
+const ADMIN_BOXES_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_BOXES_PASSWORD ?? "";
+const ADMIN_TECNICO_PASSWORD =
+  process.env.NEXT_PUBLIC_ADMIN_TECNICO_PASSWORD ?? "";
+const ADMIN_CONVERSACIONES_PASSWORD =
+  process.env.NEXT_PUBLIC_ADMIN_CONVERSACIONES_PASSWORD ?? "";
+
 const ADMIN_SECTIONS: AdminSection[] = [
   {
     id: "encuestas",
@@ -40,7 +48,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: "Métricas y estadísticas de las encuestas de visitas técnicas",
     icon: BarChart3,
     route: "/encuestas/dashboard",
-    password: "Ingresonoticias2026.",
+    password: ADMIN_NOTICIAS_PASSWORD,
     color: "blue",
     gradient: "from-blue-500 to-blue-600",
   },
@@ -50,7 +58,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: "Métricas y estadísticas de las encuestas de atención en boxes",
     icon: Building2,
     route: "/encuestas-boxes/dashboard",
-    password: "Boxes2026",
+    password: ADMIN_BOXES_PASSWORD,
     color: "indigo",
     gradient: "from-indigo-500 to-indigo-600",
   },
@@ -60,7 +68,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: "Administra empleados y genera códigos QR para boxes",
     icon: QrCode,
     route: "/encuestas-boxes/admin",
-    password: "Boxes2026",
+    password: ADMIN_BOXES_PASSWORD,
     color: "cyan",
     gradient: "from-cyan-500 to-cyan-600",
   },
@@ -70,7 +78,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: "Registro y gestión de visitas técnicas a domicilio",
     icon: Wrench,
     route: "/visitas-tecnicas",
-    password: "Tecnico2025",
+    password: ADMIN_TECNICO_PASSWORD,
     color: "green",
     gradient: "from-green-500 to-green-600",
   },
@@ -80,7 +88,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: "Gestión y administración de conversaciones",
     icon: MessageSquare,
     route: "/conversaciones",
-    password: "Coop2025",
+    password: ADMIN_CONVERSACIONES_PASSWORD,
     color: "purple",
     gradient: "from-purple-500 to-purple-600",
   },

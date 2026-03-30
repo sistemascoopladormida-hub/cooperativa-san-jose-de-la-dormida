@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 
-const ADMIN_PASSWORD = "Ingresonoticias2026."
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_NOTICIAS_PASSWORD ?? ""
 
 type NewsPost = {
   id: number

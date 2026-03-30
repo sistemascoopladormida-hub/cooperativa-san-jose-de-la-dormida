@@ -2,14 +2,22 @@ import { NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 
 export const runtime = "nodejs"
+const ADMIN_NOTICIAS_PASSWORD = process.env.ADMIN_NOTICIAS_PASSWORD
 
 export async function POST(request: NextRequest) {
   try {
+    if (!ADMIN_NOTICIAS_PASSWORD) {
+      return NextResponse.json(
+        { error: "Configuración de contraseña faltante" },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const password = body.password
     const id = body.id
 
-    if (password !== "Ingresonoticias2026.") {
+    if (password !== ADMIN_NOTICIAS_PASSWORD) {
       return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 401 })
     }
 
