@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 /** Límite máximo de facturas que un usuario puede solicitar por mes (web y WhatsApp) */
-export const MAX_INVOICES_PER_MONTH = 5;
+export const MAX_INVOICES_PER_MONTH = 15;
 
 /**
  * Obtiene el mes y año actual en formato para la consulta
