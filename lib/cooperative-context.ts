@@ -150,37 +150,23 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Segundo vencimiento: 20 de febrero
 
 TURNERO DE FARMACIAS:
-- 1 de marzo: Farmacia Robledo
-- 2 de marzo: Farmacia Centro
-- 3 de marzo: Farmacia Social
-- 4 de marzo: Farmacia Carreño
-- 5 de marzo: Farmacia Robledo
-- 6 de marzo: Farmacia Centro
-- 7 de marzo: Farmacia Social
-- 8 de marzo: Farmacia Carreño
-- 9 de marzo: Farmacia Robledo
-- 10 de marzo: Farmacia Centro
-- 11 de marzo: Farmacia Social
-- 12 de marzo: Farmacia Carreño
-- 13 de marzo: Farmacia Robledo
-- 14 de marzo: Farmacia Centro
-- 15 de marzo: Farmacia Social
-- 16 de marzo: Farmacia Carreño
-- 17 de marzo: Farmacia Robledo
-- 18 de marzo: Farmacia Centro
-- 19 de marzo: Farmacia Social
-- 20 de marzo: Farmacia Carreño
-- 21 de marzo: Farmacia Robledo
-- 22 de marzo: Farmacia Centro
-- 23 de marzo: Farmacia Social
-- 24 de marzo: Farmacia Carreño
-- 25 de marzo: Farmacia Robledo
-- 26 de marzo: Farmacia Centro
-- 27 de marzo: Farmacia Social
-- 28 de marzo: Farmacia Carreño
-- 29 de marzo: Farmacia Robledo
-- 30 de marzo: Farmacia Centro
-- 31 de marzo: Farmacia Social
+- 1 de abril: Farmacia Carreño
+- 2 de abril: Farmacia Robledo
+- 3 de abril: Farmacia Centro
+- 4 de abril: Farmacia Social
+- 5 de abril: Farmacia Carreño
+- 6 de abril: Farmacia Robledo
+- 7 de abril: Farmacia Centro
+- 8 de abril: Farmacia Social
+- 9 de abril: Farmacia Carreño
+- 10 de abril: Farmacia Robledo
+- 11 de abril: Farmacia Centro
+- 12 de abril: Farmacia Social
+- 13 de abril: Farmacia Carreño
+- 14 de abril: Farmacia Robledo
+- 15 de abril: Farmacia Centro
+- 16 de abril: Farmacia Social
+- 17 de abril: Farmacia Carreño
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
