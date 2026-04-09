@@ -138,6 +138,23 @@ function capitalizeMonth(month: string): string {
 }
 
 /**
+ * Carpeta(s) candidata(s) para estructura antigua.
+ * Caso especial operativo:
+ * - Periodo marzo 2026 fue facturado el 1 de abril 2026 y se almaceno en "facturas-Abril-2026".
+ */
+function getOldStructureFolderCandidates(month: string, year: string): string[] {
+  const normalizedMonth = month.toLowerCase().trim();
+  const candidates: string[] = [];
+
+  if (normalizedMonth === "marzo" && year === "2026") {
+    candidates.push("facturas-Abril-2026");
+  }
+
+  candidates.push(`facturas-${capitalizeMonth(month)}-${year}`);
+  return [...new Set(candidates)];
+}
+
+/**
  * Obtiene el nombre de la carpeta según el mes y tipo
  * Estructura antigua: "facturas-{Mes}-{año}" (septiembre, octubre, noviembre, diciembre 2025 y todo 2026+)
  * Estructura nueva: "servicios-{mes}-{año}" o "electricidad-{mes}-{año}" (solo noviembre 2025)
@@ -356,26 +373,25 @@ export async function findInvoiceInDrive(
     const isOldStructure = usesOldStructure(targetMonth, targetYear);
 
     if (isOldStructure) {
-      // Estructura antigua: buscar en carpeta "facturas-{Mes}-{año}" dentro de "Facturas" (con mayúscula inicial en el mes)
-      const capitalizedMonth = capitalizeMonth(targetMonth);
-      const folderName = `facturas-${capitalizedMonth}-${targetYear}`;
-      const folderId = await findFolderByName(folderName, facturasParentId);
-
-      if (folderId) {
-        console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
-        const pdf = await searchPDFInFolder(folderId, accountNumber);
-        if (pdf) {
-          // En estructura antigua, no sabemos si es servicios o electricidad
-          // Usamos "servicios" como default, pero podría ser cualquiera
-          console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
-          return {
-            fileId: pdf.fileId,
-            fileName: pdf.fileName,
-            type: "servicios", // Default, ya que en la estructura antigua están juntas
-          };
+      // Estructura antigua: buscar por carpeta candidata
+      const candidateFolders = getOldStructureFolderCandidates(targetMonth, targetYear);
+      for (const folderName of candidateFolders) {
+        const folderId = await findFolderByName(folderName, facturasParentId);
+        if (folderId) {
+          console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
+          const pdf = await searchPDFInFolder(folderId, accountNumber);
+          if (pdf) {
+            // En estructura antigua, no sabemos si es servicios o electricidad
+            console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
+            return {
+              fileId: pdf.fileId,
+              fileName: pdf.fileName,
+              type: "servicios",
+            };
+          }
+        } else {
+          console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
         }
-      } else {
-        console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
       }
     } else {
       // Estructura nueva: buscar en carpetas separadas "servicios" y "electricidad"
@@ -439,24 +455,23 @@ export async function findInvoiceInDrive(
         const isPastOldStructure = usesOldStructure(pastMonth, pastYear);
 
         if (isPastOldStructure) {
-          // Estructura antigua: buscar en carpeta "facturas-{Mes}-{año}" dentro de "Facturas" (con mayúscula inicial en el mes)
-          const capitalizedPastMonth = capitalizeMonth(pastMonth);
-          const folderName = `facturas-${capitalizedPastMonth}-${pastYear}`;
-          const folderId = await findFolderByName(folderName, facturasParentId);
-
-          if (folderId) {
-            console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
-            const pdf = await searchPDFInFolder(folderId, accountNumber);
-            if (pdf) {
-              console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
-              return {
-                fileId: pdf.fileId,
-                fileName: pdf.fileName,
-                type: "servicios", // Default
-              };
+          const candidateFolders = getOldStructureFolderCandidates(pastMonth, pastYear);
+          for (const folderName of candidateFolders) {
+            const folderId = await findFolderByName(folderName, facturasParentId);
+            if (folderId) {
+              console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
+              const pdf = await searchPDFInFolder(folderId, accountNumber);
+              if (pdf) {
+                console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
+                return {
+                  fileId: pdf.fileId,
+                  fileName: pdf.fileName,
+                  type: "servicios",
+                };
+              }
+            } else {
+              console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
             }
-          } else {
-            console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
           }
         } else {
           // Estructura nueva: buscar en carpetas separadas
