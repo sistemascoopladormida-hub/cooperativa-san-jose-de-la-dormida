@@ -149,7 +149,7 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Primer vencimiento: 10 de febrero
     - Segundo vencimiento: 20 de febrero
 
-TURNERO DE FARMACIAS:
+TURNERO DE FARMACIAS (abril, año en curso):
 - 1 de abril: Farmacia Carreño
 - 2 de abril: Farmacia Robledo
 - 3 de abril: Farmacia Centro
@@ -167,6 +167,19 @@ TURNERO DE FARMACIAS:
 - 15 de abril: Farmacia Centro
 - 16 de abril: Farmacia Social
 - 17 de abril: Farmacia Carreño
+- 18 de abril: Farmacia Robledo
+- 19 de abril: Farmacia Centro
+- 20 de abril: Farmacia Social
+- 21 de abril: Farmacia Carreño
+- 22 de abril: Farmacia Robledo
+- 23 de abril: Farmacia Centro
+- 24 de abril: Farmacia Social
+- 25 de abril: Farmacia Carreño
+- 26 de abril: Farmacia Robledo
+- 27 de abril: Farmacia Centro
+- 28 de abril: Farmacia Social
+- 29 de abril: Farmacia Carreño
+- 30 de abril: Farmacia Robledo
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web

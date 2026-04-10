@@ -40,7 +40,7 @@ function ServicesCarousel({ services }: { services: Service[] }) {
     const timer = setTimeout(() => {
       checkScrollButtons()
     }, 100)
-    
+
     const scrollElement = scrollRef.current
     if (scrollElement) {
       scrollElement.addEventListener('scroll', checkScrollButtons)
@@ -262,33 +262,33 @@ function PharmacySchedule() {
     const day = parseInt(parts[0])
     const monthName = parts[1]?.trim()
     const month = months[monthName] ?? -1
-    
+
     if (month === -1 || isNaN(day)) {
       return new Date(NaN)
     }
-    
+
     // Usar el año actual
     const year = currentDate.getFullYear()
-    
+
     // Crear fecha y normalizar (para evitar problemas con zonas horarias)
     const date = new Date(year, month, day)
     date.setHours(12, 0, 0, 0) // Establecer mediodía para evitar problemas de zona horaria
-    
+
     return date
   }
 
   // Función para comparar si una fecha es hoy
   const isToday = (dateString: string): boolean => {
     const pharmacyDate = parsePharmacyDate(dateString)
-    
+
     // Verificar si la fecha es válida
     if (isNaN(pharmacyDate.getTime())) {
       return false
     }
-    
+
     const today = new Date()
     today.setHours(12, 0, 0, 0) // Normalizar a mediodía para comparación
-    
+
     return (
       pharmacyDate.getDate() === today.getDate() &&
       pharmacyDate.getMonth() === today.getMonth() &&
@@ -297,37 +297,36 @@ function PharmacySchedule() {
   }
 
   const pharmacySchedule = [
-    { date: "1 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "2 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "3 de marzo", pharmacy: "Farmacia Social" },
-    { date: "4 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "5 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "6 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "7 de marzo", pharmacy: "Farmacia Social" },
-    { date: "8 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "9 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "10 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "11 de marzo", pharmacy: "Farmacia Social" },
-    { date: "12 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "13 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "14 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "15 de marzo", pharmacy: "Farmacia Social" },
-    { date: "16 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "17 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "18 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "19 de marzo", pharmacy: "Farmacia Social" },
-    { date: "20 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "21 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "22 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "23 de marzo", pharmacy: "Farmacia Social" },
-    { date: "24 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "25 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "26 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "27 de marzo", pharmacy: "Farmacia Social" },
-    { date: "28 de marzo", pharmacy: "Farmacia Carreño" },
-    { date: "29 de marzo", pharmacy: "Farmacia Robledo" },
-    { date: "30 de marzo", pharmacy: "Farmacia Centro" },
-    { date: "31 de marzo", pharmacy: "Farmacia Social" },
+    { date: "1 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "2 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "3 de abril", pharmacy: "Farmacia Centro" },
+    { date: "4 de abril", pharmacy: "Farmacia Social" },
+    { date: "5 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "6 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "7 de abril", pharmacy: "Farmacia Centro" },
+    { date: "8 de abril", pharmacy: "Farmacia Social" },
+    { date: "9 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "10 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "11 de abril", pharmacy: "Farmacia Centro" },
+    { date: "12 de abril", pharmacy: "Farmacia Social" },
+    { date: "13 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "14 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "15 de abril", pharmacy: "Farmacia Centro" },
+    { date: "16 de abril", pharmacy: "Farmacia Social" },
+    { date: "17 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "18 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "19 de abril", pharmacy: "Farmacia Centro" },
+    { date: "20 de abril", pharmacy: "Farmacia Social" },
+    { date: "21 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "22 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "23 de abril", pharmacy: "Farmacia Centro" },
+    { date: "24 de abril", pharmacy: "Farmacia Social" },
+    { date: "25 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "26 de abril", pharmacy: "Farmacia Robledo" },
+    { date: "27 de abril", pharmacy: "Farmacia Centro" },
+    { date: "28 de abril", pharmacy: "Farmacia Social" },
+    { date: "29 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "30 de abril", pharmacy: "Farmacia Robledo" },
   ]
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -389,7 +388,7 @@ function PharmacySchedule() {
   const onDragEnd = () => setIsDragging(false)
 
   return (
-    <motion.section 
+    <motion.section
       className="py-12 lg:py-16 bg-gradient-to-br from-sky-50 via-cyan-50 to-sky-100/50 relative overflow-hidden border-y-2 border-sky-200/30"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
@@ -398,7 +397,7 @@ function PharmacySchedule() {
     >
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-5">
-        <motion.div 
+        <motion.div
           className="absolute top-0 right-0 w-64 h-64 bg-sky-400 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
@@ -410,7 +409,7 @@ function PharmacySchedule() {
             ease: "easeInOut",
           }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-400 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
@@ -425,14 +424,14 @@ function PharmacySchedule() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div 
+        <motion.div
           className="text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div 
+          <motion.div
             className="inline-flex items-center gap-2 px-4 py-2 bg-sky-100 rounded-full mb-4"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
@@ -447,7 +446,7 @@ function PharmacySchedule() {
             </motion.div>
             <span className="text-sm font-semibold text-sky-700">Turnero de Farmacias</span>
           </motion.div>
-          <motion.h2 
+          <motion.h2
             className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -456,19 +455,19 @@ function PharmacySchedule() {
           >
             Farmacias de Turno
           </motion.h2>
-          <motion.p 
+          <motion.p
             className="text-sm text-gray-600"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Consulta qué farmacia está de turno cada día
+            Turnero de abril — consultá qué farmacia está de turno cada día
           </motion.p>
         </motion.div>
 
         {/* Pharmacy Schedule - Scroll horizontal */}
-        <motion.div 
+        <motion.div
           className="max-w-5xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -515,7 +514,7 @@ function PharmacySchedule() {
               {pharmacySchedule.map((item, index) => {
                 const today = isToday(item.date)
                 const isSocial = item.pharmacy === "Farmacia Social"
-                
+
                 return (
                   <motion.div
                     key={`${item.date}-${index}`}
@@ -527,42 +526,37 @@ function PharmacySchedule() {
                     whileHover={{ scale: 1.03, y: -2 }}
                     className="flex-shrink-0 w-[130px] sm:w-[140px] snap-center"
                   >
-                    <Card 
-                      className={`h-full border-2 transition-all duration-300 ${
-                        today 
-                          ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50" 
+                    <Card
+                      className={`h-full border-2 transition-all duration-300 ${today
+                          ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50"
                           : isSocial
-                          ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
-                          : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
-                      }`}
+                            ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
+                            : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
+                        }`}
                     >
                       <CardContent className="p-3 sm:p-4 text-center">
                         <div className="mb-2 flex justify-center">
                           <motion.div
-                            className={`p-2 rounded-xl ${
-                              today
+                            className={`p-2 rounded-xl ${today
                                 ? "bg-gradient-to-br from-sky-400 to-cyan-500"
                                 : isSocial
-                                ? "bg-gradient-to-br from-amber-400 to-amber-600"
-                                : "bg-gradient-to-br from-sky-100 to-cyan-200"
-                            } group-hover:scale-110 transition-transform duration-300`}
+                                  ? "bg-gradient-to-br from-amber-400 to-amber-600"
+                                  : "bg-gradient-to-br from-sky-100 to-cyan-200"
+                              } group-hover:scale-110 transition-transform duration-300`}
                             whileHover={{ rotate: [0, -8, 8, 0] }}
                             transition={{ duration: 0.4 }}
                           >
-                            <Pill className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                              today || isSocial ? "text-white" : "text-sky-600"
-                            }`} />
+                            <Pill className={`w-4 h-4 sm:w-5 sm:h-5 ${today || isSocial ? "text-white" : "text-sky-600"
+                              }`} />
                           </motion.div>
                         </div>
                         <div className="space-y-1">
-                          <div className={`text-xs font-semibold ${
-                            today ? "text-sky-700" : isSocial ? "text-amber-800" : "text-gray-500"
-                          }`}>
+                          <div className={`text-xs font-semibold ${today ? "text-sky-700" : isSocial ? "text-amber-800" : "text-gray-500"
+                            }`}>
                             {item.date}
                           </div>
-                          <div className={`text-xs sm:text-sm font-bold leading-tight ${
-                            today ? "text-sky-800" : isSocial ? "text-amber-900" : "text-gray-800"
-                          }`}>
+                          <div className={`text-xs sm:text-sm font-bold leading-tight ${today ? "text-sky-800" : isSocial ? "text-amber-900" : "text-gray-800"
+                            }`}>
                             {item.pharmacy}
                           </div>
                           {isSocial && (
@@ -611,7 +605,7 @@ function PharmacySchedule() {
 
 export default function HomePage() {
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false)
-  
+
   const services = [
     {
       icon: Zap,
@@ -664,7 +658,7 @@ export default function HomePage() {
       <Header />
 
       {/* Hero Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="relative text-white overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -683,7 +677,7 @@ export default function HomePage() {
           {/* Overlay para mejorar legibilidad del texto */}
           <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
         </div>
-        
+
         {/* Background Image - Mobile */}
         <div className="lg:hidden absolute inset-0">
           <Image
@@ -697,10 +691,10 @@ export default function HomePage() {
           {/* Overlay para mejorar legibilidad del texto */}
           <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
         </div>
-        
+
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
-          <motion.div 
+          <motion.div
             className="absolute top-0 right-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
@@ -713,7 +707,7 @@ export default function HomePage() {
               ease: "easeInOut",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
@@ -727,7 +721,7 @@ export default function HomePage() {
             }}
           />
         </div>
-        
+
         {/* Botón Clima Flotante - Esquina Superior Derecha */}
         <motion.div
           className="absolute top-6 right-6 lg:top-8 lg:right-8 z-20"
@@ -742,13 +736,13 @@ export default function HomePage() {
             whileTap={{ scale: 0.95 }}
           >
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, 10, -10, 0],
                 scale: [1, 1.1, 1]
               }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
+              transition={{
+                duration: 3,
+                repeat: Infinity,
                 ease: "easeInOut",
                 repeatDelay: 2
               }}
@@ -762,13 +756,13 @@ export default function HomePage() {
 
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div 
+            <motion.div
               className="space-y-8"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <motion.div 
+              <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -782,21 +776,21 @@ export default function HomePage() {
                 </motion.div>
                 <span className="text-sm font-medium">Más de 60 años sirviendo a la comunidad</span>
               </motion.div>
-              
-              <motion.div 
+
+              <motion.div
                 className="space-y-6"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
-                <motion.h1 
+                <motion.h1
                   className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
                   Bienvenido a la
-                  <motion.span 
+                  <motion.span
                     className="text-coop-orange block bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -804,7 +798,7 @@ export default function HomePage() {
                   >
                     Cooperativa
                   </motion.span>
-                  <motion.span 
+                  <motion.span
                     className="block"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -813,7 +807,7 @@ export default function HomePage() {
                     de San Jose De La Dormida
                   </motion.span>
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   className="text-lg sm:text-xl lg:text-2xl text-green-50 leading-relaxed max-w-xl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -822,8 +816,8 @@ export default function HomePage() {
                   Servicios de calidad para nuestra comunidad. Electricidad, Internet, TV y más, con el compromiso de siempre.
                 </motion.p>
               </motion.div>
-              
-              <motion.div 
+
+              <motion.div
                 className="flex flex-col sm:flex-row gap-4 pt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -833,14 +827,14 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <a 
-                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
-                    target="_blank" 
+                  <a
+                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="group"
                   >
-                    <Button 
-                      size="lg" 
+                    <Button
+                      size="lg"
                       className="bg-coop-orange text-white hover:bg-coop-orange/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
                       Pagar Factura
@@ -858,9 +852,9 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <a 
-                    href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/" 
-                    target="_blank" 
+                  <a
+                    href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="group"
                   >
@@ -883,7 +877,7 @@ export default function HomePage() {
               </motion.div>
 
               {/* Stats */}
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-3 gap-6 pt-8 border-t border-white/20"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -901,7 +895,7 @@ export default function HomePage() {
                     transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
                     whileHover={{ scale: 1.1 }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="text-3xl lg:text-4xl font-bold text-coop-orange"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -914,13 +908,13 @@ export default function HomePage() {
                 ))}
               </motion.div>
             </motion.div>
-            
+
           </div>
         </div>
       </motion.section>
 
       {/* Asistentes Virtuales Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="py-20 lg:py-28 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -929,7 +923,7 @@ export default function HomePage() {
       >
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5">
-          <motion.div 
+          <motion.div
             className="absolute top-20 right-10 w-72 h-72 bg-coop-blue rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
@@ -941,7 +935,7 @@ export default function HomePage() {
               ease: "easeInOut",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-20 left-10 w-96 h-96 bg-coop-green rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
@@ -954,16 +948,16 @@ export default function HomePage() {
             }}
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.div 
+            <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 bg-coop-blue/10 rounded-full mb-6"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
@@ -978,7 +972,7 @@ export default function HomePage() {
               </motion.div>
               <span className="text-sm font-medium text-coop-blue">Asistencia 24/7</span>
             </motion.div>
-            <motion.h2 
+            <motion.h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -987,7 +981,7 @@ export default function HomePage() {
             >
               Asistentes Virtuales
             </motion.h2>
-            <motion.p 
+            <motion.p
               className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1038,7 +1032,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <CardContent className="p-8">
                   <div className="space-y-6">
                     <div className="bg-gradient-to-br from-coop-green/5 to-teal-500/5 p-4 rounded-xl border-2 border-coop-green/20 mb-6">
@@ -1060,7 +1054,7 @@ export default function HomePage() {
                         <span className="font-semibold text-coop-green">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También consulta información sobre servicios, horarios y más directamente desde WhatsApp.
                       </p>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         <MessageCircle className="w-5 h-5 text-coop-green" />
@@ -1092,8 +1086,8 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </motion.div>
-                        {/* Chatbot Web */}
-                        <motion.div
+            {/* Chatbot Web */}
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -1119,7 +1113,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <CardContent className="p-8">
                   <div className="space-y-6">
                     <div className="bg-gradient-to-br from-coop-blue/5 to-coop-green/5 p-4 rounded-xl border-2 border-coop-blue/20 mb-6">
@@ -1141,7 +1135,7 @@ export default function HomePage() {
                         <span className="font-semibold text-coop-blue">Principalmente para solicitar y descargar tus facturas</span> proporcionando tu número de cuenta. También responde consultas sobre servicios, horarios de atención y más.
                       </p>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         <MessageCircle className="w-5 h-5 text-coop-green" />
@@ -1176,7 +1170,7 @@ export default function HomePage() {
           </div>
 
           {/* Beneficios compartidos */}
-          <motion.div 
+          <motion.div
             className="mt-16 max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1218,7 +1212,7 @@ export default function HomePage() {
       <PharmacySchedule />
 
       {/* Services Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="py-20 lg:py-28 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1227,7 +1221,7 @@ export default function HomePage() {
       >
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5">
-          <motion.div 
+          <motion.div
             className="absolute top-20 left-10 w-72 h-72 bg-coop-green rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
@@ -1239,7 +1233,7 @@ export default function HomePage() {
               ease: "easeInOut",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-20 right-10 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
@@ -1252,16 +1246,16 @@ export default function HomePage() {
             }}
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.div 
+            <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 bg-coop-green/10 rounded-full mb-6"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
@@ -1276,7 +1270,7 @@ export default function HomePage() {
               </motion.div>
               <span className="text-sm font-medium text-coop-green">Servicios de Calidad</span>
             </motion.div>
-            <motion.h2 
+            <motion.h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1285,7 +1279,7 @@ export default function HomePage() {
             >
               Nuestros Servicios
             </motion.h2>
-            <motion.p 
+            <motion.p
               className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1298,7 +1292,7 @@ export default function HomePage() {
 
           <ServicesCarousel services={services} />
 
-          <motion.div 
+          <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1310,8 +1304,8 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
             >
               <Link href="/servicios" className="group inline-block">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
                 >
                   Ver Todos los Servicios
@@ -1330,7 +1324,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* Benefits Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="py-20 lg:py-28 bg-white relative overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1339,7 +1333,7 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div 
+            <motion.div
               className="space-y-8"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1358,8 +1352,8 @@ export default function HomePage() {
                   Somos más que un proveedor de servicios, somos una comunidad comprometida con tu bienestar.
                 </p>
               </div>
-              
-              <motion.div 
+
+              <motion.div
                 className="space-y-5"
                 initial="hidden"
                 whileInView="visible"
@@ -1375,13 +1369,13 @@ export default function HomePage() {
                 }}
               >
                 {benefits.map((benefit, index) => (
-                  <motion.div 
-                    key={index} 
+                  <motion.div
+                    key={index}
                     className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors group"
                     variants={{
                       hidden: { opacity: 0, x: -20 },
-                      visible: { 
-                        opacity: 1, 
+                      visible: {
+                        opacity: 1,
                         x: 0,
                         transition: {
                           type: "spring",
@@ -1391,7 +1385,7 @@ export default function HomePage() {
                     }}
                     whileHover={{ x: 5, scale: 1.02 }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="flex-shrink-0 mt-0.5"
                       whileHover={{ scale: 1.2, rotate: 360 }}
                       transition={{ duration: 0.5 }}
@@ -1405,9 +1399,9 @@ export default function HomePage() {
                 ))}
               </motion.div>
             </motion.div>
-            
+
             {/* Benefits Image Section */}
-            <motion.div 
+            <motion.div
               className="relative"
               initial={{ opacity: 0, x: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
@@ -1416,7 +1410,7 @@ export default function HomePage() {
             >
               {/* Community image - Desktop */}
               {/* TODO: Agregar imagen comunidad desktop: /images/community-desktop.jpg - Dimensiones: 1000x800px */}
-              <motion.div 
+              <motion.div
                 className="hidden lg:block relative w-full aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-orange/20"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
@@ -1425,10 +1419,10 @@ export default function HomePage() {
                   <Users className="w-32 h-32 text-coop-green/30" />
                 </div>
               </motion.div>
-              
+
               {/* Community image - Mobile */}
               {/* TODO: Agregar imagen comunidad mobile: /images/community-mobile.jpg - Dimensiones: 600x500px */}
-              <motion.div 
+              <motion.div
                 className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-coop-orange/20"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
@@ -1437,9 +1431,9 @@ export default function HomePage() {
                   <Users className="w-24 h-24 text-coop-green/30" />
                 </div>
               </motion.div>
-              
+
               {/* CTA Card Overlay */}
-              <motion.div 
+              <motion.div
                 className="absolute -bottom-6 -right-2 lg:-bottom-8 lg:-right-8 bg-white rounded-2xl shadow-2xl p-6 lg:p-8 border-2 border-coop-orange/30 max-w-xs"
                 initial={{ opacity: 0, y: 30, scale: 0.8 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -1456,9 +1450,9 @@ export default function HomePage() {
                     <p className="text-sm text-gray-600 mb-4">
                       Accede al cuadro tarifario oficial de ERSeP con toda la información actualizada.
                     </p>
-                    <a 
-                      href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/" 
-                      target="_blank" 
+                    <a
+                      href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="block"
                     >
@@ -1476,7 +1470,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* PFC Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="py-20 lg:py-28 bg-gradient-to-br from-gray-50 via-coop-green/5 to-gray-50 relative overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1484,7 +1478,7 @@ export default function HomePage() {
         transition={{ duration: 0.6 }}
       >
         {/* Background decoration */}
-        <motion.div 
+        <motion.div
           className="absolute top-0 right-0 w-96 h-96 bg-coop-green/5 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
@@ -1496,7 +1490,7 @@ export default function HomePage() {
             ease: "easeInOut",
           }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-0 left-0 w-96 h-96 bg-coop-orange/5 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
@@ -1508,11 +1502,11 @@ export default function HomePage() {
             ease: "easeInOut",
           }}
         />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* PFC Image Section */}
-            <motion.div 
+            <motion.div
               className="relative order-2 lg:order-1"
               initial={{ opacity: 0, x: -50, scale: 0.9 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
@@ -1529,7 +1523,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* PFC image - Mobile */}
               {/* TODO: Agregar imagen PFC mobile: /images/pfc-mobile.jpg - Dimensiones: 600x500px */}
               <div className="lg:hidden relative w-full aspect-[6/5] rounded-3xl overflow-hidden shadow-2xl">
@@ -1540,9 +1534,9 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Badge */}
-              <motion.div 
+              <motion.div
                 className="absolute -top-4 -right-4 lg:-top-6 lg:-right-6 bg-coop-orange rounded-full p-4 lg:p-6 shadow-xl"
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -1551,8 +1545,8 @@ export default function HomePage() {
                 <ShieldCheck className="w-8 h-8 lg:w-10 lg:h-10 text-coop-green" />
               </motion.div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="space-y-8 order-1 lg:order-2"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1565,7 +1559,7 @@ export default function HomePage() {
                   <span className="text-sm font-medium text-coop-green">Programa Especial</span>
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
-                
+
                   Plan de financiamiento Colectivo
                   <span className="block text-coop-green mt-2">(PFC)</span>
                 </h2>
@@ -1573,7 +1567,7 @@ export default function HomePage() {
                   Descubre cómo el PFC apoya la salud y el bienestar integral de nuestros socios con programas especializados y atención personalizada.
                 </p>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-coop-green/10 hover:bg-white/80 transition-colors">
                   <div className="flex-shrink-0 mt-0.5">
@@ -1600,14 +1594,14 @@ export default function HomePage() {
                   <span className="text-lg text-gray-700 font-medium pt-0.5">Apoyo integral para una mejor calidad de vida</span>
                 </div>
               </div>
-              
+
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Link href="/pfc" className="inline-block group">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-6 text-base"
                   >
                     Más Información sobre PFC
@@ -1627,7 +1621,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* CTA Section - Enhanced with Framer Motion */}
-      <motion.section 
+      <motion.section
         className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white py-20 lg:py-28 overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1636,7 +1630,7 @@ export default function HomePage() {
       >
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
-          <motion.div 
+          <motion.div
             className="absolute top-0 left-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
@@ -1649,7 +1643,7 @@ export default function HomePage() {
               ease: "easeInOut",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
@@ -1663,9 +1657,9 @@ export default function HomePage() {
             }}
           />
         </div>
-        
+
         <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.div 
+          <motion.div
             className="max-w-3xl mx-auto space-y-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1678,7 +1672,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <motion.div 
+              <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6 border border-white/20"
                 initial={{ scale: 0.8, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
@@ -1693,7 +1687,7 @@ export default function HomePage() {
                 </motion.div>
                 <span className="text-sm font-medium">Estamos aquí para ayudarte</span>
               </motion.div>
-              <motion.h2 
+              <motion.h2
                 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -1702,7 +1696,7 @@ export default function HomePage() {
               >
                 ¿Necesitas ayuda o tienes consultas?
               </motion.h2>
-              <motion.p 
+              <motion.p
                 className="text-lg sm:text-xl text-green-50 leading-relaxed max-w-2xl mx-auto"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -1712,8 +1706,8 @@ export default function HomePage() {
                 Nuestro equipo está aquí para ayudarte. Contáctanos por cualquier medio y te responderemos a la brevedad.
               </motion.p>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1725,8 +1719,8 @@ export default function HomePage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Link href="/contacto" className="group inline-block">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
                   >
                     <motion.div
@@ -1765,7 +1759,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* Teléfonos de Guardia Section - Prominent and Accessible */}
-      <motion.section 
+      <motion.section
         className="py-16 lg:py-20 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 relative overflow-hidden border-t-4 border-red-500"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1818,8 +1812,8 @@ export default function HomePage() {
                   <CardTitle className="text-xl font-bold text-gray-900">Traslado Social</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
-                  <a 
-                    href="tel:+543521406183" 
+                  <a
+                    href="tel:+543521406183"
                     className="text-2xl font-bold text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
@@ -1848,8 +1842,8 @@ export default function HomePage() {
                   <CardTitle className="text-xl font-bold text-gray-900">Eléctrica</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
-                  <a 
-                    href="tel:+543521406186" 
+                  <a
+                    href="tel:+543521406186"
                     className="text-2xl font-bold text-yellow-600 hover:text-yellow-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
@@ -1878,8 +1872,8 @@ export default function HomePage() {
                   <CardTitle className="text-xl font-bold text-gray-900">Internet / TV</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
-                  <a 
-                    href="tel:+543521438313" 
+                  <a
+                    href="tel:+543521438313"
                     className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
@@ -1908,8 +1902,8 @@ export default function HomePage() {
                   <CardTitle className="text-xl font-bold text-gray-900">Administración</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
-                  <a 
-                    href="tel:+543521401330" 
+                  <a
+                    href="tel:+543521401330"
                     className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
@@ -1938,8 +1932,8 @@ export default function HomePage() {
                   <CardTitle className="text-xl font-bold text-gray-900">Servicio Funebres</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center pt-0">
-                  <a 
-                    href="tel:+543521406189" 
+                  <a
+                    href="tel:+543521406189"
                     className="text-2xl font-bold text-gray-600 hover:text-gray-700 transition-colors inline-flex items-center gap-2 group/link"
                   >
                     <PhoneCall className="w-5 h-5 group-hover/link:scale-110 transition-transform" />
