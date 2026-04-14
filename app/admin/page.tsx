@@ -18,9 +18,9 @@ import {
   X,
   Building2,
   QrCode,
+  BrainCircuit,
 } from "lucide-react";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import { CONVERSATION_ANALYSIS_ADMIN_PASSWORD } from "@/lib/conversation-analysis-admin-password";
 
 interface AdminSection {
   id: string;
@@ -92,6 +92,17 @@ const ADMIN_SECTIONS: AdminSection[] = [
     color: "purple",
     gradient: "from-purple-500 to-purple-600",
   },
+  {
+    id: "analisis-conversaciones",
+    title: "Análisis de conversaciones",
+    description:
+      "Vista del análisis automático del chatbot (intención, resolución, issues)",
+    icon: BrainCircuit,
+    route: "/admin/analisis-conversaciones",
+    password: CONVERSATION_ANALYSIS_ADMIN_PASSWORD,
+    color: "violet",
+    gradient: "from-violet-500 to-cyan-600",
+  },
 ];
 
 export default function AdminPage() {
@@ -143,6 +154,19 @@ export default function AdminPage() {
         }
       } else if (selectedSection.id === "conversaciones") {
         const response = await fetch("/api/conversaciones/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: passwordInput }),
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          setAuthError(data.error || "Error al autenticar");
+          setLoading(false);
+          return;
+        }
+      } else if (selectedSection.id === "analisis-conversaciones") {
+        const response = await fetch("/api/admin/conversation-analysis/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: passwordInput }),
