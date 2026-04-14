@@ -166,20 +166,18 @@ TURNERO DE FARMACIAS (abril, año en curso):
 - 14 de abril: Farmacia Robledo
 - 15 de abril: Farmacia Centro
 - 16 de abril: Farmacia Social
-- 17 de abril: Farmacia Carreño
-- 18 de abril: Farmacia Robledo
-- 19 de abril: Farmacia Centro
-- 20 de abril: Farmacia Social
-- 21 de abril: Farmacia Carreño
-- 22 de abril: Farmacia Robledo
-- 23 de abril: Farmacia Centro
-- 24 de abril: Farmacia Social
-- 25 de abril: Farmacia Carreño
-- 26 de abril: Farmacia Robledo
-- 27 de abril: Farmacia Centro
-- 28 de abril: Farmacia Social
-- 29 de abril: Farmacia Carreño
-- 30 de abril: Farmacia Robledo
+- 17 de abril: Farmacia Daniotti
+- 18 de abril: Farmacia Carreño
+- 19 de abril: Farmacia Robledo
+- 20 de abril: Farmacia Centro
+- 21 de abril: Farmacia Social
+- 22 de abril: Farmacia Daniotti
+- 23 de abril: Farmacia Carreño
+- 24 de abril: Farmacia Robledo
+- 25 de abril: Farmacia Centro
+- 26 de abril: Farmacia Social
+- 27 de abril: Farmacia Daniotti
+- 28 de abril: Farmacia Carreño
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
