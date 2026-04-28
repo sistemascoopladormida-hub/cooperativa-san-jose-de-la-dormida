@@ -132,8 +132,8 @@ ESTADO DE FACTURAS Y BOLETAS:
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
   * Período: Diciembre
   * Vencimientos:
-    - Primer vencimiento: 10 de febrero
-    - Segundo vencimiento: 20 de febrero
+    - Primer vencimiento: 10 de Marzo
+    - Segundo vencimiento: 20 de Marzo
   * Medios de pago habilitados:
     - Caja de cobro (Efectivo, Tarjetas de crédito y débito)
     - App CoopOnline
@@ -146,8 +146,8 @@ ESTADO DE FACTURAS Y BOLETAS:
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
   * Período: Enero
   * Vencimientos:
-    - Primer vencimiento: 10 de febrero
-    - Segundo vencimiento: 20 de febrero
+    - Primer vencimiento: 10 de marzo
+    - Segundo vencimiento: 20 de marzo
 
 TURNERO DE FARMACIAS (abril, año en curso):
 - 1 de abril: Farmacia Carreño
