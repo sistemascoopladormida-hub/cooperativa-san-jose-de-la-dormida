@@ -262,6 +262,10 @@ async function handleInvoiceRequest(
     const previousMonths = new Set<string>();
     for (const msg of recentMessages) {
       if (msg.role === "user") {
+        // Evitar contaminar el contexto con meses de mensajes no relacionados a facturas.
+        if (!hasInvoiceRequestIntent(msg.content)) {
+          continue;
+        }
         const prevRequest = detectInvoiceRequest(msg.content);
         for (const num of prevRequest.accountNumbers) {
           previousAccountNumbers.add(num);
@@ -440,6 +444,7 @@ async function handleInvoiceRequest(
     if (invoicesFound.length > 0) {
       let invoiceCountBefore = await getInvoiceRequestCountThisMonth(from);
       const fileNames: string[] = [];
+      const sentMonths = new Set<string>();
 
       for (const { invoice, month } of invoicesFound) {
         const pdfBuffer = await downloadPDFFromDrive(invoice.fileId);
@@ -463,13 +468,22 @@ async function handleInvoiceRequest(
             invoiceRequest.year
           );
           fileNames.push(invoice.fileName);
+          if (month) {
+            sentMonths.add(month);
+          }
         }
       }
 
       const invoiceCountAfter = await getInvoiceRequestCountThisMonth(from);
       let confirmationMessage = `✅ Te he enviado ${fileNames.length > 1 ? "tus facturas" : "tu factura"}.`;
-      if (combinedMonths.length > 0) {
-        confirmationMessage += `\n\n📅 Período: ${combinedMonths.join(", ")}${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
+      const monthsForConfirmation =
+        sentMonths.size > 0
+          ? Array.from(sentMonths)
+          : currentMonths.length > 0
+            ? currentMonths
+            : [];
+      if (monthsForConfirmation.length > 0) {
+        confirmationMessage += `\n\n📅 Período: ${monthsForConfirmation.join(", ")}${invoiceRequest.year ? " " + invoiceRequest.year : ""}`;
       }
       confirmationMessage += `\n\n📄 Archivos: ${fileNames.join(", ")}`;
       confirmationMessage += `\n\n💳 Puedes pagar desde la caja de cobro de la cooperativa o desde la app CoopOnline:`;
