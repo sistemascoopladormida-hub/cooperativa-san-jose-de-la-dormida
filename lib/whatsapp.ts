@@ -88,7 +88,9 @@ function makeHttpsRequest(
 export async function sendImageMessage(
   to: string,
   imageBuffer: Buffer,
-  caption?: string
+  caption?: string,
+  filename: string = "imagen.jpeg",
+  mimeType: string = "image/jpeg"
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -104,9 +106,9 @@ export async function sendImageMessage(
     const uploadData = await makeHttpsRequest(
       `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${phoneId}/media`,
       imageBuffer,
-      "ubicacion-numero-cuenta.jpeg",
+      filename,
       { Authorization: `Bearer ${token}` },
-      "image/jpeg",
+      mimeType,
       "image"
     );
 

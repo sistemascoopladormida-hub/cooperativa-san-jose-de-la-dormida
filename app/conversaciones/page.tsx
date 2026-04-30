@@ -22,6 +22,7 @@ import {
   Bot,
   FileCheck,
   Send,
+  PlusCircle,
 } from "lucide-react";
 
 interface Conversation {
@@ -434,16 +435,26 @@ export default function ConversacionesPage() {
                 </p>
               </div>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Salir
-              </Button>
-            </motion.div>
+            <div className="flex items-center gap-2">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button asChild variant="outline">
+                  <Link href="/conversaciones/nuevo">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Nueva conversación
+                  </Link>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Salir
+                </Button>
+              </motion.div>
+            </div>
           </div>
         </div>
       </motion.div>
