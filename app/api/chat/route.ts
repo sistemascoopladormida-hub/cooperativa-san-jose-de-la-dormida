@@ -24,6 +24,10 @@ import {
   getInvoiceRequestCountThisMonth,
   MAX_INVOICES_PER_MONTH,
 } from "@/lib/invoices";
+import {
+  APRIL_2026_UNAVAILABLE_MESSAGE,
+  getInvoicePeriodPolicy,
+} from "@/lib/invoice-period-policy";
 
 export const runtime = "nodejs";
 
@@ -132,6 +136,59 @@ export async function POST(request: NextRequest) {
         lastUserMessage
       );
 
+    let previousPeriodRequest: {
+      month?: string;
+      months?: string[];
+      year?: string;
+    } | null = null;
+
+    if (hasInvoiceIntent) {
+      const initialInvoiceRequest = detectInvoiceRequest(lastUserMessage);
+      const initialPeriodPolicy = getInvoicePeriodPolicy(initialInvoiceRequest);
+      const isAccountContinuation =
+        initialInvoiceRequest.accountNumbers.length > 0 ||
+        /\b(?:enviamela|envíamela|mandamela|mandámela|dale|sí\s+dale|si\s+dale)\b/i.test(
+          lastUserMessage
+        );
+
+      if (!initialPeriodPolicy.hasSpecifiedPeriod && isAccountContinuation) {
+        for (
+          let i = messages.length - 2;
+          i >= Math.max(0, messages.length - 10);
+          i--
+        ) {
+          if (messages[i]?.sender === "user") {
+            const previousRequest = detectInvoiceRequest(messages[i].text || "");
+            const previousPeriodPolicy =
+              getInvoicePeriodPolicy(previousRequest);
+
+            if (previousPeriodPolicy.hasSpecifiedPeriod) {
+              previousPeriodRequest = {
+                month: previousRequest.month,
+                months: previousRequest.months,
+                year: previousRequest.year,
+              };
+              break;
+            }
+          }
+        }
+      }
+
+      const effectiveInitialPeriodPolicy = previousPeriodRequest
+        ? getInvoicePeriodPolicy(previousPeriodRequest)
+        : initialPeriodPolicy;
+
+      if (
+        !effectiveInitialPeriodPolicy.hasSpecifiedPeriod ||
+        effectiveInitialPeriodPolicy.isBlockedApril2026
+      ) {
+        await logWebMessages(lastUserMessage, APRIL_2026_UNAVAILABLE_MESSAGE);
+        return NextResponse.json({
+          response: APRIL_2026_UNAVAILABLE_MESSAGE,
+        });
+      }
+    }
+
     if (hasInvoiceIntent && !isInformationalQuestion) {
       // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
       const addressOrNameCheck =
@@ -224,6 +281,13 @@ export async function POST(request: NextRequest) {
             }
           }
         }
+      }
+
+      if (!invoiceRequest.month && previousPeriodRequest?.month) {
+        invoiceRequest.month = previousPeriodRequest.month;
+      }
+      if (!invoiceRequest.year && previousPeriodRequest?.year) {
+        invoiceRequest.year = previousPeriodRequest.year;
       }
 
       // Si quiere factura pero NO proporcionó número (ni en mensaje actual ni en anteriores)

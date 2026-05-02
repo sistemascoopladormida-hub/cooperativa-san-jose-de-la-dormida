@@ -34,6 +34,10 @@ import {
   canRequestMoreInvoices,
   MAX_INVOICES_PER_MONTH,
 } from "@/lib/invoices";
+import {
+  APRIL_2026_UNAVAILABLE_MESSAGE,
+  getInvoicePeriodPolicy,
+} from "@/lib/invoice-period-policy";
 import { getChatbotResponse } from "@/lib/chatbot";
 
 const WHATSAPP_API_VERSION = "v22.0";
@@ -197,6 +201,20 @@ async function handleInvoiceViaWhatsAppRequest(
     return false;
   }
 
+  const invoiceRequest = detectInvoiceRequest(text);
+  const periodPolicy = getInvoicePeriodPolicy(invoiceRequest);
+  if (!periodPolicy.hasSpecifiedPeriod || periodPolicy.isBlockedApril2026) {
+    await sendTextMessage(from, APRIL_2026_UNAVAILABLE_MESSAGE);
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(conversationId, "assistant", APRIL_2026_UNAVAILABLE_MESSAGE);
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+    return true;
+  }
+
   const response =
     `Gracias por tu interés. 🙏\n\n` +
     `Estamos trabajando para poder enviar las facturas por WhatsApp. Te avisaremos cuando esta opción esté disponible.\n\n` +
@@ -235,22 +253,8 @@ async function handleInvoiceRequest(
     return false;
   }
 
-  // Primero verificar si el usuario está enviando dirección/nombre en lugar de número de cuenta
-  const addressOrNameCheck = detectAddressOrNameInsteadOfAccount(text);
-  
-  if (addressOrNameCheck.isAddressOrName) {
-    console.log(
-      `[WEBHOOK] ⚠️ Usuario envió dirección/nombre en lugar de número de cuenta. Enviando imagen de ayuda.`
-    );
-    await sendAccountNumberImage(
-      from,
-      text,
-      whatsappMessageId,
-      `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
-    );
-    return true;
-  }
-  
+  const invoiceRequest = detectInvoiceRequest(text);
+
   // Obtener el contexto de la conversación (números y meses de mensajes anteriores)
   let conversationContext: string[] = [];
   let contextMonths: string[] = [];
@@ -286,7 +290,46 @@ async function handleInvoiceRequest(
     console.error("[WEBHOOK] Error obteniendo contexto de conversación:", error);
   }
 
-  const invoiceRequest = detectInvoiceRequest(text);
+  const currentPeriodPolicy = getInvoicePeriodPolicy(invoiceRequest);
+  const canUseContextPeriod =
+    !currentPeriodPolicy.hasSpecifiedPeriod &&
+    invoiceRequest.accountNumbers.length > 0 &&
+    contextMonths.length > 0;
+  const effectivePeriodPolicy = canUseContextPeriod
+    ? getInvoicePeriodPolicy({ months: contextMonths })
+    : currentPeriodPolicy;
+
+  if (!effectivePeriodPolicy.hasSpecifiedPeriod || effectivePeriodPolicy.isBlockedApril2026) {
+    console.log(
+      `[WEBHOOK] Solicitud de factura sin período válido o abril 2026 bloqueado. Enviando aviso informativo.`
+    );
+    await sendTextMessage(from, APRIL_2026_UNAVAILABLE_MESSAGE);
+    try {
+      const conversationId = await getOrCreateConversation(from);
+      await saveMessage(conversationId, "user", text, whatsappMessageId);
+      await saveMessage(conversationId, "assistant", APRIL_2026_UNAVAILABLE_MESSAGE);
+    } catch (dbError) {
+      console.error("Error guardando en BD:", dbError);
+    }
+    return true;
+  }
+
+  // Primero verificar si el usuario está enviando dirección/nombre en lugar de número de cuenta
+  const addressOrNameCheck = detectAddressOrNameInsteadOfAccount(text);
+
+  if (addressOrNameCheck.isAddressOrName) {
+    console.log(
+      `[WEBHOOK] ⚠️ Usuario envió dirección/nombre en lugar de número de cuenta. Enviando imagen de ayuda.`
+    );
+    await sendAccountNumberImage(
+      from,
+      text,
+      whatsappMessageId,
+      `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
+    );
+    return true;
+  }
+
   console.log("[WEBHOOK] Mensaje recibido:", text);
   console.log(
     "[WEBHOOK] Solicitud de factura detectada:",
@@ -417,7 +460,7 @@ async function handleInvoiceRequest(
 
   try {
     const invoicesFound: Array<{
-      invoice: Awaited<ReturnType<typeof findInvoiceInDrive>>;
+      invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceInDrive>>>;
       month?: string;
     }> = [];
 

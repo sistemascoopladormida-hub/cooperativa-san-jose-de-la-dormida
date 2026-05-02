@@ -2,6 +2,10 @@ import { google } from "googleapis";
 import type { JWT } from "google-auth-library";
 import fs from "fs";
 import path from "path";
+import {
+  isBlockedApril2026InvoicePeriod,
+  isBlockedInvoiceFolderName,
+} from "@/lib/invoice-period-policy";
 
 // Inicializar Google Drive API
 let driveClient: any = null;
@@ -139,19 +143,15 @@ function capitalizeMonth(month: string): string {
 
 /**
  * Carpeta(s) candidata(s) para estructura antigua.
- * Caso especial operativo:
- * - Periodo marzo 2026 fue facturado el 1 de abril 2026 y se almaceno en "facturas-Abril-2026".
+ * No incluye carpetas bloqueadas operativamente.
  */
 function getOldStructureFolderCandidates(month: string, year: string): string[] {
-  const normalizedMonth = month.toLowerCase().trim();
   const candidates: string[] = [];
 
-  if (normalizedMonth === "marzo" && year === "2026") {
-    candidates.push("facturas-Abril-2026");
-  }
-
   candidates.push(`facturas-${capitalizeMonth(month)}-${year}`);
-  return [...new Set(candidates)];
+  return [...new Set(candidates)].filter(
+    (folderName) => !isBlockedInvoiceFolderName(folderName)
+  );
 }
 
 /**
@@ -210,6 +210,11 @@ async function findFacturasParentFolder(): Promise<string | null> {
  */
 async function findFolderByName(folderName: string, parentFolderId?: string | null): Promise<string | null> {
   try {
+    if (isBlockedInvoiceFolderName(folderName)) {
+      console.log(`[DRIVE] ⛔ Carpeta bloqueada ignorada: ${folderName}`);
+      return null;
+    }
+
     const drive = await getDriveClient();
     
     // Construir la query: buscar carpeta con el nombre específico
@@ -231,7 +236,7 @@ async function findFolderByName(folderName: string, parentFolderId?: string | nu
     
     // Si no se encuentra, intentar con punto en lugar de guion (fallback para diciembre.2025)
     const variantName = folderName.replace(/-(\d{4})$/, '.$1'); // Reemplaza "-2025" con ".2025"
-    if (variantName !== folderName) {
+    if (variantName !== folderName && !isBlockedInvoiceFolderName(variantName)) {
       let variantQuery = `mimeType='application/vnd.google-apps.folder' and name='${variantName}' and trashed=false`;
       if (parentFolderId) {
         variantQuery += ` and '${parentFolderId}' in parents`;
@@ -360,6 +365,11 @@ export async function findInvoiceInDrive(
       }
     }
 
+    if (isBlockedApril2026InvoicePeriod(targetMonth, targetYear)) {
+      console.log(`[DRIVE] ⛔ Búsqueda bloqueada para abril 2026`);
+      return null;
+    }
+
     console.log(`[DRIVE] 🔍 Buscando cuenta ${accountNumber} en ${targetMonth} ${targetYear}`);
 
     // Primero buscar la carpeta padre "Facturas" dentro de "Ordenadores > MI PC > Facturas"
@@ -449,6 +459,11 @@ export async function findInvoiceInDrive(
         const pastDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const pastMonth = getMonthName(pastDate.getMonth() + 1);
         const pastYear = pastDate.getFullYear().toString();
+
+        if (isBlockedApril2026InvoicePeriod(pastMonth, pastYear)) {
+          console.log(`[DRIVE] ⛔ Mes anterior bloqueado ignorado: ${pastMonth} ${pastYear}`);
+          continue;
+        }
 
         console.log(`[DRIVE] 🔍 Mes anterior ${i}: ${pastMonth} ${pastYear}`);
         
