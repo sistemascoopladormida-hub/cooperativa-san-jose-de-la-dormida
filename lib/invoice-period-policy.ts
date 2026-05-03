@@ -2,9 +2,12 @@ export const APRIL_2026_UNAVAILABLE_MESSAGE =
   "Las facturas de abril 2026 aún no se encuentran disponibles por problemas técnicos.\n" +
   "Si necesitás facturas de meses anteriores, por favor indicá el período correspondiente.";
 
+export const INVOICE_PERIOD_NOT_FOUND_MESSAGE =
+  "No se encontró la factura para el período solicitado. Por favor verificá el mes y año.";
+
 export const BLOCKED_INVOICE_FOLDER_NAME = "facturas-Abril-2026";
 
-const MONTH_NAMES = [
+export const MONTH_NAMES = [
   "enero",
   "febrero",
   "marzo",
@@ -25,11 +28,16 @@ type InvoicePeriodRequest = {
   year?: string;
 };
 
-function normalizeMonth(month: string): string {
+export type ResolvedInvoicePeriod = {
+  month: string;
+  year: string;
+};
+
+export function normalizeMonth(month: string): string {
   return month.toLowerCase().trim();
 }
 
-function inferInvoiceYearForMonth(
+export function inferInvoiceYearForMonth(
   month: string,
   explicitYear?: string,
   referenceDate = new Date()
@@ -51,13 +59,10 @@ function inferInvoiceYearForMonth(
   return currentYearNumber.toString();
 }
 
-export function getInvoicePeriodPolicy(
+export function resolveInvoicePeriods(
   request: InvoicePeriodRequest,
   referenceDate = new Date()
-): {
-  hasSpecifiedPeriod: boolean;
-  isBlockedApril2026: boolean;
-} {
+): ResolvedInvoicePeriod[] {
   const requestedMonths =
     request.months && request.months.length > 0
       ? request.months
@@ -65,20 +70,36 @@ export function getInvoicePeriodPolicy(
         ? [request.month]
         : [];
 
-  const isBlockedApril2026 = requestedMonths.some((month) => {
+  return requestedMonths.map((month) => {
     const normalizedMonth = normalizeMonth(month);
-    const inferredYear = inferInvoiceYearForMonth(
-      normalizedMonth,
-      request.year,
-      referenceDate
-    );
-
-    return normalizedMonth === "abril" && inferredYear === "2026";
+    return {
+      month: normalizedMonth,
+      year: inferInvoiceYearForMonth(
+        normalizedMonth,
+        request.year,
+        referenceDate
+      ),
+    };
   });
+}
+
+export function getInvoicePeriodPolicy(
+  request: InvoicePeriodRequest,
+  referenceDate = new Date()
+): {
+  hasSpecifiedPeriod: boolean;
+  isBlockedApril2026: boolean;
+  periods: ResolvedInvoicePeriod[];
+} {
+  const periods = resolveInvoicePeriods(request, referenceDate);
+  const isBlockedApril2026 = periods.some(
+    (period) => period.month === "abril" && period.year === "2026"
+  );
 
   return {
-    hasSpecifiedPeriod: requestedMonths.length > 0,
+    hasSpecifiedPeriod: periods.length > 0,
     isBlockedApril2026,
+    periods,
   };
 }
 

@@ -322,7 +322,30 @@ export function detectInvoiceRequest(
     ),
   ];
 
-  const months = [...new Set([...monthsFromName, ...monthsFromPeriod])];
+  // Detectar formatos numéricos de período: "03/26", "03-2026", "3.26"
+  const numericPeriodPattern = /\b(0?[1-9]|1[0-2])\s*[\/.-]\s*(\d{2}|\d{4})\b/g;
+  const numericPeriodMatches = [...normalizedMessage.matchAll(numericPeriodPattern)];
+  const monthsFromNumericPeriod = [
+    ...new Set(
+      numericPeriodMatches.map((match) => {
+        const numericMonth = Number(match[1]);
+        return monthNamesByPeriod[numericMonth - 1];
+      })
+    ),
+  ];
+  const yearFromNumericPeriod = numericPeriodMatches[0]
+    ? numericPeriodMatches[0][2].length === 2
+      ? `20${numericPeriodMatches[0][2]}`
+      : numericPeriodMatches[0][2]
+    : undefined;
+
+  const months = [
+    ...new Set([
+      ...monthsFromName,
+      ...monthsFromPeriod,
+      ...monthsFromNumericPeriod,
+    ]),
+  ];
   let month = months[0]; // Primer mes para retrocompatibilidad
 
   // Si no se encontró mes específico, verificar si dice "mes pasado" o similar
@@ -354,7 +377,7 @@ export function detectInvoiceRequest(
   // Detectar año
   const yearPattern = /(20\d{2})/;
   const yearMatch = message.match(yearPattern);
-  let year = yearMatch ? yearMatch[1] : undefined;
+  let year = yearMatch ? yearMatch[1] : yearFromNumericPeriod;
 
   // Si se detectó "mes pasado" o similar, también calcular el año si es necesario
   if (!year && month && /(?:mes\s+pasado|mes\s+anterior)/i.test(message)) {

@@ -16,7 +16,7 @@ import {
   isServiceOutageComplaint,
   SERVICE_OUTAGE_RESPONSE,
 } from "@/lib/service-outage-detector";
-import { findInvoiceInDrive } from "@/lib/drive";
+import { findInvoiceInDrive, invoicePeriodFolderExists } from "@/lib/drive";
 import { getOrCreateConversation, saveMessage } from "@/lib/conversations";
 import {
   canRequestMoreInvoices,
@@ -27,6 +27,7 @@ import {
 import {
   APRIL_2026_UNAVAILABLE_MESSAGE,
   getInvoicePeriodPolicy,
+  INVOICE_PERIOD_NOT_FOUND_MESSAGE,
 } from "@/lib/invoice-period-policy";
 
 export const runtime = "nodejs";
@@ -127,19 +128,11 @@ export async function POST(request: NextRequest) {
     // 1) Lógica de facturas y número de cuenta (igual que WhatsApp)
     // Solo procesar como factura si hay INTENCIÓN EXPLÍCITA (no "hola", "te desconfiguraste", etc.)
     const hasInvoiceIntent = hasInvoiceRequestIntent(lastUserMessage);
-    const isInformationalQuestion =
-      /(?:están|estan|está|esta|disponible|cuando|cuándo|hay|existen)/i.test(
-        lastUserMessage
-      ) &&
-      /(?:facturas?|boletas?|recibos?)/i.test(lastUserMessage) &&
-      !/(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|podrías|puedes)/i.test(
-        lastUserMessage
-      );
-
     let previousPeriodRequest: {
       month?: string;
       months?: string[];
       year?: string;
+      type?: "servicios" | "electricidad";
     } | null = null;
 
     if (hasInvoiceIntent) {
@@ -167,6 +160,7 @@ export async function POST(request: NextRequest) {
                 month: previousRequest.month,
                 months: previousRequest.months,
                 year: previousRequest.year,
+                type: previousRequest.type,
               };
               break;
             }
@@ -187,9 +181,26 @@ export async function POST(request: NextRequest) {
           response: APRIL_2026_UNAVAILABLE_MESSAGE,
         });
       }
+
+      const periodRequestForFolderCheck =
+        previousPeriodRequest || initialInvoiceRequest;
+      for (const period of effectiveInitialPeriodPolicy.periods) {
+        const folderExists = await invoicePeriodFolderExists(
+          period.month,
+          period.year,
+          periodRequestForFolderCheck.type
+        );
+
+        if (!folderExists) {
+          await logWebMessages(lastUserMessage, INVOICE_PERIOD_NOT_FOUND_MESSAGE);
+          return NextResponse.json({
+            response: INVOICE_PERIOD_NOT_FOUND_MESSAGE,
+          });
+        }
+      }
     }
 
-    if (hasInvoiceIntent && !isInformationalQuestion) {
+    if (hasInvoiceIntent) {
       // 1.a) Usuario envía dirección/nombre en lugar de número de cuenta
       const addressOrNameCheck =
         detectAddressOrNameInsteadOfAccount(lastUserMessage);
@@ -478,8 +489,8 @@ ${cooperativeContext}
 Responde siempre en español, de forma natural, conversacional y HUMANA. Sé empático, útil, profesional y amigable. Usa un tono cercano pero profesional, como si fueras un empleado de la cooperativa hablando con un socio.
 
 IMPORTANTE sobre facturas:
-- Si preguntan si las facturas están disponibles o cuándo estarán disponibles, responde de forma natural y amigable explicando que sí, las facturas están disponibles. Menciona que pueden retirarlas en los boxes de atención al público, que fueron enviadas por correo electrónico, y que también pueden solicitarlas desde este chat proporcionando su número de cuenta (3-4 dígitos).
-- Si preguntan cómo obtener su factura, explica que pueden retirarla en los boxes, que fue enviada por correo electrónico, o que pueden solicitarla desde este chat proporcionando su número de cuenta de 3-4 dígitos.
+- No respondas con listas hardcodeadas de meses disponibles. La disponibilidad de facturas se valida contra las carpetas reales de Google Drive.
+- Si preguntan cómo obtener su factura, explica que deben indicar el período y su número de cuenta de 3-4 dígitos para que el sistema la busque.
 - Sé conversacional: evita respuestas robóticas o demasiado formales. Responde como si fueras una persona real ayudando a otra.
 
 IMPORTANTE sobre precios y cuadro tarifario:

@@ -3,6 +3,7 @@ import type { JWT } from "google-auth-library";
 import fs from "fs";
 import path from "path";
 import {
+  inferInvoiceYearForMonth,
   isBlockedApril2026InvoicePeriod,
   isBlockedInvoiceFolderName,
 } from "@/lib/invoice-period-policy";
@@ -260,6 +261,72 @@ async function findFolderByName(folderName: string, parentFolderId?: string | nu
   }
 }
 
+function resolveTargetPeriod(month?: string, year?: string): {
+  targetMonth: string;
+  targetYear: string;
+} {
+  const now = new Date();
+  const targetMonth = month || getMonthName(now.getMonth() + 1);
+  const targetYear = inferInvoiceYearForMonth(targetMonth, year, now);
+
+  return { targetMonth, targetYear };
+}
+
+function getSeparatedFolderCandidates(
+  month: string,
+  year: string,
+  requestedType?: "servicios" | "electricidad"
+): Array<{ folderName: string; type: "servicios" | "electricidad" }> {
+  let types: Array<"servicios" | "electricidad">;
+  if (requestedType) {
+    types = [requestedType, requestedType === "servicios" ? "electricidad" : "servicios"];
+  } else {
+    types = ["servicios", "electricidad"];
+  }
+
+  return types.flatMap((type) => {
+    const folderName = getFolderName(month, year, type);
+    return folderName && !isBlockedInvoiceFolderName(folderName)
+      ? [{ folderName, type }]
+      : [];
+  });
+}
+
+export async function invoicePeriodFolderExists(
+  month: string,
+  year?: string,
+  requestedType?: "servicios" | "electricidad"
+): Promise<boolean> {
+  const { targetMonth, targetYear } = resolveTargetPeriod(month, year);
+
+  if (isBlockedApril2026InvoicePeriod(targetMonth, targetYear)) {
+    console.log(`[DRIVE] ⛔ Validación de carpeta bloqueada para abril 2026`);
+    return false;
+  }
+
+  const facturasParentId = await findFacturasParentFolder();
+  const generalFolders = getOldStructureFolderCandidates(targetMonth, targetYear);
+  for (const folderName of generalFolders) {
+    if (await findFolderByName(folderName, facturasParentId)) {
+      return true;
+    }
+  }
+
+  if (!usesOldStructure(targetMonth, targetYear)) {
+    for (const { folderName } of getSeparatedFolderCandidates(
+      targetMonth,
+      targetYear,
+      requestedType
+    )) {
+      if (await findFolderByName(folderName, facturasParentId)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 /**
  * Busca un PDF en una carpeta específica por número de cuenta
  */
@@ -338,32 +405,8 @@ export async function findInvoiceInDrive(
   type: "servicios" | "electricidad";
 } | null> {
   try {
-    // Si no se especifica mes/año, usar el mes actual
     const now = new Date();
-    const currentYearNum = now.getFullYear();
-    const currentMonthNum = now.getMonth() + 1; // 1-12
-    
-    let targetMonth = month || getMonthName(currentMonthNum);
-    let targetYear = year;
-    
-    // Si no se especificó año, inferirlo basándose en el mes solicitado
-    if (!targetYear) {
-      const monthNames = [
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-      ];
-      const requestedMonthNum = monthNames.indexOf(targetMonth.toLowerCase()) + 1;
-      
-      // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
-      // Ejemplo: estamos en enero 2026, si piden noviembre, debe ser noviembre 2025
-      if (requestedMonthNum > currentMonthNum) {
-        targetYear = (currentYearNum - 1).toString();
-        console.log(`[DRIVE] 📅 Año inferido: ${targetMonth} debe ser ${targetYear} (mes solicitado ${requestedMonthNum} > mes actual ${currentMonthNum})`);
-      } else {
-        // Por defecto, usar el año actual
-        targetYear = currentYearNum.toString();
-      }
-    }
+    const { targetMonth, targetYear } = resolveTargetPeriod(month, year);
 
     if (isBlockedApril2026InvoicePeriod(targetMonth, targetYear)) {
       console.log(`[DRIVE] ⛔ Búsqueda bloqueada para abril 2026`);
@@ -379,48 +422,41 @@ export async function findInvoiceInDrive(
       // Continuar de todas formas, por si acaso las carpetas están en otro lugar
     }
 
-    // Determinar qué estructura usar
     const isOldStructure = usesOldStructure(targetMonth, targetYear);
+    const generalFolders = getOldStructureFolderCandidates(targetMonth, targetYear);
 
-    if (isOldStructure) {
-      // Estructura antigua: buscar por carpeta candidata
-      const candidateFolders = getOldStructureFolderCandidates(targetMonth, targetYear);
-      for (const folderName of candidateFolders) {
-        const folderId = await findFolderByName(folderName, facturasParentId);
-        if (folderId) {
-          console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
-          const pdf = await searchPDFInFolder(folderId, accountNumber);
-          if (pdf) {
-            // En estructura antigua, no sabemos si es servicios o electricidad
-            console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
-            return {
-              fileId: pdf.fileId,
-              fileName: pdf.fileName,
-              type: "servicios",
-            };
-          }
-        } else {
-          console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
+    for (const folderName of generalFolders) {
+      const folderId = await findFolderByName(folderName, facturasParentId);
+      if (folderId) {
+        console.log(`[DRIVE] 📁 Buscando en: ${folderName}`);
+        const pdf = await searchPDFInFolder(folderId, accountNumber);
+        if (pdf) {
+          console.log(`[DRIVE] ✅✅✅ ENCONTRADO: ${pdf.fileName} (facturas)`);
+          return {
+            fileId: pdf.fileId,
+            fileName: pdf.fileName,
+            type: "servicios",
+          };
         }
+      } else {
+        console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
       }
-    } else {
+    }
+
+    if (!isOldStructure) {
       // Estructura nueva: buscar en carpetas separadas "servicios" y "electricidad"
       // Si el usuario especificó un tipo, buscar primero en esa carpeta
-      let types: Array<"servicios" | "electricidad">;
       if (requestedType) {
-        // Buscar primero en el tipo solicitado, luego en el otro
-        types = [requestedType, requestedType === "servicios" ? "electricidad" : "servicios"];
         console.log(`[DRIVE] 🔍 Tipo solicitado: ${requestedType}, buscando primero en esa carpeta`);
-      } else {
-        // Si no se especificó tipo, buscar en ambas
-        types = ["servicios", "electricidad"];
       }
 
-      for (let i = 0; i < types.length; i++) {
-        const type = types[i];
-        const folderName = getFolderName(targetMonth, targetYear, type);
-        if (!folderName) continue;
-
+      const separatedFolders = getSeparatedFolderCandidates(
+        targetMonth,
+        targetYear,
+        requestedType
+      );
+      for (let i = 0; i < separatedFolders.length; i++) {
+        const { folderName, type } = separatedFolders[i];
         const folderId = await findFolderByName(folderName, facturasParentId);
 
         if (folderId) {
@@ -434,14 +470,14 @@ export async function findInvoiceInDrive(
               type,
             };
           } else {
-            if (i < types.length - 1) {
-              console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${types[i + 1]}...`);
+            if (i < separatedFolders.length - 1) {
+              console.log(`[DRIVE] ⚠️ No encontrado en ${type}, continuando con ${separatedFolders[i + 1].type}...`);
             }
           }
         } else {
           console.log(`[DRIVE] ⚠️ Carpeta ${folderName} no existe`);
-          if (i < types.length - 1) {
-            console.log(`[DRIVE] Continuando con ${types[i + 1]}...`);
+          if (i < separatedFolders.length - 1) {
+            console.log(`[DRIVE] Continuando con ${separatedFolders[i + 1].type}...`);
           }
         }
       }

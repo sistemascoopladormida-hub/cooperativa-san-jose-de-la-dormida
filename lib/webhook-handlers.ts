@@ -15,7 +15,11 @@ import {
   isServiceOutageComplaint,
   SERVICE_OUTAGE_RESPONSE,
 } from "@/lib/service-outage-detector";
-import { findInvoiceInDrive, downloadPDFFromDrive } from "@/lib/drive";
+import {
+  findInvoiceInDrive,
+  downloadPDFFromDrive,
+  invoicePeriodFolderExists,
+} from "@/lib/drive";
 import { sendDocumentMessage, sendImageMessage } from "@/lib/whatsapp";
 import { sendTextMessage } from "./whatsapp-messages";
 import {
@@ -37,6 +41,7 @@ import {
 import {
   APRIL_2026_UNAVAILABLE_MESSAGE,
   getInvoicePeriodPolicy,
+  INVOICE_PERIOD_NOT_FOUND_MESSAGE,
 } from "@/lib/invoice-period-policy";
 import { getChatbotResponse } from "@/lib/chatbot";
 
@@ -215,25 +220,7 @@ async function handleInvoiceViaWhatsAppRequest(
     return true;
   }
 
-  const response =
-    `Gracias por tu interés. 🙏\n\n` +
-    `Estamos trabajando para poder enviar las facturas por WhatsApp. Te avisaremos cuando esta opción esté disponible.\n\n` +
-    `Mientras tanto, puedes:\n` +
-    `• Retirar tus facturas en los boxes de atención al público\n` +
-    `• Revisar tu correo electrónico (las enviamos por email)\n` +
-    `• Solicitar tu factura desde el chatbot de nuestra web con tu número de cuenta\n\n` +
-    `¿Alguna otra consulta? Estoy aquí para ayudarte 😊`;
-
-  await sendTextMessage(from, response);
-  try {
-    const conversationId = await getOrCreateConversation(from);
-    await saveMessage(conversationId, "user", text, whatsappMessageId);
-    await saveMessage(conversationId, "assistant", response);
-  } catch (dbError) {
-    console.error("Error guardando en BD:", dbError);
-  }
-  console.log("[WEBHOOK] Usuario pidió factura por WhatsApp (encuesta Meta): respuesta enviada");
-  return true;
+  return false;
 }
 
 /**
@@ -258,6 +245,7 @@ async function handleInvoiceRequest(
   // Obtener el contexto de la conversación (números y meses de mensajes anteriores)
   let conversationContext: string[] = [];
   let contextMonths: string[] = [];
+  let contextYear: string | undefined;
   try {
     const conversationId = await getOrCreateConversation(from);
     const recentMessages = await getRecentMessages(conversationId, 10);
@@ -281,6 +269,9 @@ async function handleInvoiceRequest(
         } else if (prevRequest.month) {
           previousMonths.add(prevRequest.month);
         }
+        if (!contextYear && prevRequest.year) {
+          contextYear = prevRequest.year;
+        }
       }
     }
     conversationContext = Array.from(previousAccountNumbers);
@@ -296,7 +287,7 @@ async function handleInvoiceRequest(
     invoiceRequest.accountNumbers.length > 0 &&
     contextMonths.length > 0;
   const effectivePeriodPolicy = canUseContextPeriod
-    ? getInvoicePeriodPolicy({ months: contextMonths })
+    ? getInvoicePeriodPolicy({ months: contextMonths, year: contextYear })
     : currentPeriodPolicy;
 
   if (!effectivePeriodPolicy.hasSpecifiedPeriod || effectivePeriodPolicy.isBlockedApril2026) {
@@ -357,6 +348,30 @@ async function handleInvoiceRequest(
   const currentMonths = invoiceRequest.months ?? (invoiceRequest.month ? [invoiceRequest.month] : []);
   const combinedMonths =
     currentMonths.length > 0 ? currentMonths : contextMonths;
+
+  const periodYear =
+    invoiceRequest.year || (currentMonths.length > 0 ? undefined : contextYear);
+  for (const targetMonth of combinedMonths) {
+    const folderExists = await invoicePeriodFolderExists(
+      targetMonth,
+      periodYear,
+      invoiceRequest.type
+    );
+    if (!folderExists) {
+      await sendTextMessage(from, INVOICE_PERIOD_NOT_FOUND_MESSAGE);
+      try {
+        const conversationId = await getOrCreateConversation(from);
+        await saveMessage(conversationId, "user", text, whatsappMessageId);
+        await saveMessage(conversationId, "assistant", INVOICE_PERIOD_NOT_FOUND_MESSAGE);
+      } catch (dbError) {
+        console.error("Error guardando en BD:", dbError);
+      }
+      return true;
+    }
+  }
+  if (!invoiceRequest.year && currentMonths.length === 0 && contextYear) {
+    invoiceRequest.year = contextYear;
+  }
 
   const combinedAccountNumbers = Array.from(allAccountNumbers);
   console.log(`[WEBHOOK] 🔢 Números de cuenta a intentar:`, combinedAccountNumbers);
