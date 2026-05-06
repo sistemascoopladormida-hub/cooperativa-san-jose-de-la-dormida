@@ -98,6 +98,40 @@ export function extractAccountNumber(filename: string): string | null {
   }
 }
 
+function normalizeAccountNumber(value: string): string {
+  const digitsOnly = value.replace(/\D/g, "");
+  if (!digitsOnly) return "";
+  const normalized = digitsOnly.replace(/^0+/, "");
+  return normalized || "0";
+}
+
+function filenameLikelyContainsAccountNumber(
+  filename: string,
+  accountNumber: string
+): boolean {
+  const normalizedAccount = normalizeAccountNumber(accountNumber);
+  if (!normalizedAccount) {
+    return false;
+  }
+
+  const nameWithoutExt = filename.replace(/\.pdf$/i, "");
+  const escapedAccount = normalizedAccount.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Caso 1: token separado por símbolos/espacios (ej: factura_5160.pdf)
+  const boundedPattern = new RegExp(`(?:^|\\D)0*${escapedAccount}(?:\\D|$)`);
+  if (boundedPattern.test(nameWithoutExt)) {
+    return true;
+  }
+
+  // Caso 2: nombre completamente numérico (ej: 000051600097001400008565.pdf)
+  const digitsOnly = nameWithoutExt.replace(/\D/g, "");
+  if (!digitsOnly) {
+    return false;
+  }
+  const compactPattern = new RegExp(`0*${escapedAccount}`);
+  return compactPattern.test(digitsOnly);
+}
+
 /**
  * Determina si un mes/año usa la estructura antigua (facturas) o nueva (servicios/electricidad separadas)
  * Estructura antigua: "facturas-{mes}-{año}" (una sola carpeta)
@@ -336,9 +370,11 @@ async function searchPDFInFolder(
 ): Promise<{ fileId: string; fileName: string } | null> {
   try {
     const drive = await getDriveClient();
+    const normalizedTargetAccount = normalizeAccountNumber(accountNumber);
 
     let nextPageToken: string | undefined = undefined;
     let totalChecked = 0;
+    const fuzzyMatches: Array<{ fileId: string; fileName: string }> = [];
 
     // Buscar con paginación para obtener todos los PDFs
     do {
@@ -367,17 +403,43 @@ async function searchPDFInFolder(
           console.log(`[DRIVE] Ejemplo ${totalChecked}: ${file.name} -> cuenta extraída: "${extractedAccount}"`);
         }
         
-        if (extractedAccount === accountNumber) {
+        const normalizedExtracted = extractedAccount
+          ? normalizeAccountNumber(extractedAccount)
+          : "";
+        
+        if (normalizedExtracted && normalizedExtracted === normalizedTargetAccount) {
           console.log(`[DRIVE] ✅ ENCONTRADO: ${file.name}`);
           return {
             fileId: file.id!,
             fileName: file.name!,
           };
         }
+
+        if (
+          file.id &&
+          file.name &&
+          filenameLikelyContainsAccountNumber(file.name, normalizedTargetAccount)
+        ) {
+          fuzzyMatches.push({
+            fileId: file.id,
+            fileName: file.name,
+          });
+        }
       }
 
       nextPageToken = response.data.nextPageToken || undefined;
     } while (nextPageToken);
+
+    if (fuzzyMatches.length === 1) {
+      console.log(`[DRIVE] ✅ ENCONTRADO por coincidencia flexible: ${fuzzyMatches[0].fileName}`);
+      return fuzzyMatches[0];
+    }
+
+    if (fuzzyMatches.length > 1) {
+      console.log(
+        `[DRIVE] ⚠️ Coincidencias ambiguas (${fuzzyMatches.length}) para cuenta ${normalizedTargetAccount}.`
+      );
+    }
 
     console.log(`[DRIVE] ❌ No encontrado (${totalChecked} archivos revisados)`);
     return null;
