@@ -92,8 +92,8 @@ export function getInvoicePeriodPolicy(
   periods: ResolvedInvoicePeriod[];
 } {
   const periods = resolveInvoicePeriods(request, referenceDate);
-  const isBlockedApril2026 = periods.some(
-    (period) => period.month === "abril" && period.year === "2026"
+  const isBlockedApril2026 = periods.some((period) =>
+    isBlockedApril2026InvoicePeriod(period.month, period.year)
   );
 
   return {
