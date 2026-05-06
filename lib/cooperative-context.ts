@@ -149,35 +149,33 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Primer vencimiento: 10 de marzo
     - Segundo vencimiento: 20 de marzo
 
-TURNERO DE FARMACIAS (abril, año en curso):
-- 1 de abril: Farmacia Carreño
-- 2 de abril: Farmacia Robledo
-- 3 de abril: Farmacia Centro
-- 4 de abril: Farmacia Social
-- 5 de abril: Farmacia Carreño
-- 6 de abril: Farmacia Robledo
-- 7 de abril: Farmacia Centro
-- 8 de abril: Farmacia Social
-- 9 de abril: Farmacia Carreño
-- 10 de abril: Farmacia Robledo
-- 11 de abril: Farmacia Centro
-- 12 de abril: Farmacia Social
-- 13 de abril: Farmacia Carreño
-- 14 de abril: Farmacia Robledo
-- 15 de abril: Farmacia Centro
-- 16 de abril: Farmacia Social
-- 17 de abril: Farmacia Daniotti
-- 18 de abril: Farmacia Carreño
-- 19 de abril: Farmacia Robledo
-- 20 de abril: Farmacia Centro
-- 21 de abril: Farmacia Social
-- 22 de abril: Farmacia Daniotti
-- 23 de abril: Farmacia Carreño
-- 24 de abril: Farmacia Robledo
-- 25 de abril: Farmacia Centro
-- 26 de abril: Farmacia Social
-- 27 de abril: Farmacia Daniotti
-- 28 de abril: Farmacia Carreño
+TURNERO DE FARMACIAS (mayo, año en curso):
+- 6 de mayo: Farmacia Social
+- 7 de mayo: Farmacia Daniotti
+- 8 de mayo: Farmacia Carreño
+- 9 de mayo: Farmacia Robledo
+- 10 de mayo: Farmacia Centro
+- 11 de mayo: Farmacia Social
+- 12 de mayo: Farmacia Daniotti
+- 13 de mayo: Farmacia Carreño
+- 14 de mayo: Farmacia Robledo
+- 15 de mayo: Farmacia Centro
+- 16 de mayo: Farmacia Social
+- 17 de mayo: Farmacia Daniotti
+- 18 de mayo: Farmacia Carreño
+- 19 de mayo: Farmacia Robledo
+- 20 de mayo: Farmacia Centro
+- 21 de mayo: Farmacia Social
+- 22 de mayo: Farmacia Daniotti
+- 23 de mayo: Farmacia Carreño
+- 24 de mayo: Farmacia Robledo
+- 25 de mayo: Farmacia Centro
+- 26 de mayo: Farmacia Social
+- 27 de mayo: Farmacia Daniotti
+- 28 de mayo: Farmacia Carreño
+- 29 de mayo: Farmacia Robledo
+- 30 de mayo: Farmacia Centro
+- 31 de mayo: Farmacia Social
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
@@ -208,7 +206,7 @@ ENVÍO DE FACTURAS (CHATBOT/ASISTENTE):
 - Los usuarios deben especificar el mes y año de la factura que desean (ej: "factura de noviembre 2025", "factura de marzo 2026", "factura 03/26")
 - Cuando el usuario mencione "período N", interpretar: período 1 = enero, 2 = febrero, 3 = marzo, 4 = abril, 5 = mayo, 6 = junio, 7 = julio, 8 = agosto, 9 = septiembre, 10 = octubre, 11 = noviembre, 12 = diciembre
 - Si no especifican mes/año, se debe solicitar el período correspondiente.
-- El sistema busca la carpeta real del período solicitado en Google Drive con formato "facturas-{Mes}-{Año}" y nunca debe acceder a "facturas-Abril-2026".
+- El sistema busca la carpeta real del período solicitado en Google Drive con formato "facturas-{Mes}-{Año}".
 - Ejemplos de solicitudes válidas (número de cuenta de 3-4 dígitos):
   * "Quiero mi factura, mi número de cuenta es 637"
   * "Necesito la factura 239 de noviembre"

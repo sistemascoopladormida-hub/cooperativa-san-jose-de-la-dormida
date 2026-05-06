@@ -297,34 +297,32 @@ function PharmacySchedule() {
   }
 
   const pharmacySchedule = [
-    { date: "1 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "2 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "3 de abril", pharmacy: "Farmacia Centro" },
-    { date: "4 de abril", pharmacy: "Farmacia Social" },
-    { date: "5 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "6 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "7 de abril", pharmacy: "Farmacia Centro" },
-    { date: "8 de abril", pharmacy: "Farmacia Social" },
-    { date: "9 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "10 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "11 de abril", pharmacy: "Farmacia Centro" },
-    { date: "12 de abril", pharmacy: "Farmacia Social" },
-    { date: "13 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "14 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "15 de abril", pharmacy: "Farmacia Centro" },
-    { date: "16 de abril", pharmacy: "Farmacia Social" },
-    { date: "17 de abril", pharmacy: "Farmacia Daniotti" },
-    { date: "18 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "19 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "20 de abril", pharmacy: "Farmacia Centro" },
-    { date: "21 de abril", pharmacy: "Farmacia Social" },
-    { date: "22 de abril", pharmacy: "Farmacia Daniotti" },
-    { date: "23 de abril", pharmacy: "Farmacia Carreño" },
-    { date: "24 de abril", pharmacy: "Farmacia Robledo" },
-    { date: "25 de abril", pharmacy: "Farmacia Centro" },
-    { date: "26 de abril", pharmacy: "Farmacia Social" },
-    { date: "27 de abril", pharmacy: "Farmacia Daniotti" },
-    { date: "28 de abril", pharmacy: "Farmacia Carreño" },
+    { date: "6 de mayo", pharmacy: "Farmacia Social" },
+    { date: "7 de mayo", pharmacy: "Farmacia Daniotti" },
+    { date: "8 de mayo", pharmacy: "Farmacia Carreño" },
+    { date: "9 de mayo", pharmacy: "Farmacia Robledo" },
+    { date: "10 de mayo", pharmacy: "Farmacia Centro" },
+    { date: "11 de mayo", pharmacy: "Farmacia Social" },
+    { date: "12 de mayo", pharmacy: "Farmacia Daniotti" },
+    { date: "13 de mayo", pharmacy: "Farmacia Carreño" },
+    { date: "14 de mayo", pharmacy: "Farmacia Robledo" },
+    { date: "15 de mayo", pharmacy: "Farmacia Centro" },
+    { date: "16 de mayo", pharmacy: "Farmacia Social" },
+    { date: "17 de mayo", pharmacy: "Farmacia Daniotti" },
+    { date: "18 de mayo", pharmacy: "Farmacia Carreño" },
+    { date: "19 de mayo", pharmacy: "Farmacia Robledo" },
+    { date: "20 de mayo", pharmacy: "Farmacia Centro" },
+    { date: "21 de mayo", pharmacy: "Farmacia Social" },
+    { date: "22 de mayo", pharmacy: "Farmacia Daniotti" },
+    { date: "23 de mayo", pharmacy: "Farmacia Carreño" },
+    { date: "24 de mayo", pharmacy: "Farmacia Robledo" },
+    { date: "25 de mayo", pharmacy: "Farmacia Centro" },
+    { date: "26 de mayo", pharmacy: "Farmacia Social" },
+    { date: "27 de mayo", pharmacy: "Farmacia Daniotti" },
+    { date: "28 de mayo", pharmacy: "Farmacia Carreño" },
+    { date: "29 de mayo", pharmacy: "Farmacia Robledo" },
+    { date: "30 de mayo", pharmacy: "Farmacia Centro" },
+    { date: "31 de mayo", pharmacy: "Farmacia Social" },
   ]
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -460,7 +458,7 @@ function PharmacySchedule() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Turnero de abril — consultá qué farmacia está de turno cada día
+            Turnero de mayo — consultá qué farmacia está de turno cada día
           </motion.p>
         </motion.div>
 

@@ -172,10 +172,7 @@ export async function POST(request: NextRequest) {
         ? getInvoicePeriodPolicy(previousPeriodRequest)
         : initialPeriodPolicy;
 
-      if (
-        !effectiveInitialPeriodPolicy.hasSpecifiedPeriod ||
-        effectiveInitialPeriodPolicy.isBlockedApril2026
-      ) {
+      if (effectiveInitialPeriodPolicy.isBlockedApril2026) {
         await logWebMessages(lastUserMessage, APRIL_2026_UNAVAILABLE_MESSAGE);
         return NextResponse.json({
           response: APRIL_2026_UNAVAILABLE_MESSAGE,

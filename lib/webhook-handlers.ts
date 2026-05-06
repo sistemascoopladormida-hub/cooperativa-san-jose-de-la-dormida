@@ -39,7 +39,6 @@ import {
   MAX_INVOICES_PER_MONTH,
 } from "@/lib/invoices";
 import {
-  APRIL_2026_UNAVAILABLE_MESSAGE,
   getInvoicePeriodPolicy,
   INVOICE_PERIOD_NOT_FOUND_MESSAGE,
 } from "@/lib/invoice-period-policy";
@@ -206,20 +205,6 @@ async function handleInvoiceViaWhatsAppRequest(
     return false;
   }
 
-  const invoiceRequest = detectInvoiceRequest(text);
-  const periodPolicy = getInvoicePeriodPolicy(invoiceRequest);
-  if (!periodPolicy.hasSpecifiedPeriod || periodPolicy.isBlockedApril2026) {
-    await sendTextMessage(from, APRIL_2026_UNAVAILABLE_MESSAGE);
-    try {
-      const conversationId = await getOrCreateConversation(from);
-      await saveMessage(conversationId, "user", text, whatsappMessageId);
-      await saveMessage(conversationId, "assistant", APRIL_2026_UNAVAILABLE_MESSAGE);
-    } catch (dbError) {
-      console.error("Error guardando en BD:", dbError);
-    }
-    return true;
-  }
-
   return false;
 }
 
@@ -289,21 +274,6 @@ async function handleInvoiceRequest(
   const effectivePeriodPolicy = canUseContextPeriod
     ? getInvoicePeriodPolicy({ months: contextMonths, year: contextYear })
     : currentPeriodPolicy;
-
-  if (!effectivePeriodPolicy.hasSpecifiedPeriod || effectivePeriodPolicy.isBlockedApril2026) {
-    console.log(
-      `[WEBHOOK] Solicitud de factura sin período válido o abril 2026 bloqueado. Enviando aviso informativo.`
-    );
-    await sendTextMessage(from, APRIL_2026_UNAVAILABLE_MESSAGE);
-    try {
-      const conversationId = await getOrCreateConversation(from);
-      await saveMessage(conversationId, "user", text, whatsappMessageId);
-      await saveMessage(conversationId, "assistant", APRIL_2026_UNAVAILABLE_MESSAGE);
-    } catch (dbError) {
-      console.error("Error guardando en BD:", dbError);
-    }
-    return true;
-  }
 
   // Primero verificar si el usuario está enviando dirección/nombre en lugar de número de cuenta
   const addressOrNameCheck = detectAddressOrNameInsteadOfAccount(text);

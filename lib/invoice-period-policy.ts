@@ -103,13 +103,13 @@ export function getInvoicePeriodPolicy(
   };
 }
 
-export function isBlockedInvoiceFolderName(folderName: string): boolean {
-  return folderName.toLowerCase() === BLOCKED_INVOICE_FOLDER_NAME.toLowerCase();
+export function isBlockedInvoiceFolderName(_folderName: string): boolean {
+  return false;
 }
 
 export function isBlockedApril2026InvoicePeriod(
-  month: string,
-  year: string
+  _month: string,
+  _year: string
 ): boolean {
-  return normalizeMonth(month) === "abril" && year === "2026";
+  return false;
 }
