@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
@@ -10,6 +10,11 @@ import Footer from "@/components/layout/footer"
 import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Cloud, Pill } from "lucide-react"
 import { motion } from "framer-motion"
 import WeatherModal from "@/components/clima/weather-modal"
+import {
+  getPharmacyScheduleMonthLabel,
+  isPharmacyDateToday,
+  pharmacySchedule,
+} from "@/lib/pharmacy-schedule"
 
 type Service = {
   icon: React.ComponentType<{ className?: string }>
@@ -245,85 +250,7 @@ function PharmacySchedule() {
     return () => clearInterval(interval)
   }, [])
 
-  // Función para parsear fechas en formato "DD de mes" (ej: "16 de enero")
-  const parsePharmacyDate = (dateString: string): Date => {
-    const months: { [key: string]: number } = {
-      'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
-      'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
-      'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
-    }
-
-    const parts = dateString.toLowerCase().trim().split(' de ')
-    if (parts.length !== 2) {
-      // Si el formato no es correcto, retornar fecha inválida
-      return new Date(NaN)
-    }
-
-    const day = parseInt(parts[0])
-    const monthName = parts[1]?.trim()
-    const month = months[monthName] ?? -1
-
-    if (month === -1 || isNaN(day)) {
-      return new Date(NaN)
-    }
-
-    // Usar el año actual
-    const year = currentDate.getFullYear()
-
-    // Crear fecha y normalizar (para evitar problemas con zonas horarias)
-    const date = new Date(year, month, day)
-    date.setHours(12, 0, 0, 0) // Establecer mediodía para evitar problemas de zona horaria
-
-    return date
-  }
-
-  // Función para comparar si una fecha es hoy
-  const isToday = (dateString: string): boolean => {
-    const pharmacyDate = parsePharmacyDate(dateString)
-
-    // Verificar si la fecha es válida
-    if (isNaN(pharmacyDate.getTime())) {
-      return false
-    }
-
-    const today = new Date()
-    today.setHours(12, 0, 0, 0) // Normalizar a mediodía para comparación
-
-    return (
-      pharmacyDate.getDate() === today.getDate() &&
-      pharmacyDate.getMonth() === today.getMonth() &&
-      pharmacyDate.getFullYear() === today.getFullYear()
-    )
-  }
-
-  const pharmacySchedule = [
-    { date: "6 de mayo", pharmacy: "Farmacia Social" },
-    { date: "7 de mayo", pharmacy: "Farmacia Daniotti" },
-    { date: "8 de mayo", pharmacy: "Farmacia Carreño" },
-    { date: "9 de mayo", pharmacy: "Farmacia Robledo" },
-    { date: "10 de mayo", pharmacy: "Farmacia Centro" },
-    { date: "11 de mayo", pharmacy: "Farmacia Social" },
-    { date: "12 de mayo", pharmacy: "Farmacia Daniotti" },
-    { date: "13 de mayo", pharmacy: "Farmacia Carreño" },
-    { date: "14 de mayo", pharmacy: "Farmacia Robledo" },
-    { date: "15 de mayo", pharmacy: "Farmacia Centro" },
-    { date: "16 de mayo", pharmacy: "Farmacia Social" },
-    { date: "17 de mayo", pharmacy: "Farmacia Daniotti" },
-    { date: "18 de mayo", pharmacy: "Farmacia Carreño" },
-    { date: "19 de mayo", pharmacy: "Farmacia Robledo" },
-    { date: "20 de mayo", pharmacy: "Farmacia Centro" },
-    { date: "21 de mayo", pharmacy: "Farmacia Social" },
-    { date: "22 de mayo", pharmacy: "Farmacia Daniotti" },
-    { date: "23 de mayo", pharmacy: "Farmacia Carreño" },
-    { date: "24 de mayo", pharmacy: "Farmacia Robledo" },
-    { date: "25 de mayo", pharmacy: "Farmacia Centro" },
-    { date: "26 de mayo", pharmacy: "Farmacia Social" },
-    { date: "27 de mayo", pharmacy: "Farmacia Daniotti" },
-    { date: "28 de mayo", pharmacy: "Farmacia Carreño" },
-    { date: "29 de mayo", pharmacy: "Farmacia Robledo" },
-    { date: "30 de mayo", pharmacy: "Farmacia Centro" },
-    { date: "31 de mayo", pharmacy: "Farmacia Social" },
-  ]
+  const scheduleMonthLabel = getPharmacyScheduleMonthLabel()
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -353,11 +280,21 @@ function PharmacySchedule() {
     }
   }, [pharmacySchedule.length])
 
-  // Scroll al día de hoy al cargar
+  // Centrar el día de hoy solo dentro del carrusel horizontal (evita scroll de la página)
   const todayRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     const timer = setTimeout(() => {
-      todayRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
+      const container = scrollRef.current
+      const todayCard = todayRef.current
+      if (!container || !todayCard) return
+
+      const cardCenter = todayCard.offsetLeft + todayCard.offsetWidth / 2
+      const targetLeft = cardCenter - container.clientWidth / 2
+      const maxScroll = container.scrollWidth - container.clientWidth
+      container.scrollTo({
+        left: Math.max(0, Math.min(targetLeft, maxScroll)),
+        behavior: "smooth",
+      })
     }, 300)
     return () => clearTimeout(timer)
   }, [])
@@ -458,7 +395,7 @@ function PharmacySchedule() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Turnero de mayo — consultá qué farmacia está de turno cada día
+            Turnero de {scheduleMonthLabel.toLowerCase()} — consultá qué farmacia está de turno cada día
           </motion.p>
         </motion.div>
 
@@ -508,7 +445,7 @@ function PharmacySchedule() {
               onTouchEnd={onDragEnd}
             >
               {pharmacySchedule.map((item, index) => {
-                const today = isToday(item.date)
+                const today = isPharmacyDateToday(item.date, currentDate)
                 const isSocial = item.pharmacy === "Farmacia Social"
 
                 return (
@@ -602,6 +539,13 @@ function PharmacySchedule() {
 export default function HomePage() {
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false)
 
+  // Mantener la página en el hero al cargar / volver al inicio
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return
+    window.history.scrollRestoration = "manual"
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+  }, [])
+
   const services = [
     {
       icon: Zap,
@@ -655,7 +599,7 @@ export default function HomePage() {
 
       {/* Hero Section - Enhanced with Framer Motion */}
       <motion.section
-        className="relative text-white overflow-hidden"
+        className="relative text-white overflow-hidden min-h-[calc(100dvh-4rem)] lg:min-h-[calc(100dvh-5rem)]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}

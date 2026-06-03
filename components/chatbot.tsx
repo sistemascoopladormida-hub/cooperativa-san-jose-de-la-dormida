@@ -36,6 +36,7 @@ export default function Chatbot() {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesScrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
 
@@ -54,12 +55,20 @@ export default function Chatbot() {
   }
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const viewport = messagesScrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    ) as HTMLElement | null
+    if (viewport) {
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: "smooth" })
+      return
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
   }
 
   useEffect(() => {
+    if (!isOpen) return
     scrollToBottom()
-  }, [messages, isTyping])
+  }, [messages, isTyping, isOpen])
 
   // Inicializar sesión en el cliente
   useEffect(() => {
@@ -274,7 +283,10 @@ export default function Chatbot() {
           </div>
 
           {/* Área de mensajes - Enhanced with Framer Motion */}
-          <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white">
+          <ScrollArea
+            ref={messagesScrollAreaRef}
+            className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white"
+          >
             <div className="space-y-4">
               {/* Botones de acción rápida - Solo se muestran cuando hay pocos mensajes */}
               {messages.length <= 1 && (

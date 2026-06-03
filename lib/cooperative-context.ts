@@ -1,3 +1,5 @@
+import { formatPharmacyScheduleContextBlock } from "@/lib/pharmacy-schedule"
+
 /**
  * Contexto de la Cooperativa La Dormida para el chatbot
  */
@@ -149,33 +151,7 @@ ESTADO DE FACTURAS Y BOLETAS:
     - Primer vencimiento: 10 de marzo
     - Segundo vencimiento: 20 de marzo
 
-TURNERO DE FARMACIAS (mayo, año en curso):
-- 6 de mayo: Farmacia Social
-- 7 de mayo: Farmacia Daniotti
-- 8 de mayo: Farmacia Carreño
-- 9 de mayo: Farmacia Robledo
-- 10 de mayo: Farmacia Centro
-- 11 de mayo: Farmacia Social
-- 12 de mayo: Farmacia Daniotti
-- 13 de mayo: Farmacia Carreño
-- 14 de mayo: Farmacia Robledo
-- 15 de mayo: Farmacia Centro
-- 16 de mayo: Farmacia Social
-- 17 de mayo: Farmacia Daniotti
-- 18 de mayo: Farmacia Carreño
-- 19 de mayo: Farmacia Robledo
-- 20 de mayo: Farmacia Centro
-- 21 de mayo: Farmacia Social
-- 22 de mayo: Farmacia Daniotti
-- 23 de mayo: Farmacia Carreño
-- 24 de mayo: Farmacia Robledo
-- 25 de mayo: Farmacia Centro
-- 26 de mayo: Farmacia Social
-- 27 de mayo: Farmacia Daniotti
-- 28 de mayo: Farmacia Carreño
-- 29 de mayo: Farmacia Robledo
-- 30 de mayo: Farmacia Centro
-- 31 de mayo: Farmacia Social
+${formatPharmacyScheduleContextBlock()}
 
 ASOCIARSE:
 - Los interesados pueden visitar la oficina o completar el formulario en la sección "Asociarse" de la página web
