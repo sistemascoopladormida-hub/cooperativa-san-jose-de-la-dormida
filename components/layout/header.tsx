@@ -90,11 +90,11 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 </motion.div>
               </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg lg:text-xl font-bold text-coop-green leading-tight transition-colors group-hover:text-coop-blue">
+              <h1 className="text-lg lg:text-xl font-bold text-coop-green transition-colors group-hover:text-coop-blue">
                 Cooperativa
                 <br />
-                <span className="text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900">La Dormida</span>
               </h1>
+              <span className="text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900">La Dormida</span>
             </div>
           </Link>
           </motion.div>
