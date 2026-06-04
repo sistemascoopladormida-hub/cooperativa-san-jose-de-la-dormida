@@ -16,10 +16,17 @@ type RevistaItem = {
 
 const REVISTAS: RevistaItem[] = [
   {
+    id: "mayo-2026",
+    titulo: "REVISTA MAYO 2026",
+    descripcion:
+      "Edición de Mayo 2026. Revisá novedades, servicios y contenido institucional de la cooperativa.",
+    url: "https://online.fliphtml5.com/rutabi/REVISTA-MAYO-2026/",
+  },
+  {
     id: "abril-2026",
     titulo: "REVISTA ABRIL 2026",
     descripcion:
-      "Edición de marzo 2026. Revisá novedades, servicios y contenido institucional de la cooperativa.",
+      "Edición de Abril 2026. Revisá novedades, servicios y contenido institucional de la cooperativa.",
     url: "https://online.fliphtml5.com/rutabi/REVISTA-abril-2026/",
   },
   {
