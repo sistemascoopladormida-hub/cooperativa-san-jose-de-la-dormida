@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "components/home/world-cup-hero.tsx",
+    "components/ui/button.tsx",
+    "lib/utils.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
