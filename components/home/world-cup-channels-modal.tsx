@@ -29,7 +29,7 @@ export default function WorldCupChannelsModal({
 
         <div className="overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/15">
           <Image
-            src="/grillamundial.jpg"
+            src="/grillamundial.jpeg"
             alt="Disfrutá los partidos del Mundial de Fútbol 2026. Telefe canal 6.3, TVP canal 1.3 y TyC Sports canal 3.2."
             width={880}
             height={1100}
