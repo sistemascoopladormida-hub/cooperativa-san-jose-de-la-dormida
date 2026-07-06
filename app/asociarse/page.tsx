@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -27,8 +27,20 @@ import {
   FileText,
   Heart,
 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
-export default function AsociarsePage() {
+const VALID_SERVICE_IDS = new Set([
+  "electricidad",
+  "internet",
+  "television",
+  "pfc",
+  "farmacia",
+])
+
+function AsociarseForm() {
+  const searchParams = useSearchParams()
+  const servicioParam = searchParams.get("servicio")
+
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -45,6 +57,17 @@ export default function AsociarsePage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (servicioParam && VALID_SERVICE_IDS.has(servicioParam)) {
+      setFormData((prev) => ({
+        ...prev,
+        serviciosInteres: prev.serviciosInteres.includes(servicioParam)
+          ? prev.serviciosInteres
+          : [...prev.serviciosInteres, servicioParam],
+      }))
+    }
+  }, [servicioParam])
 
   const benefits = [
     {
@@ -373,5 +396,13 @@ export default function AsociarsePage() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function AsociarsePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <AsociarseForm />
+    </Suspense>
   )
 }

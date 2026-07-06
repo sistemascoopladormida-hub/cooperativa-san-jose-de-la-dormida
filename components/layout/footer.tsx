@@ -164,15 +164,6 @@ export default function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/contacto" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
-                  Contacto
-                </Link>
-              </li>
-              <li>
-                <Link 
                   href="/autoridades" 
                   className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
                 >

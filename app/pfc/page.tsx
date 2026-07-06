@@ -454,7 +454,7 @@ export default function PFCPage() {
                       <ShieldCheck className="w-5 h-5 text-coop-green" />
                       PFC (Plan Basico)
                     </span>
-                    <span className="text-coop-green font-bold text-xl">$12.877/mes</span>
+                    <span className="text-coop-green font-bold text-xl">$13.070,97/mes</span>
                   </CardTitle>
                   <CardDescription>Cobertura medica esencial con precio accesible.</CardDescription>
                 </CardHeader>
@@ -803,12 +803,12 @@ export default function PFCPage() {
                     </thead>
                     <tbody>
                       {[
-                        ["Precio", "$12.877", "$25.000"],
+                        ["Precio", "$13.070,97", "$25.000"],
                         ["Cobertura familiar", "Si", "Si"],
                         ["Especialidades base", "Si", "Si"],
                         ["Cardiologia", "No", "Si"],
                         ["Medico Clinico", "No", "Si"],
-                        ["Traslados sociales", "2 por ano", "3 por ano"],
+                        ["Traslados sociales", "2 por año", "3 por año"],
                         ["Cantidad de consultas", "Limitada", "Mayor cobertura"],
                         ["Nivel de atencion", "Estandar", "Ampliado"],
                       ].map((row) => (

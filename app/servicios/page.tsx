@@ -11,6 +11,8 @@ export default function ServiciosPage() {
     {
       icon: Zap,
       title: "Electricidad",
+      serviceId: "electricidad",
+      moreInfoHref: "/reclamos",
       description: "Suministro eléctrico confiable las 24 horas del día",
       features: [
         "Suministro ininterrumpido",
@@ -27,6 +29,8 @@ export default function ServiciosPage() {
     {
       icon: Wifi,
       title: "Internet",
+      serviceId: "internet",
+      moreInfoHref: "/reclamos",
       description: "Conexión de alta velocidad con fibra óptica",
       features: [
         "Velocidades a partir de 100 Mbps",
@@ -34,7 +38,7 @@ export default function ServiciosPage() {
         "Soporte técnico especializado",
         "Sin límite de datos",
       ],
-      price: "Desde $19,200/mes",
+      price: "",
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
@@ -43,9 +47,11 @@ export default function ServiciosPage() {
     {
       icon: Tv,
       title: "Televisión",
+      serviceId: "television",
+      moreInfoHref: "/reclamos",
       description: "Amplia variedad de canales y entretenimiento",
       features: ["Más de 50 canales", "Canales HD incluidos", "Canales en HD", "Programación familiar", "Servicio técnico gratuito"],
-      price: "Desde $9,800/mes",
+      price: "",
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
@@ -54,6 +60,8 @@ export default function ServiciosPage() {
     {
       icon: ShieldCheck,
       title: "Plan de financiamiento Colectivo (PFC)",
+      serviceId: "pfc",
+      moreInfoHref: "/pfc",
       description: "Cobertura integral de salud y acompañamiento para toda la familia",
       features: [
         "Traslados social comunitario",
@@ -64,7 +72,7 @@ export default function ServiciosPage() {
         "Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, podologa, psicología y diabetología",
         "Taller interdisciplinario (fonoaudiología, psicopedagogía, psicología y maestra integradora) para niños y adultos mayores con dificultades de aprendizaje, TEA y otras condiciones",
       ],
-      price: "A partir de $10,000/mes",
+      price: "",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
       borderColor: "border-emerald-200",
@@ -73,6 +81,8 @@ export default function ServiciosPage() {
     {
       icon: Heart,
       title: "Farmacia Social",
+      serviceId: "farmacia",
+      moreInfoHref: "mailto:farmacia@cooperativaladormida.com",
       description: "Medicamentos y perfumería con beneficios exclusivos para socios",
       features: [
         "3 cuotas sin interés con tarjetas bancarizadas",
@@ -107,10 +117,15 @@ export default function ServiciosPage() {
       phoneDisplay: "3521 401330",
       phoneHref: "+543521401330",
     },
-    "Programa PFC": {
+    "Plan de financiamiento Colectivo (PFC)": {
       label: "Ambulancia PFC / Consultorios médicos (turnos)",
       phoneDisplay: "3521 406183 / 401387",
       phoneHref: "+543521406183",
+    },
+    "Farmacia Social": {
+      label: "Farmacia Social",
+      phoneDisplay: "3521 401330",
+      phoneHref: "+543521401330",
     },
   }
 
@@ -276,13 +291,24 @@ export default function ServiciosPage() {
                     </div>
                   )}
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn text-white">
-                      Contratar Servicio
-                      <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    <Button
+                      asChild
+                      className="bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 flex-1 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold group/btn text-white"
+                    >
+                      <Link href={`/asociarse?servicio=${service.serviceId}`}>
+                        Contratar Servicio
+                        <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </Link>
                     </Button>
-                    <Button variant="outline" className="flex-1 border-2 hover:bg-gray-50 font-semibold">
-                      Más Información
-                    </Button>
+                    {service.moreInfoHref.startsWith("mailto:") ? (
+                      <Button asChild variant="outline" className="flex-1 border-2 hover:bg-gray-50 font-semibold">
+                        <a href={service.moreInfoHref}>Más Información</a>
+                      </Button>
+                    ) : (
+                      <Button asChild variant="outline" className="flex-1 border-2 hover:bg-gray-50 font-semibold">
+                        <Link href={service.moreInfoHref}>Más Información</Link>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -367,9 +393,9 @@ export default function ServiciosPage() {
               </div>
             </div>
             <div className="text-center lg:text-right">
-              <Link href="/contacto">
+                <Link href="/reclamos">
                 <Button size="lg" className="bg-coop-orange text-white hover:bg-coop-orange/90">
-                  Contactar Ahora
+                  Hacer un reclamo
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>

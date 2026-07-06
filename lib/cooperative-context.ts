@@ -11,7 +11,7 @@ Ubicación: Av. Perón 557 - CP 5244, Córdoba, San José de la Dormida
 
 CONTACTO:
 - Teléfono: 3521-401330
-- Horarios de atención: Lunes a Viernes de 7:00 a 12:00
+- Horarios de atención: Lunes a Viernes de 7:00 a 15:00
 
 CORREOS ELECTRÓNICOS PROFESIONALES:
 - Sistemas: sistemas@cooperativaladormida.com
@@ -49,7 +49,6 @@ SERVICIOS OFRECIDOS:
    - Fibra óptica hasta el hogar
    - Soporte técnico especializado
    - Sin límite de datos
-   - Precio: Desde $19,200/mes
 
 3. Televisión:
    - Amplia variedad de canales y entretenimiento
@@ -57,7 +56,6 @@ SERVICIOS OFRECIDOS:
    - Canales HD incluidos
    - Programación familiar
    - Servicio técnico gratuito
-   - Precio: Desde $9,800/mes
 
 4. Plan de Financiamiento Colectivo (PFC):
    - Cobertura integral de salud y acompañamiento para toda la familia
@@ -68,7 +66,6 @@ SERVICIOS OFRECIDOS:
    - Prestación de elementos ortopédicos
    - Consultorios externos: ginecología, fisioterapia, alergista, nutricionista, pedicura, podóloga, psicología y diabetología
    - Taller interdisciplinario para niños y adultos mayores
-   - Precio: A partir de $10,000/mes
 
 5. Farmacia Social:
    - Medicamentos y perfumería con beneficios exclusivos para socios
@@ -134,8 +131,8 @@ ESTADO DE FACTURAS Y BOLETAS:
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
   * Período: Diciembre
   * Vencimientos:
-    - Primer vencimiento: 10 de Marzo
-    - Segundo vencimiento: 20 de Marzo
+    - Primer vencimiento: 10 de Julio
+    - Segundo vencimiento: 20 de Julio
   * Medios de pago habilitados:
     - Caja de cobro (Efectivo, Tarjetas de crédito y débito)
     - App CoopOnline
@@ -148,8 +145,8 @@ ESTADO DE FACTURAS Y BOLETAS:
   * También puedes solicitarlas desde este número de WhatsApp proporcionando tu número de cuenta (3-4 dígitos)
   * Período: Enero
   * Vencimientos:
-    - Primer vencimiento: 10 de marzo
-    - Segundo vencimiento: 20 de marzo
+    - Primer vencimiento: 10 de Julio
+    - Segundo vencimiento: 20 de Julio
 
 ${formatPharmacyScheduleContextBlock()}
 

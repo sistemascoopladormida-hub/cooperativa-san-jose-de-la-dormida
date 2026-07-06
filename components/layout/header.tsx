@@ -43,7 +43,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/pfc", label: "PFC", icon: Stethoscope },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
     { href: "/revista", label: "Revista", icon: FileText },
-    { href: "/contacto", label: "Contacto", icon: Phone },
+    { href: "/reclamos", label: "Reclamos", icon: Phone },
     { href: "/asociarse", label: "Asociarse", icon: UserPlus },
 
   ]

@@ -1201,7 +1201,7 @@ export default function CampingPage() {
                 </a>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/contacto">
+                <Link href="/reclamos">
                   <Button
                     size="lg"
                     variant="outline"
