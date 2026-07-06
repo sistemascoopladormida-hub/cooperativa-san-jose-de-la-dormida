@@ -52,7 +52,7 @@ const WHATSAPP_API_VERSION = "v22.0";
 async function handleAccountNumberQuestion(
   from: string,
   text: string,
-  whatsappMessageId: string
+  whatsappMessageId: string,
 ): Promise<boolean> {
   if (!isAccountNumberHelpQuestion(text)) {
     return false;
@@ -66,7 +66,7 @@ async function handleAccountNumberQuestion(
       process.cwd(),
       "public",
       "images",
-      "ubicacion de numero de cuenta.jpeg"
+      "ubicacion de numero de cuenta.jpeg",
     );
     const imageBuffer = await readFile(imagePath);
 
@@ -124,18 +124,20 @@ async function sendAccountNumberImage(
   from: string,
   text: string,
   whatsappMessageId: string,
-  message?: string
+  message?: string,
 ): Promise<void> {
   try {
     const imagePath = join(
       process.cwd(),
       "public",
       "images",
-      "ubicacion de numero de cuenta.jpeg"
+      "ubicacion de numero de cuenta.jpeg",
     );
     const imageBuffer = await readFile(imagePath);
 
-    const imageCaption = message || `📋 Para poder enviarte tu factura, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`;
+    const imageCaption =
+      message ||
+      `📋 Para poder enviarte tu factura, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`;
 
     const imageResult = await sendImageMessage(from, imageBuffer, imageCaption);
 
@@ -184,12 +186,21 @@ async function sendAccountNumberImage(
  */
 function isInvoiceViaWhatsAppRequest(text: string): boolean {
   const lower = text.toLowerCase().trim();
-  const hasInvoiceWord = /\b(factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(lower);
-  const hasWhatsAppRef = /\b(whatsapp|por\s+whatsapp|en\s+whatsapp)\b/i.test(lower);
-  const hasSendRequest = /\b(enviar|enviarme|envíenme|envienme|mandar|mandarme|recibir|que\s+me\s+envíen|que\s+me\s+manden)\b/i.test(lower);
+  const hasInvoiceWord =
+    /\b(factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(lower);
+  const hasWhatsAppRef = /\b(whatsapp|por\s+whatsapp|en\s+whatsapp)\b/i.test(
+    lower,
+  );
+  const hasSendRequest =
+    /\b(enviar|enviarme|envíenme|envienme|mandar|mandarme|recibir|que\s+me\s+envíen|que\s+me\s+manden)\b/i.test(
+      lower,
+    );
 
   // Pide factura/boleta Y menciona WhatsApp (con o sin verbo de envío)
-  return (hasInvoiceWord && hasWhatsAppRef) || (hasSendRequest && hasInvoiceWord && hasWhatsAppRef);
+  return (
+    (hasInvoiceWord && hasWhatsAppRef) ||
+    (hasSendRequest && hasInvoiceWord && hasWhatsAppRef)
+  );
 }
 
 /**
@@ -199,7 +210,7 @@ function isInvoiceViaWhatsAppRequest(text: string): boolean {
 async function handleInvoiceViaWhatsAppRequest(
   from: string,
   text: string,
-  whatsappMessageId: string
+  whatsappMessageId: string,
 ): Promise<boolean> {
   if (!isInvoiceViaWhatsAppRequest(text)) {
     return false;
@@ -214,13 +225,13 @@ async function handleInvoiceViaWhatsAppRequest(
 async function handleInvoiceRequest(
   from: string,
   text: string,
-  whatsappMessageId: string
+  whatsappMessageId: string,
 ): Promise<boolean> {
   // Si no hay intención explícita de factura (ej: "hola", "te desconfiguraste"),
   // NO procesar como factura → dejar que el chatbot responda de forma humana
   if (!hasInvoiceRequestIntent(text)) {
     console.log(
-      `[WEBHOOK] Sin intención de factura en mensaje: "${text.substring(0, 50)}..." → derivando a chatbot`
+      `[WEBHOOK] Sin intención de factura en mensaje: "${text.substring(0, 50)}..." → derivando a chatbot`,
     );
     return false;
   }
@@ -234,7 +245,7 @@ async function handleInvoiceRequest(
   try {
     const conversationId = await getOrCreateConversation(from);
     const recentMessages = await getRecentMessages(conversationId, 10);
-    
+
     const previousAccountNumbers = new Set<string>();
     const previousMonths = new Set<string>();
     for (const msg of recentMessages) {
@@ -261,9 +272,17 @@ async function handleInvoiceRequest(
     }
     conversationContext = Array.from(previousAccountNumbers);
     contextMonths = Array.from(previousMonths);
-    console.log(`[WEBHOOK] 📝 Contexto: números=`, conversationContext, `meses=`, contextMonths);
+    console.log(
+      `[WEBHOOK] 📝 Contexto: números=`,
+      conversationContext,
+      `meses=`,
+      contextMonths,
+    );
   } catch (error) {
-    console.error("[WEBHOOK] Error obteniendo contexto de conversación:", error);
+    console.error(
+      "[WEBHOOK] Error obteniendo contexto de conversación:",
+      error,
+    );
   }
 
   const currentPeriodPolicy = getInvoicePeriodPolicy(invoiceRequest);
@@ -280,13 +299,13 @@ async function handleInvoiceRequest(
 
   if (addressOrNameCheck.isAddressOrName) {
     console.log(
-      `[WEBHOOK] ⚠️ Usuario envió dirección/nombre en lugar de número de cuenta. Enviando imagen de ayuda.`
+      `[WEBHOOK] ⚠️ Usuario envió dirección/nombre en lugar de número de cuenta. Enviando imagen de ayuda.`,
     );
     await sendAccountNumberImage(
       from,
       text,
       whatsappMessageId,
-      `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`
+      `📋 Para poder enviarte tu factura, necesito tu número de cuenta (no el domicilio ni el nombre).\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. En la imagen puedes ver dónde encontrarlo.`,
     );
     return true;
   }
@@ -294,7 +313,7 @@ async function handleInvoiceRequest(
   console.log("[WEBHOOK] Mensaje recibido:", text);
   console.log(
     "[WEBHOOK] Solicitud de factura detectada:",
-    JSON.stringify(invoiceRequest)
+    JSON.stringify(invoiceRequest),
   );
 
   // IMPORTANTE: Solo usar números del CONTEXTO cuando el usuario está continuando
@@ -302,20 +321,28 @@ async function handleInvoiceRequest(
   // Si el mensaje actual NO tiene número (ej: "hola quiero mi boleta"), NO usar contexto
   // → pedir el número de cuenta para evitar enviar facturas incorrectas.
   const hasNumberInCurrentMessage = invoiceRequest.accountNumbers.length > 0;
-  const hasMonthOrTypeInCurrentMessage = !!(invoiceRequest.month || invoiceRequest.type);
+  const hasMonthOrTypeInCurrentMessage = !!(
+    invoiceRequest.month || invoiceRequest.type
+  );
 
   const allAccountNumbers = new Set<string>();
   for (const num of invoiceRequest.accountNumbers) {
     allAccountNumbers.add(num);
   }
-  if (!hasNumberInCurrentMessage && hasMonthOrTypeInCurrentMessage && conversationContext.length > 0) {
+  if (
+    !hasNumberInCurrentMessage &&
+    hasMonthOrTypeInCurrentMessage &&
+    conversationContext.length > 0
+  ) {
     for (const num of conversationContext) {
       allAccountNumbers.add(num);
     }
   }
 
   // Meses: usar del mensaje actual o del contexto (ej: "factura enero y febrero" → usuario envía "7981")
-  const currentMonths = invoiceRequest.months ?? (invoiceRequest.month ? [invoiceRequest.month] : []);
+  const currentMonths =
+    invoiceRequest.months ??
+    (invoiceRequest.month ? [invoiceRequest.month] : []);
   const combinedMonths =
     currentMonths.length > 0 ? currentMonths : contextMonths;
 
@@ -325,14 +352,18 @@ async function handleInvoiceRequest(
     const folderExists = await invoicePeriodFolderExists(
       targetMonth,
       periodYear,
-      invoiceRequest.type
+      invoiceRequest.type,
     );
     if (!folderExists) {
       await sendTextMessage(from, INVOICE_PERIOD_NOT_FOUND_MESSAGE);
       try {
         const conversationId = await getOrCreateConversation(from);
         await saveMessage(conversationId, "user", text, whatsappMessageId);
-        await saveMessage(conversationId, "assistant", INVOICE_PERIOD_NOT_FOUND_MESSAGE);
+        await saveMessage(
+          conversationId,
+          "assistant",
+          INVOICE_PERIOD_NOT_FOUND_MESSAGE,
+        );
       } catch (dbError) {
         console.error("Error guardando en BD:", dbError);
       }
@@ -344,18 +375,21 @@ async function handleInvoiceRequest(
   }
 
   const combinedAccountNumbers = Array.from(allAccountNumbers);
-  console.log(`[WEBHOOK] 🔢 Números de cuenta a intentar:`, combinedAccountNumbers);
+  console.log(
+    `[WEBHOOK] 🔢 Números de cuenta a intentar:`,
+    combinedAccountNumbers,
+  );
 
   if (combinedAccountNumbers.length === 0) {
     // Pedir número de cuenta en lugar de fallar silenciosamente
     console.log(
-      `[WEBHOOK] ⚠️ Usuario quiere factura pero no proporcionó número de cuenta. Enviando ayuda.`
+      `[WEBHOOK] ⚠️ Usuario quiere factura pero no proporcionó número de cuenta. Enviando ayuda.`,
     );
     await sendAccountNumberImage(
       from,
       text,
       whatsappMessageId,
-      `📋 Para poder enviarte tu factura/boleta, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. Por favor, enviámelo para poder ayudarte. 😊`
+      `📋 Para poder enviarte tu factura/boleta, necesito tu número de cuenta.\n\nEl número de cuenta aparece en dos lugares de tu factura:\n\n1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\nEs un número de 3 a 4 dígitos. Por favor, enviámelo para poder ayudarte. 😊`,
     );
     return true;
   }
@@ -370,37 +404,67 @@ async function handleInvoiceRequest(
     const now = new Date();
     const currentYearNum = now.getFullYear();
     const currentMonthNum = now.getMonth() + 1; // 1-12
-    
+
     const monthNames = [
-      "enero", "febrero", "marzo", "abril", "mayo", "junio",
-      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
     ];
-    const requestedMonthNum = monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
-    
-    console.log(`[WEBHOOK] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`);
-    
+    const requestedMonthNum =
+      monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
+
+    console.log(
+      `[WEBHOOK] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`,
+    );
+
     // Si estamos en enero y piden noviembre o diciembre, debe ser el año anterior
-    if (currentMonthNum === 1 && (requestedMonthNum === 11 || requestedMonthNum === 12)) {
+    if (
+      currentMonthNum === 1 &&
+      (requestedMonthNum === 11 || requestedMonthNum === 12)
+    ) {
       invoiceRequest.year = (currentYearNum - 1).toString();
-      console.log(`[WEBHOOK] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`);
+      console.log(
+        `[WEBHOOK] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`,
+      );
     } else if (requestedMonthNum > currentMonthNum) {
       // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
       invoiceRequest.year = (currentYearNum - 1).toString();
-      console.log(`[WEBHOOK] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`);
+      console.log(
+        `[WEBHOOK] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`,
+      );
     } else {
       // Por defecto, usar el año actual
       invoiceRequest.year = currentYearNum.toString();
-      console.log(`[WEBHOOK] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`);
+      console.log(
+        `[WEBHOOK] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`,
+      );
     }
   } else if (invoiceRequest.month && invoiceRequest.year) {
-    console.log(`[WEBHOOK] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
+    console.log(
+      `[WEBHOOK] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`,
+    );
   }
 
   const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
 
   // Si la confianza es baja pero hay números para intentar, subir la confianza a media para intentar buscar
-  if (combinedAccountNumbers.length > 0 && invoiceRequest.confidence === "low" && hasMonthOrType) {
-    console.log(`[WEBHOOK] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
+  if (
+    combinedAccountNumbers.length > 0 &&
+    invoiceRequest.confidence === "low" &&
+    hasMonthOrType
+  ) {
+    console.log(
+      `[WEBHOOK] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`,
+    );
     invoiceRequest.confidence = "medium";
   }
 
@@ -422,7 +486,7 @@ async function handleInvoiceRequest(
       console.error("Error guardando en BD:", dbError);
     }
     console.log(
-      `[WEBHOOK] ⚠️ Usuario ${from} bloqueado: límite de ${MAX_INVOICES_PER_MONTH} facturas alcanzado (${currentCount} este mes)`
+      `[WEBHOOK] ⚠️ Usuario ${from} bloqueado: límite de ${MAX_INVOICES_PER_MONTH} facturas alcanzado (${currentCount} este mes)`,
     );
     return true;
   }
@@ -433,14 +497,12 @@ async function handleInvoiceRequest(
       ? combinedMonths
       : [invoiceRequest.month || undefined].filter(Boolean);
   const effectiveMonths =
-    monthsToSearch.length > 0
-      ? monthsToSearch
-      : [undefined]; // undefined = mes actual en findInvoiceInDrive
+    monthsToSearch.length > 0 ? monthsToSearch : [undefined]; // undefined = mes actual en findInvoiceInDrive
 
   console.log(
     `[WEBHOOK] Buscando factura para cuentas: ${combinedAccountNumbers.join(", ")}, meses: ${effectiveMonths.join(", ") || "actual"}, año: ${
       invoiceRequest.year || "no especificado"
-    }`
+    }`,
   );
 
   try {
@@ -455,11 +517,11 @@ async function handleInvoiceRequest(
           accountNum,
           targetMonth ?? undefined,
           invoiceRequest.year,
-          invoiceRequest.type
+          invoiceRequest.type,
         );
         if (invoice) {
           const alreadyAdded = invoicesFound.some(
-            (i) => i.invoice.fileName === invoice.fileName
+            (i) => i.invoice.fileName === invoice.fileName,
           );
           if (!alreadyAdded) {
             invoicesFound.push({ invoice, month: targetMonth ?? undefined });
@@ -484,7 +546,7 @@ async function handleInvoiceRequest(
           from,
           pdfBuffer,
           invoice.fileName,
-          caption
+          caption,
         );
 
         if (docResult.success) {
@@ -493,7 +555,7 @@ async function handleInvoiceRequest(
             invoiceRequest.accountNumber,
             invoice.fileName,
             month,
-            invoiceRequest.year
+            invoiceRequest.year,
           );
           fileNames.push(invoice.fileName);
           if (month) {
@@ -534,9 +596,9 @@ async function handleInvoiceRequest(
       // No se encontró la factura con ningún número - enviar imagen de ayuda
       const numbersAttempted = combinedAccountNumbers.join(", ");
       console.log(
-        `[WEBHOOK] ❌ Factura no encontrada para ninguno de los números intentados: ${numbersAttempted}`
+        `[WEBHOOK] ❌ Factura no encontrada para ninguno de los números intentados: ${numbersAttempted}`,
       );
-      
+
       // Mensaje mejorado que menciona todos los números intentados
       let errorMessage = `❌ No pude encontrar tu factura con los siguientes números de cuenta: ${numbersAttempted}.\n\n`;
       errorMessage += `Por favor, verifica que el número de cuenta sea correcto. `;
@@ -547,27 +609,15 @@ async function handleInvoiceRequest(
       errorMessage += `💡 *Tip:* Si mencionaste varios números, intenté buscar con todos ellos. `;
       errorMessage += `Si ninguno funcionó, verifica que estés usando el número de cuenta correcto de tu factura más reciente.\n\n`;
       errorMessage += `Si el problema persiste, puedes contactar con nuestra oficina al 3521-401330.`;
-      
+
       // Enviar imagen mostrando dónde encontrar el número de cuenta
-      await sendAccountNumberImage(
-        from,
-        text,
-        whatsappMessageId,
-        errorMessage
-      );
+      await sendAccountNumberImage(from, text, whatsappMessageId, errorMessage);
     }
     return true;
   } catch (error: any) {
-    console.error(
-      "[WEBHOOK] ❌ Error procesando solicitud de factura:",
-      error
-    );
+    console.error("[WEBHOOK] ❌ Error procesando solicitud de factura:", error);
     if (error instanceof Error) {
-      console.error(
-        "[WEBHOOK] Error details:",
-        error.message,
-        error.stack
-      );
+      console.error("[WEBHOOK] Error details:", error.message, error.stack);
     }
     const errorMessage = `⚠️ Hubo un error al buscar tu factura. Por favor, intenta de nuevo más tarde o contacta con nuestra oficina de administración al 3521-401330.`;
 
@@ -591,7 +641,7 @@ async function handleInvoiceRequest(
 export async function processTextMessage(
   from: string,
   text: string,
-  whatsappMessageId: string
+  whatsappMessageId: string,
 ): Promise<void> {
   // 0. "Activar facturas" - Opt-in (funciona igual si viene de plantilla o se escribe manual)
   if (isActivacionFactura(text)) {
@@ -603,7 +653,7 @@ export async function processTextMessage(
         "user",
         "Activar facturas",
         whatsappMessageId,
-        "activacion_facturas"
+        "activacion_facturas",
       );
       await sendTextMessage(from, ACTIVACION_FACTURAS_RESPONSE);
       await saveMessage(
@@ -611,7 +661,7 @@ export async function processTextMessage(
         "assistant",
         ACTIVACION_FACTURAS_RESPONSE,
         undefined,
-        "activacion_facturas"
+        "activacion_facturas",
       );
       console.log("[WEBHOOK] ✅ Activación facturas procesada para:", from);
     } catch (err) {
@@ -624,7 +674,7 @@ export async function processTextMessage(
   const handledAccountQuestion = await handleAccountNumberQuestion(
     from,
     text,
-    whatsappMessageId
+    whatsappMessageId,
   );
   if (handledAccountQuestion) {
     return;
@@ -634,7 +684,7 @@ export async function processTextMessage(
   // Debe derivarse a Administración, NO al flujo de facturas
   if (isNewServiceRequest(text)) {
     console.log(
-      "[WEBHOOK] Solicitud de alta de servicio detectada, derivando a Administración"
+      "[WEBHOOK] Solicitud de alta de servicio detectada, derivando a Administración",
     );
     await sendTextMessage(from, NEW_SERVICE_DERIVATION_MESSAGE);
     try {
@@ -643,7 +693,7 @@ export async function processTextMessage(
       await saveMessage(
         conversationId,
         "assistant",
-        NEW_SERVICE_DERIVATION_MESSAGE
+        NEW_SERVICE_DERIVATION_MESSAGE,
       );
     } catch (dbError) {
       console.error("Error guardando en BD:", dbError);
@@ -656,10 +706,12 @@ export async function processTextMessage(
     const retryRequest = detectInvoiceRequest(text);
     if (retryRequest.accountNumbers.length > 0) {
       console.log(
-        "[WEBHOOK] Usuario reporta factura incorrecta pero envía cuenta válida. Reintentando búsqueda de factura."
+        "[WEBHOOK] Usuario reporta factura incorrecta pero envía cuenta válida. Reintentando búsqueda de factura.",
       );
     } else {
-      console.log("[WEBHOOK] Usuario indica que la factura enviada es incorrecta. Enviando ayuda.");
+      console.log(
+        "[WEBHOOK] Usuario indica que la factura enviada es incorrecta. Enviando ayuda.",
+      );
       await sendAccountNumberImage(
         from,
         text,
@@ -669,7 +721,7 @@ export async function processTextMessage(
           `📋 En la imagen puedes ver dónde encontrarlo en tu factura:\n\n` +
           `1️⃣ En la parte superior, debajo del nombre del titular, como "Cuenta: XXXX"\n` +
           `2️⃣ En la parte inferior, en la sección "DATOS PARA INGRESAR A LA WEB"\n\n` +
-          `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`
+          `Por favor, verifica en tu factura física o PDF y enviame el número correcto para ayudarte. 😊`,
       );
       return;
     }
@@ -679,17 +731,13 @@ export async function processTextMessage(
   // NO es solicitud de factura - el usuario reporta un problema con su dirección
   if (isServiceOutageComplaint(text)) {
     console.log(
-      "[WEBHOOK] Reclamo por corte de servicio detectado, derivando a guardia/reclamos"
+      "[WEBHOOK] Reclamo por corte de servicio detectado, derivando a guardia/reclamos",
     );
     await sendTextMessage(from, SERVICE_OUTAGE_RESPONSE);
     try {
       const conversationId = await getOrCreateConversation(from);
       await saveMessage(conversationId, "user", text, whatsappMessageId);
-      await saveMessage(
-        conversationId,
-        "assistant",
-        SERVICE_OUTAGE_RESPONSE
-      );
+      await saveMessage(conversationId, "assistant", SERVICE_OUTAGE_RESPONSE);
     } catch (dbError) {
       console.error("Error guardando en BD:", dbError);
     }
@@ -700,7 +748,7 @@ export async function processTextMessage(
   const handledInvoiceViaWhatsApp = await handleInvoiceViaWhatsAppRequest(
     from,
     text,
-    whatsappMessageId
+    whatsappMessageId,
   );
   if (handledInvoiceViaWhatsApp) {
     return;
@@ -710,7 +758,7 @@ export async function processTextMessage(
   const handledInvoice = await handleInvoiceRequest(
     from,
     text,
-    whatsappMessageId
+    whatsappMessageId,
   );
   if (handledInvoice) {
     return;
@@ -720,7 +768,7 @@ export async function processTextMessage(
   const chatbotResponse = await getChatbotResponse(
     from,
     text,
-    whatsappMessageId
+    whatsappMessageId,
   );
 
   // Enviar respuesta a WhatsApp
@@ -734,11 +782,10 @@ export async function processTextMessage(
         conversationId,
         "assistant",
         chatbotResponse,
-        sendResult.messageId
+        sendResult.messageId,
       );
     } catch (dbError) {
       console.error("Error guardando mensaje de respuesta:", dbError);
     }
   }
 }
-

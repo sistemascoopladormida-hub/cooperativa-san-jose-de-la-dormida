@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  */
 function verifySignature(
   rawBody: string,
-  signatureHeader: string | null
+  signatureHeader: string | null,
 ): boolean {
   const secret = process.env.WHATSAPP_APP_SECRET;
   if (!secret || !signatureHeader) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   if (!verifyToken) {
     return NextResponse.json(
       { error: "Configuración faltante" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -82,9 +82,12 @@ export async function POST(request: NextRequest) {
 
                 // Verificar si el mensaje ya fue procesado para evitar duplicados
                 if (whatsappMessageId) {
-                  const alreadyProcessed = await isMessageAlreadyProcessed(whatsappMessageId);
+                  const alreadyProcessed =
+                    await isMessageAlreadyProcessed(whatsappMessageId);
                   if (alreadyProcessed) {
-                    console.log(`[WEBHOOK] Mensaje ${whatsappMessageId} ya fue procesado, ignorando duplicado`);
+                    console.log(
+                      `[WEBHOOK] Mensaje ${whatsappMessageId} ya fue procesado, ignorando duplicado`,
+                    );
                     continue;
                   }
                 }

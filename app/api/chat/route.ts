@@ -39,7 +39,7 @@ const openai = new OpenAI({
 function sanitizeInvoicePromiseResponse(response: string): string {
   const hasInvoicePromisePattern =
     /(estoy\s+buscando\s+tu\s+factura|tu\s+factura\s+est[aá]\s+en\s+camino|te\s+la\s+enviar[eé]\s+de\s+inmediato|un\s+momento,\s*por\s+favor)/i.test(
-      response
+      response,
     );
 
   if (!hasInvoicePromisePattern) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "OPENAI_API_KEY no está configurada" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
       const isAccountContinuation =
         initialInvoiceRequest.accountNumbers.length > 0 ||
         /\b(?:enviamela|envíamela|mandamela|mandámela|dale|sí\s+dale|si\s+dale)\b/i.test(
-          lastUserMessage
+          lastUserMessage,
         );
 
       if (!initialPeriodPolicy.hasSpecifiedPeriod && isAccountContinuation) {
@@ -151,7 +151,9 @@ export async function POST(request: NextRequest) {
           i--
         ) {
           if (messages[i]?.sender === "user") {
-            const previousRequest = detectInvoiceRequest(messages[i].text || "");
+            const previousRequest = detectInvoiceRequest(
+              messages[i].text || "",
+            );
             const previousPeriodPolicy =
               getInvoicePeriodPolicy(previousRequest);
 
@@ -185,11 +187,14 @@ export async function POST(request: NextRequest) {
         const folderExists = await invoicePeriodFolderExists(
           period.month,
           period.year,
-          periodRequestForFolderCheck.type
+          periodRequestForFolderCheck.type,
         );
 
         if (!folderExists) {
-          await logWebMessages(lastUserMessage, INVOICE_PERIOD_NOT_FOUND_MESSAGE);
+          await logWebMessages(
+            lastUserMessage,
+            INVOICE_PERIOD_NOT_FOUND_MESSAGE,
+          );
           return NextResponse.json({
             response: INVOICE_PERIOD_NOT_FOUND_MESSAGE,
           });
@@ -220,13 +225,13 @@ export async function POST(request: NextRequest) {
 
       // 1.b) Detección de solicitud de factura
       let invoiceRequest = detectInvoiceRequest(lastUserMessage);
-      
+
       console.log(`[CHAT] 📋 Detección inicial:`, {
         accountNumber: invoiceRequest.accountNumber,
         month: invoiceRequest.month,
         year: invoiceRequest.year,
         type: invoiceRequest.type,
-        confidence: invoiceRequest.confidence
+        confidence: invoiceRequest.confidence,
       });
 
       // Guardar el mes/año del mensaje actual ANTES de buscar en mensajes anteriores
@@ -242,9 +247,11 @@ export async function POST(request: NextRequest) {
       const hasNumberInCurrentMessage = !!invoiceRequest.accountNumber;
       const isInvoiceContinuation =
         /\b(?:enviamela|envíamela|mandamela|dale|sí\s+dale)\b/i.test(
-          lastUserMessage
+          lastUserMessage,
         );
-      const hasMonthOrTypeInCurrent = !!(invoiceRequest.month || invoiceRequest.type);
+      const hasMonthOrTypeInCurrent = !!(
+        invoiceRequest.month || invoiceRequest.type
+      );
 
       if (
         !hasNumberInCurrentMessage &&
@@ -258,7 +265,7 @@ export async function POST(request: NextRequest) {
         ) {
           if (messages[i]?.sender === "user") {
             const previousRequest = detectInvoiceRequest(
-              messages[i].text || ""
+              messages[i].text || "",
             );
             if (
               previousRequest.accountNumber &&
@@ -266,7 +273,7 @@ export async function POST(request: NextRequest) {
                 previousRequest.confidence === "medium")
             ) {
               console.log(
-                `[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`
+                `[CHAT] 📋 Número de cuenta ${previousRequest.accountNumber} encontrado en mensaje anterior`,
               );
               invoiceRequest.accountNumber = previousRequest.accountNumber;
               if (currentMonth) {
@@ -322,37 +329,61 @@ export async function POST(request: NextRequest) {
         const now = new Date();
         const currentYearNum = now.getFullYear();
         const currentMonthNum = now.getMonth() + 1; // 1-12
-        
+
         const monthNames = [
-          "enero", "febrero", "marzo", "abril", "mayo", "junio",
-          "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+          "enero",
+          "febrero",
+          "marzo",
+          "abril",
+          "mayo",
+          "junio",
+          "julio",
+          "agosto",
+          "septiembre",
+          "octubre",
+          "noviembre",
+          "diciembre",
         ];
-        const requestedMonthNum = monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
-        
-        console.log(`[CHAT] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`);
-        
+        const requestedMonthNum =
+          monthNames.indexOf(invoiceRequest.month.toLowerCase()) + 1;
+
+        console.log(
+          `[CHAT] 📅 Inferencia de año: mes solicitado=${requestedMonthNum} (${invoiceRequest.month}), mes actual=${currentMonthNum}, año actual=${currentYearNum}`,
+        );
+
         // Si estamos en enero y piden noviembre o diciembre, debe ser el año anterior
-        if (currentMonthNum === 1 && (requestedMonthNum === 11 || requestedMonthNum === 12)) {
+        if (
+          currentMonthNum === 1 &&
+          (requestedMonthNum === 11 || requestedMonthNum === 12)
+        ) {
           invoiceRequest.year = (currentYearNum - 1).toString();
-          console.log(`[CHAT] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`);
+          console.log(
+            `[CHAT] 📅 Año inferido (caso enero): ${invoiceRequest.month} ${invoiceRequest.year}`,
+          );
         } else if (requestedMonthNum > currentMonthNum) {
           // Si el mes solicitado es mayor que el mes actual, debe ser del año anterior
           invoiceRequest.year = (currentYearNum - 1).toString();
-          console.log(`[CHAT] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`);
+          console.log(
+            `[CHAT] 📅 Año inferido (mes futuro): ${invoiceRequest.month} ${invoiceRequest.year} (${requestedMonthNum} > ${currentMonthNum})`,
+          );
         } else {
           // Por defecto, usar el año actual
           invoiceRequest.year = currentYearNum.toString();
-          console.log(`[CHAT] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`);
+          console.log(
+            `[CHAT] 📅 Año inferido (por defecto): ${invoiceRequest.month} ${invoiceRequest.year}`,
+          );
         }
       } else if (invoiceRequest.month && invoiceRequest.year) {
-        console.log(`[CHAT] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`);
+        console.log(
+          `[CHAT] 📅 Año ya especificado: ${invoiceRequest.month} ${invoiceRequest.year}`,
+        );
       }
 
       if (invoiceRequest.accountNumber) {
         // Si la confianza es baja PERO hay un mes mencionado, es muy probable que sea una solicitud válida
         // En ese caso, intentar buscar la factura de todas formas
         const hasMonthOrType = invoiceRequest.month || invoiceRequest.type;
-        
+
         // Si la confianza es baja Y NO hay mes/tipo, enviar imagen explicativa
         if (invoiceRequest.confidence === "low" && !hasMonthOrType) {
           const response =
@@ -369,18 +400,23 @@ export async function POST(request: NextRequest) {
             showImage: "ubicacion de numero de cuenta",
           });
         }
-        
+
         // Si la confianza es baja pero hay mes/tipo, subir la confianza a media para intentar buscar
         if (invoiceRequest.confidence === "low" && hasMonthOrType) {
-          console.log(`[CHAT] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`);
+          console.log(
+            `[CHAT] ⚠️ Confianza baja pero hay mes/tipo mencionado, subiendo confianza a media para intentar búsqueda`,
+          );
           invoiceRequest.confidence = "medium";
         }
 
         // Verificar límite de facturas por mes (máximo 5)
-        const webUserIdentifier = sessionId ? `WEB-${sessionId}` : "WEB-anonymous";
+        const webUserIdentifier = sessionId
+          ? `WEB-${sessionId}`
+          : "WEB-anonymous";
         const canRequest = await canRequestMoreInvoices(webUserIdentifier);
         if (!canRequest) {
-          const currentCount = await getInvoiceRequestCountThisMonth(webUserIdentifier);
+          const currentCount =
+            await getInvoiceRequestCountThisMonth(webUserIdentifier);
           const limitResponse =
             `⚠️ Has alcanzado el límite máximo de ${MAX_INVOICES_PER_MONTH} facturas por mes (solicitudes este mes: ${currentCount}).\n\n` +
             `Para solicitar más facturas, por favor contacta con nuestra oficina de administración al 3521-401330.\n\n` +
@@ -398,15 +434,15 @@ export async function POST(request: NextRequest) {
         console.log(`[CHAT] 🔍 Buscando factura:`, {
           accountNumber: invoiceRequest.accountNumber,
           month: invoiceRequest.month,
-          year: invoiceRequest.year || 'NO ESPECIFICADO (se inferirá)',
-          type: invoiceRequest.type || 'NO ESPECIFICADO (buscará en ambas)'
+          year: invoiceRequest.year || "NO ESPECIFICADO (se inferirá)",
+          type: invoiceRequest.type || "NO ESPECIFICADO (buscará en ambas)",
         });
-        
+
         const invoice = await findInvoiceInDrive(
           invoiceRequest.accountNumber,
           invoiceRequest.month,
           invoiceRequest.year, // Puede ser undefined, drive.ts lo inferirá
-          invoiceRequest.type
+          invoiceRequest.type,
         );
 
         if (invoice) {
@@ -414,7 +450,7 @@ export async function POST(request: NextRequest) {
             invoice.type === "servicios" ? "servicios" : "energía eléctrica";
 
           const downloadUrl = `/api/chat/invoice?fileId=${encodeURIComponent(
-            invoice.fileId
+            invoice.fileId,
           )}&fileName=${encodeURIComponent(invoice.fileName)}`;
 
           // Registrar la solicitud de factura para el límite mensual
@@ -423,10 +459,11 @@ export async function POST(request: NextRequest) {
             invoiceRequest.accountNumber,
             invoice.fileName,
             invoiceRequest.month,
-            invoiceRequest.year
+            invoiceRequest.year,
           );
 
-          const invoiceCountAfter = await getInvoiceRequestCountThisMonth(webUserIdentifier);
+          const invoiceCountAfter =
+            await getInvoiceRequestCountThisMonth(webUserIdentifier);
           let confirmationMessage = `✅ Te he enviado tu factura de ${typeLabel}.\n\n`;
 
           if (invoiceRequest.month) {
@@ -527,10 +564,10 @@ Si el usuario pregunta algo que no está en la información proporcionada, admí
     const lowerLast = lastUserMessage.toLowerCase();
     const isAccountLocationQuestion =
       /(dónde|donde|donde está|dónde está|ubicación|ubicacion|no encuentro|no lo encuentro|sigo sin encontrar)/i.test(
-        lowerLast
+        lowerLast,
       ) &&
       /(número de cuenta|numero de cuenta|nro de cuenta|nro cuenta|cuenta)/i.test(
-        lowerLast
+        lowerLast,
       );
 
     await logWebMessages(lastUserMessage, response);
@@ -545,7 +582,7 @@ Si el usuario pregunta algo que no está en la información proporcionada, admí
     console.error("Error en la API de chat:", error);
     return NextResponse.json(
       { error: error.message || "Error al procesar la solicitud" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

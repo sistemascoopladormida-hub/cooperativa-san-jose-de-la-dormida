@@ -7,7 +7,10 @@ import {
   saveMessage,
   updateWhatsappOptIn,
 } from "@/lib/conversations";
-import { isActivacionFactura, ACTIVACION_FACTURAS_RESPONSE } from "@/lib/activacion-facturas";
+import {
+  isActivacionFactura,
+  ACTIVACION_FACTURAS_RESPONSE,
+} from "@/lib/activacion-facturas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,7 +22,7 @@ const WHATSAPP_API_VERSION = process.env.WHATSAPP_API_VERSION || "v22.0";
  */
 function verifySignature(
   rawBody: string,
-  signatureHeader: string | null
+  signatureHeader: string | null,
 ): boolean {
   const secret = process.env.WHATSAPP_APP_SECRET;
   if (!secret || !signatureHeader) {
@@ -38,13 +41,15 @@ function verifySignature(
  */
 async function sendWhatsAppMessage(
   to: string,
-  message: string
+  message: string,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!token || !phoneId) {
-    console.error("[WEBHOOK-WA] Configuración faltante: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID");
+    console.error(
+      "[WEBHOOK-WA] Configuración faltante: WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID",
+    );
     return { success: false, error: "Configuración faltante" };
   }
 
@@ -100,7 +105,7 @@ export async function GET(request: NextRequest) {
   if (!verifyToken) {
     return NextResponse.json(
       { error: "Configuración faltante: WHATSAPP_VERIFY_TOKEN" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -138,7 +143,10 @@ export async function POST(request: NextRequest) {
         for (const message of value.messages) {
           // Solo procesar mensajes de texto
           if (message?.type !== "text") {
-            console.log("[WEBHOOK-WA] Ignorando mensaje no-text:", message?.type);
+            console.log(
+              "[WEBHOOK-WA] Ignorando mensaje no-text:",
+              message?.type,
+            );
             continue;
           }
 
@@ -150,9 +158,13 @@ export async function POST(request: NextRequest) {
 
           // Evitar duplicados
           if (whatsappMessageId) {
-            const alreadyProcessed = await isMessageAlreadyProcessed(whatsappMessageId);
+            const alreadyProcessed =
+              await isMessageAlreadyProcessed(whatsappMessageId);
             if (alreadyProcessed) {
-              console.log("[WEBHOOK-WA] Mensaje ya procesado:", whatsappMessageId);
+              console.log(
+                "[WEBHOOK-WA] Mensaje ya procesado:",
+                whatsappMessageId,
+              );
               continue;
             }
           }
@@ -171,13 +183,13 @@ export async function POST(request: NextRequest) {
                 "user",
                 "Activar facturas",
                 whatsappMessageId,
-                "activacion_facturas"
+                "activacion_facturas",
               );
 
               // Enviar respuesta automática
               const sendResult = await sendWhatsAppMessage(
                 from,
-                ACTIVACION_FACTURAS_RESPONSE
+                ACTIVACION_FACTURAS_RESPONSE,
               );
 
               if (sendResult.success && sendResult.messageId) {
@@ -186,13 +198,19 @@ export async function POST(request: NextRequest) {
                   "assistant",
                   ACTIVACION_FACTURAS_RESPONSE,
                   sendResult.messageId,
-                  "activacion_facturas"
+                  "activacion_facturas",
                 );
               }
 
-              console.log("[WEBHOOK-WA] ✅ Activación facturas procesada para:", from);
+              console.log(
+                "[WEBHOOK-WA] ✅ Activación facturas procesada para:",
+                from,
+              );
             } catch (err) {
-              console.error("[WEBHOOK-WA] Error procesando activación facturas:", err);
+              console.error(
+                "[WEBHOOK-WA] Error procesando activación facturas:",
+                err,
+              );
             }
             continue;
           }

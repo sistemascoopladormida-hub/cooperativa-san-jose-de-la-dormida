@@ -9,7 +9,7 @@ import {
 function sanitizeInvoicePromiseResponse(response: string): string {
   const hasInvoicePromisePattern =
     /(estoy\s+buscando\s+tu\s+factura|tu\s+factura\s+est[aá]\s+en\s+camino|te\s+la\s+enviar[eé]\s+de\s+inmediato|un\s+momento,\s*por\s+favor)/i.test(
-      response
+      response,
     );
 
   if (!hasInvoicePromisePattern) {
@@ -33,7 +33,7 @@ const openai = new OpenAI({
 export async function getChatbotResponse(
   from: string,
   userMessage: string,
-  whatsappMessageId?: string
+  whatsappMessageId?: string,
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     return "Lo siento, el servicio de chat no está disponible en este momento. Por favor, contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.";
@@ -87,4 +87,3 @@ Responde siempre en español, de forma natural y conversacional. Sé empático, 
     return "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contacta con nuestra oficina al 3521-401330 o con los consultorios médicos PFC (turnos) al 3521 401387.";
   }
 }
-

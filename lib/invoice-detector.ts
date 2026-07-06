@@ -11,9 +11,7 @@ function normalizeForInvoiceDetection(text: string): string {
  * Retorna un objeto con confidence que indica qué tan segura es la detección
  * AHORA RETORNA TODOS LOS NÚMEROS DE CUENTA MENCIONADOS
  */
-export function detectInvoiceRequest(
-  message: string
-): {
+export function detectInvoiceRequest(message: string): {
   accountNumbers: string[]; // Múltiples números de cuenta
   accountNumber: string | null; // El primero para retrocompatibilidad
   month?: string;
@@ -28,7 +26,9 @@ export function detectInvoiceRequest(
   // Rechazar formato antiguo de matrícula (XX-XXXX-X o similar con guiones)
   const oldMatriculaPattern = /\b\d{1,2}[-–—]\d{3,4}[-–—]?[A-Z]?\b/i;
   if (oldMatriculaPattern.test(message)) {
-    console.log(`[INVOICE-DETECTOR] Formato de matrícula antiguo detectado y rechazado. El formato XX-XXXX-X ya no es válido, se requiere número de cuenta de 3-4 dígitos.`);
+    console.log(
+      `[INVOICE-DETECTOR] Formato de matrícula antiguo detectado y rechazado. El formato XX-XXXX-X ya no es válido, se requiere número de cuenta de 3-4 dígitos.`,
+    );
     // No retornar null aquí, continuar para poder dar un mensaje de error apropiado
   }
 
@@ -70,7 +70,12 @@ export function detectInvoiceRequest(
     for (const match of matches) {
       if (match && match[1]) {
         const number = match[1].trim();
-        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
+        if (
+          number.length >= 3 &&
+          number.length <= 4 &&
+          /^\d+$/.test(number) &&
+          !isPartOfDni(number)
+        ) {
           foundHighConfidenceNumbers.add(number);
           confidence = "high";
         }
@@ -79,11 +84,20 @@ export function detectInvoiceRequest(
   }
 
   for (const pattern of highConfidencePatterns) {
-    const matches = [...normalizedMessage.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+    const matches = [
+      ...normalizedMessage.matchAll(
+        new RegExp(pattern.source, pattern.flags + "g"),
+      ),
+    ];
     for (const match of matches) {
       if (match && match[1]) {
         const number = match[1].trim();
-        if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
+        if (
+          number.length >= 3 &&
+          number.length <= 4 &&
+          /^\d+$/.test(number) &&
+          !isPartOfDni(number)
+        ) {
           foundHighConfidenceNumbers.add(number);
           confidence = "high";
         }
@@ -108,11 +122,20 @@ export function detectInvoiceRequest(
 
     const foundMediumConfidenceNumbers = new Set<string>();
     for (const pattern of mediumConfidencePatterns) {
-      const matches = [...normalizedMessage.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))];
+      const matches = [
+        ...normalizedMessage.matchAll(
+          new RegExp(pattern.source, pattern.flags + "g"),
+        ),
+      ];
       for (const match of matches) {
         if (match && match[1]) {
           const number = match[1].trim();
-          if (number.length >= 3 && number.length <= 4 && /^\d+$/.test(number) && !isPartOfDni(number)) {
+          if (
+            number.length >= 3 &&
+            number.length <= 4 &&
+            /^\d+$/.test(number) &&
+            !isPartOfDni(number)
+          ) {
             foundMediumConfidenceNumbers.add(number);
             confidence = "medium";
           }
@@ -134,18 +157,51 @@ export function detectInvoiceRequest(
     if (allNumbers) {
       // Filtrar años (20XX)
       const nonYearNumbers = allNumbers.filter(
-        (num) => !num.startsWith("20") || num.length !== 4
+        (num) => !num.startsWith("20") || num.length !== 4,
       );
-      
+
       // Filtrar números que parezcan ser parte de direcciones
       // Si el número está precedido por palabras comunes de direcciones, es probable que sea una dirección
       const addressKeywords = [
-        "calle", "avenida", "av", "ruta", "km", "barrio", "los", "las", "el", "la",
-        "inmigrantes", "pajon", "valle", "dormida", "san", "jose", "jose", "número", "numero", "nro", "n°",
-        "pasaje", "pas", "pje", "dpto", "depto", "departamento", "apto", "apartamento",
-        "casa", "villa", "manzana", "mza", "lote", "lt", "sector", "sect"
+        "calle",
+        "avenida",
+        "av",
+        "ruta",
+        "km",
+        "barrio",
+        "los",
+        "las",
+        "el",
+        "la",
+        "inmigrantes",
+        "pajon",
+        "valle",
+        "dormida",
+        "san",
+        "jose",
+        "jose",
+        "número",
+        "numero",
+        "nro",
+        "n°",
+        "pasaje",
+        "pas",
+        "pje",
+        "dpto",
+        "depto",
+        "departamento",
+        "apto",
+        "apartamento",
+        "casa",
+        "villa",
+        "manzana",
+        "mza",
+        "lote",
+        "lt",
+        "sector",
+        "sect",
       ];
-      
+
       const filteredNumbers = nonYearNumbers.filter((num) => {
         // Excluir números que son parte de un DNI (formato XX.XXX.XXX ej: 29.981.483)
         // El DNI NO es el número de cuenta - evita enviar facturas incorrectas
@@ -153,7 +209,9 @@ export function detectInvoiceRequest(
         const dniMatches = message.match(dniWithDotsPattern) || [];
         for (const dni of dniMatches) {
           if (dni.includes(num)) {
-            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: es parte de un DNI (${dni})`);
+            console.log(
+              `[INVOICE-DETECTOR] Número ${num} descartado: es parte de un DNI (${dni})`,
+            );
             return false;
           }
         }
@@ -161,7 +219,9 @@ export function detectInvoiceRequest(
         const longDigitSequence = message.match(/\d{7,8}/g) || [];
         for (const seq of longDigitSequence) {
           if (seq.includes(num)) {
-            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: es parte de secuencia larga (${seq}), probable DNI`);
+            console.log(
+              `[INVOICE-DETECTOR] Número ${num} descartado: es parte de secuencia larga (${seq}), probable DNI`,
+            );
             return false;
           }
         }
@@ -169,97 +229,146 @@ export function detectInvoiceRequest(
         // Obtener el contexto alrededor del número
         const numIndex = message.toLowerCase().indexOf(num.toLowerCase());
         if (numIndex === -1) return true;
-        
-        const beforeContext = message.substring(Math.max(0, numIndex - 40), numIndex).toLowerCase();
-        const afterContext = message.substring(numIndex + num.length, Math.min(message.length, numIndex + num.length + 40)).toLowerCase();
+
+        const beforeContext = message
+          .substring(Math.max(0, numIndex - 40), numIndex)
+          .toLowerCase();
+        const afterContext = message
+          .substring(
+            numIndex + num.length,
+            Math.min(message.length, numIndex + num.length + 40),
+          )
+          .toLowerCase();
         const fullContext = beforeContext + " " + afterContext;
-        
+
         // Verificar si hay palabras clave de factura cerca del número
         // Si hay palabras de factura, es muy probable que sea un número de cuenta, no una dirección
         const invoiceKeywords = [
-          "factura", "boleta", "recibo", "cuenta", "socio", "servicio", "servicios",
-          "electricidad", "energía", "energia", "luz", "internet", "cable", "tv",
-          "número", "numero", "nro", "n°", "de la cuenta", "de cuenta", "cuenta número",
-          "cuenta numero", "cuenta nro", "mes", "período", "periodo", "del mes"
+          "factura",
+          "boleta",
+          "recibo",
+          "cuenta",
+          "socio",
+          "servicio",
+          "servicios",
+          "electricidad",
+          "energía",
+          "energia",
+          "luz",
+          "internet",
+          "cable",
+          "tv",
+          "número",
+          "numero",
+          "nro",
+          "n°",
+          "de la cuenta",
+          "de cuenta",
+          "cuenta número",
+          "cuenta numero",
+          "cuenta nro",
+          "mes",
+          "período",
+          "periodo",
+          "del mes",
         ];
-        
-        const hasInvoiceKeyword = invoiceKeywords.some(keyword => {
+
+        const hasInvoiceKeyword = invoiceKeywords.some((keyword) => {
           const keywordIndex = fullContext.indexOf(keyword);
           if (keywordIndex === -1) return false;
-          
+
           // Verificar que la palabra clave esté cerca del número (dentro de 50 caracteres)
-          const keywordPos = keywordIndex < beforeContext.length 
-            ? keywordIndex 
-            : beforeContext.length + (keywordIndex - beforeContext.length);
+          const keywordPos =
+            keywordIndex < beforeContext.length
+              ? keywordIndex
+              : beforeContext.length + (keywordIndex - beforeContext.length);
           const numPos = beforeContext.length;
           const distance = Math.abs(keywordPos - numPos);
-          
+
           return distance < 50;
         });
-        
+
         // También verificar si hay un mes mencionado en el mensaje completo
         // Si hay un mes, es muy probable que sea una solicitud de factura
-        const monthPattern = /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i;
+        const monthPattern =
+          /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i;
         const hasMonth = monthPattern.test(message);
-        
+
         // Si hay palabras clave de factura O un mes mencionado, NO descartar como dirección
         if (hasInvoiceKeyword || hasMonth) {
-          console.log(`[INVOICE-DETECTOR] Número ${num} NO descartado: ${hasInvoiceKeyword ? 'hay palabras clave de factura' : 'hay mes mencionado'} cerca`);
+          console.log(
+            `[INVOICE-DETECTOR] Número ${num} NO descartado: ${hasInvoiceKeyword ? "hay palabras clave de factura" : "hay mes mencionado"} cerca`,
+          );
           // Continuar con las otras verificaciones pero no descartar por dirección
         } else {
           // Si el número está cerca de palabras de dirección, probablemente es una dirección
           // Esto aplica para números de cualquier longitud (3-6 dígitos)
-          const hasAddressKeyword = addressKeywords.some(keyword => {
+          const hasAddressKeyword = addressKeywords.some((keyword) => {
             // Buscar la palabra clave cerca del número (dentro de 5 palabras antes o después)
             const keywordIndex = fullContext.indexOf(keyword);
             if (keywordIndex === -1) return false;
-            
+
             // Verificar que la palabra clave esté cerca del número (dentro de 30 caracteres)
-            const keywordPos = keywordIndex < beforeContext.length 
-              ? keywordIndex 
-              : beforeContext.length + (keywordIndex - beforeContext.length);
+            const keywordPos =
+              keywordIndex < beforeContext.length
+                ? keywordIndex
+                : beforeContext.length + (keywordIndex - beforeContext.length);
             const numPos = beforeContext.length;
             const distance = Math.abs(keywordPos - numPos);
-            
+
             return distance < 30;
           });
-          
+
           if (hasAddressKeyword) {
-            console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`);
+            console.log(
+              `[INVOICE-DETECTOR] Número ${num} descartado: parece ser parte de una dirección`,
+            );
             return false;
           }
         }
-        
+
         // Verificar si el número está después de "dpto", "depto", "departamento" seguido de una letra
-        const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
+        const deptoPattern =
+          /(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
         const deptoMatch = message.match(deptoPattern);
         if (deptoMatch && deptoMatch[1] === num) {
-          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de departamento`);
+          console.log(
+            `[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de departamento`,
+          );
           return false;
         }
-        
+
         // Verificar si hay un patrón de dirección: calle/pasaje + nombre(s) + número
         // Ejemplos: "pasaje toledo 515", "calle san martin 123", "calle eva perón 621"
-        const addressPatternSingle = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,4})\b/i;
-        const addressPatternMulti = /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[\wáéíóúñ\s]+\s+(\d{3,4})\b/i;
-        const addressMatch = message.match(addressPatternSingle) || message.match(addressPatternMulti);
+        const addressPatternSingle =
+          /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[a-záéíóúñ]+\s+(\d{3,4})\b/i;
+        const addressPatternMulti =
+          /\b(?:pasaje|pas|pje|calle|avenida|av|ruta|barrio)\s+[\wáéíóúñ\s]+\s+(\d{3,4})\b/i;
+        const addressMatch =
+          message.match(addressPatternSingle) ||
+          message.match(addressPatternMulti);
         if (addressMatch && addressMatch[1] === num) {
-          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de dirección (patrón calle/pasaje)`);
+          console.log(
+            `[INVOICE-DETECTOR] Número ${num} descartado: parece ser número de dirección (patrón calle/pasaje)`,
+          );
           return false;
         }
-        
+
         // Verificar si hay un nombre propio (palabra con mayúscula) seguido de número
         // Esto captura casos como "Benítez Juan Daniel dpto B" donde el número podría ser parte de la dirección
-        const nameBeforeNumberPattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\s+(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
+        const nameBeforeNumberPattern =
+          /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\s+(?:dpto|depto|departamento)\s*[a-z]?\s*(\d{3,4})\b/i;
         const nameBeforeNumberMatch = message.match(nameBeforeNumberPattern);
         if (nameBeforeNumberMatch && nameBeforeNumberMatch[2] === num) {
-          console.log(`[INVOICE-DETECTOR] Número ${num} descartado: aparece después de un nombre y dpto`);
+          console.log(
+            `[INVOICE-DETECTOR] Número ${num} descartado: aparece después de un nombre y dpto`,
+          );
           return false;
         }
-        
+
         return true;
       });
-      
+
       // Si hay números filtrados, usar TODOS (son todos de 3-4 dígitos, número de cuenta válido)
       if (filteredNumbers.length > 0) {
         accountNumbers = filteredNumbers;
@@ -277,7 +386,12 @@ export function detectInvoiceRequest(
 
   // Detectar tipo de factura
   let type: "servicios" | "electricidad" | undefined;
-  if (lowerMessage.includes("servicio") || lowerMessage.includes("internet") || lowerMessage.includes("cable") || lowerMessage.includes("tv")) {
+  if (
+    lowerMessage.includes("servicio") ||
+    lowerMessage.includes("internet") ||
+    lowerMessage.includes("cable") ||
+    lowerMessage.includes("tv")
+  ) {
     type = "servicios";
   } else if (
     lowerMessage.includes("electricidad") ||
@@ -312,25 +426,28 @@ export function detectInvoiceRequest(
     "noviembre",
     "diciembre",
   ] as const;
-  const periodPattern = /(?:periodo|período)\s*(?:n[°ºo]\.?\s*)?(0?[1-9]|1[0-2])\b/gi;
+  const periodPattern =
+    /(?:periodo|período)\s*(?:n[°ºo]\.?\s*)?(0?[1-9]|1[0-2])\b/gi;
   const monthsFromPeriod = [
     ...new Set(
       [...normalizedMessage.matchAll(periodPattern)].map((match) => {
         const period = Number(match[1]);
         return monthNamesByPeriod[period - 1];
-      })
+      }),
     ),
   ];
 
   // Detectar formatos numéricos de período: "03/26", "03-2026", "3.26"
   const numericPeriodPattern = /\b(0?[1-9]|1[0-2])\s*[\/.-]\s*(\d{2}|\d{4})\b/g;
-  const numericPeriodMatches = [...normalizedMessage.matchAll(numericPeriodPattern)];
+  const numericPeriodMatches = [
+    ...normalizedMessage.matchAll(numericPeriodPattern),
+  ];
   const monthsFromNumericPeriod = [
     ...new Set(
       numericPeriodMatches.map((match) => {
         const numericMonth = Number(match[1]);
         return monthNamesByPeriod[numericMonth - 1];
-      })
+      }),
     ),
   ];
   const yearFromNumericPeriod = numericPeriodMatches[0]
@@ -351,23 +468,49 @@ export function detectInvoiceRequest(
   // Si no se encontró mes específico, verificar si dice "mes pasado" o similar
   if (!month) {
     const lowerMessage = message.toLowerCase();
-    if (/(?:mes\s+pasado|del\s+mes\s+pasado|el\s+mes\s+pasado)/i.test(message)) {
+    if (
+      /(?:mes\s+pasado|del\s+mes\s+pasado|el\s+mes\s+pasado)/i.test(message)
+    ) {
       // Calcular el mes pasado
       const now = new Date();
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const monthNames = [
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
       ];
       month = monthNames[lastMonth.getMonth()];
       console.log(`[INVOICE-DETECTOR] Mes pasado detectado: ${month}`);
-    } else if (/(?:mes\s+anterior|del\s+mes\s+anterior|el\s+mes\s+anterior)/i.test(message)) {
+    } else if (
+      /(?:mes\s+anterior|del\s+mes\s+anterior|el\s+mes\s+anterior)/i.test(
+        message,
+      )
+    ) {
       // Calcular el mes anterior (igual que mes pasado)
       const now = new Date();
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const monthNames = [
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
       ];
       month = monthNames[lastMonth.getMonth()];
       console.log(`[INVOICE-DETECTOR] Mes anterior detectado: ${month}`);
@@ -387,7 +530,12 @@ export function detectInvoiceRequest(
   }
 
   return {
-    accountNumbers: accountNumbers.length > 0 ? accountNumbers : (accountNumber ? [accountNumber] : []),
+    accountNumbers:
+      accountNumbers.length > 0
+        ? accountNumbers
+        : accountNumber
+          ? [accountNumber]
+          : [],
     accountNumber,
     month,
     months,
@@ -434,21 +582,22 @@ export function hasInvoiceRequestIntent(message: string): boolean {
   }
 
   // Palabras clave de factura explícitas
-  const hasInvoiceKeyword = /\b(?:factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(
-    trimmed
-  );
+  const hasInvoiceKeyword =
+    /\b(?:factura|facturas|boleta|boletas|recibo|recibos)\b/i.test(trimmed);
 
   // Continuación explícita: "enviamela", "dale" (cuando pide enviar factura)
   const hasContinuationKeyword =
     /\b(?:enviamela|envíamela|mandamela|mandámela|sí\s+dale|si\s+dale|dale)\b/i.test(
-      trimmed
+      trimmed,
     ) && trimmed.split(/\s+/).length <= 3; // Solo si es mensaje corto
 
   // "cuenta X" o "número X" con número de 3-4 dígitos
   const hasAccountWithNumber =
-    /(?:cuenta|numero|número|nro|socio)\s*(?:de\s+cuenta|de\s+socio)?\s*(?::|es)?\s*\d{3,4}\b/i.test(trimmed) ||
+    /(?:cuenta|numero|número|nro|socio)\s*(?:de\s+cuenta|de\s+socio)?\s*(?::|es)?\s*\d{3,4}\b/i.test(
+      trimmed,
+    ) ||
     /\b\d{3,4}\s*(?:es\s+)?(?:mi|el|la)\s*(?:cuenta|factura|boleta)/i.test(
-      trimmed
+      trimmed,
     );
 
   // Mensaje es SOLO un número de 3-4 dígitos (continuación enviando cuenta)
@@ -457,9 +606,8 @@ export function hasInvoiceRequestIntent(message: string): boolean {
   // Solicitud explícita: quiero/necesito + factura/boleta/cuenta
   const hasExplicitRequest =
     /\b(?:quiero|necesito|pasar|enviar|mandar|dame|pásame|pasame|podrías|podrias|puedes)\b/i.test(
-      trimmed
-    ) &&
-    /\b(?:factura|boleta|recibo|cuenta)\b/i.test(trimmed);
+      trimmed,
+    ) && /\b(?:factura|boleta|recibo|cuenta)\b/i.test(trimmed);
 
   return (
     hasInvoiceKeyword ||
@@ -475,7 +623,7 @@ export function hasInvoiceRequestIntent(message: string): boolean {
  */
 function isInformationalQuestion(message: string): boolean {
   const lowerMessage = message.toLowerCase();
-  
+
   // Patrones que indican preguntas informativas
   const informationalPatterns = [
     /(?:están|estan|está|esta)\s+disponibles/i,
@@ -487,8 +635,8 @@ function isInformationalQuestion(message: string): boolean {
     /(?:en\s+)?qué\s+fecha/i,
     /(?:para\s+cuándo|para cuando)/i,
   ];
-  
-  return informationalPatterns.some(pattern => pattern.test(message));
+
+  return informationalPatterns.some((pattern) => pattern.test(message));
 }
 
 /**
@@ -535,86 +683,174 @@ export function isWrongInvoiceFeedback(text: string): boolean {
  * Detecta si el mensaje contiene una solicitud de factura pero con dirección/nombre
  * en lugar de número de cuenta válido
  */
-export function detectAddressOrNameInsteadOfAccount(
-  message: string
-): {
+export function detectAddressOrNameInsteadOfAccount(message: string): {
   isAddressOrName: boolean;
   hasInvoiceRequest: boolean;
 } {
   const lowerMessage = message.toLowerCase();
-  
+
   // Si es una pregunta informativa, NO es una solicitud de factura
   if (isInformationalQuestion(message)) {
     return { isAddressOrName: false, hasInvoiceRequest: false };
   }
-  
+
   // Palabras clave que indican solicitud REAL de factura (no preguntas)
   // Incluye respuestas de continuación: "Enviamela", "Dale", "Sí enviámela"
   const invoiceRequestKeywords = [
-    "pasar", "enviar", "mandar", "dar", "entregar", "enviarme", "mandarme",
-    "necesito", "quiero", "quiero que", "me gustaría", "me gustaria",
-    "podrían", "podrian", "pueden", "me pueden", "me podrían", "me podrian",
-    "podrías", "podrias", "puedes", "me puedes", "podrías", "podrias",
-    "dame", "dame la", "pásame", "pasame", "envíame", "envíame",
-    "solicito", "solicitar",
-    "enviamela", "envíamela", "mandamela", "mandámela", "dale", "sí dale"
+    "pasar",
+    "enviar",
+    "mandar",
+    "dar",
+    "entregar",
+    "enviarme",
+    "mandarme",
+    "necesito",
+    "quiero",
+    "quiero que",
+    "me gustaría",
+    "me gustaria",
+    "podrían",
+    "podrian",
+    "pueden",
+    "me pueden",
+    "me podrían",
+    "me podrian",
+    "podrías",
+    "podrias",
+    "puedes",
+    "me puedes",
+    "podrías",
+    "podrias",
+    "dame",
+    "dame la",
+    "pásame",
+    "pasame",
+    "envíame",
+    "envíame",
+    "solicito",
+    "solicitar",
+    "enviamela",
+    "envíamela",
+    "mandamela",
+    "mandámela",
+    "dale",
+    "sí dale",
   ];
-  
+
   // Verificar si hay solicitud REAL de factura (no solo menciona la palabra "factura")
-  const hasInvoiceRequest = invoiceRequestKeywords.some(keyword => 
-    lowerMessage.includes(keyword)
-  ) || (
+  const hasInvoiceRequest =
+    invoiceRequestKeywords.some((keyword) => lowerMessage.includes(keyword)) ||
     // También considerar solicitud si dice "factura de" o "boleta de" seguido de algo específico
-    (lowerMessage.includes("factura") || lowerMessage.includes("boleta") || lowerMessage.includes("recibo")) &&
-    (lowerMessage.includes("de") || lowerMessage.includes("del") || /\d{3,4}/.test(message))
-  );
-  
+    ((lowerMessage.includes("factura") ||
+      lowerMessage.includes("boleta") ||
+      lowerMessage.includes("recibo")) &&
+      (lowerMessage.includes("de") ||
+        lowerMessage.includes("del") ||
+        /\d{3,4}/.test(message)));
+
   if (!hasInvoiceRequest) {
     return { isAddressOrName: false, hasInvoiceRequest: false };
   }
-  
+
   // Palabras clave que indican dirección (excluir "la", "el", "los", "las" - demasiado comunes en "la boleta", "la cuenta")
   const addressKeywords = [
-    "dpto", "depto", "departamento", "apartamento", "apto",
-    "calle", "avenida", "av", "ruta", "km", "barrio",
-    "domicilio", "dirección", "direccion", "dire", "vive", "vivo",
-    "pasaje", "pas", "pje", "casa", "villa", "manzana", "mza", "lote", "lt",
-    "sector", "sect", "san jose", "inmigrantes", "pajon", "valle", "dormida", "toledo"
+    "dpto",
+    "depto",
+    "departamento",
+    "apartamento",
+    "apto",
+    "calle",
+    "avenida",
+    "av",
+    "ruta",
+    "km",
+    "barrio",
+    "domicilio",
+    "dirección",
+    "direccion",
+    "dire",
+    "vive",
+    "vivo",
+    "pasaje",
+    "pas",
+    "pje",
+    "casa",
+    "villa",
+    "manzana",
+    "mza",
+    "lote",
+    "lt",
+    "sector",
+    "sect",
+    "san jose",
+    "inmigrantes",
+    "pajon",
+    "valle",
+    "dormida",
+    "toledo",
   ];
-  
+
   // Patrones para detectar nombres propios (dos o más palabras con mayúscula inicial)
-  const namePattern = /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\b/;
-  
+  const namePattern =
+    /\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)\b/;
+
   // Apellidos comunes en español
   const commonSurnames = [
-    "benitez", "benítez", "gonzalez", "gonzález", "rodriguez", "rodríguez",
-    "fernandez", "fernández", "lopez", "lópez", "martinez", "martínez",
-    "garcia", "garcía", "perez", "pérez", "sanchez", "sánchez", "ramirez", "ramírez",
-    "torres", "flores", "rivera", "gomez", "gómez", "diaz", "díaz", "reyes", "cruz"
+    "benitez",
+    "benítez",
+    "gonzalez",
+    "gonzález",
+    "rodriguez",
+    "rodríguez",
+    "fernandez",
+    "fernández",
+    "lopez",
+    "lópez",
+    "martinez",
+    "martínez",
+    "garcia",
+    "garcía",
+    "perez",
+    "pérez",
+    "sanchez",
+    "sánchez",
+    "ramirez",
+    "ramírez",
+    "torres",
+    "flores",
+    "rivera",
+    "gomez",
+    "gómez",
+    "diaz",
+    "díaz",
+    "reyes",
+    "cruz",
   ];
-  
+
   // Verificar si hay palabras de dirección
-  const hasAddressKeyword = addressKeywords.some(keyword => 
-    lowerMessage.includes(keyword)
+  const hasAddressKeyword = addressKeywords.some((keyword) =>
+    lowerMessage.includes(keyword),
   );
-  
+
   // Verificar si hay un patrón de nombre (dos o más palabras con mayúscula inicial)
   const nameMatch = message.match(namePattern);
   const hasNamePattern = nameMatch !== null;
-  
+
   // Verificar si hay apellidos comunes
-  const hasCommonSurname = commonSurnames.some(surname => 
-    lowerMessage.includes(surname)
+  const hasCommonSurname = commonSurnames.some((surname) =>
+    lowerMessage.includes(surname),
   );
-  
+
   // Verificar si hay secuencias de palabras que parecen nombres
   const words = message.split(/\s+/);
   let consecutiveNameWords = 0;
   for (let i = 0; i < words.length; i++) {
     const word = words[i].trim();
     // Si la palabra empieza con mayúscula o es un apellido común, podría ser un nombre
-    if ((word.length > 2 && /^[A-ZÁÉÍÓÚÑ]/.test(word)) || 
-        commonSurnames.some(s => word.toLowerCase().includes(s))) {
+    if (
+      (word.length > 2 && /^[A-ZÁÉÍÓÚÑ]/.test(word)) ||
+      commonSurnames.some((s) => word.toLowerCase().includes(s))
+    ) {
       consecutiveNameWords++;
       if (consecutiveNameWords >= 2) break;
     } else {
@@ -622,28 +858,31 @@ export function detectAddressOrNameInsteadOfAccount(
     }
   }
   const hasNameLikeSequence = consecutiveNameWords >= 2;
-  
+
   const hasName = hasNamePattern || hasCommonSurname || hasNameLikeSequence;
-  
+
   // Verificar si hay "dpto", "depto" o "departamento" seguido de una letra o número
   const deptoPattern = /(?:dpto|depto|departamento)\s*[a-z]/i;
   const hasDepto = deptoPattern.test(message);
-  
+
   // Verificar si hay un formato de matrícula antiguo (XX-XXXX-X) que debe ser rechazado
   const oldMatriculaPattern = /\b\d{1,2}[-–—]\d{3,4}[-–—]?[A-Z]?\b/i;
   const hasOldMatricula = oldMatriculaPattern.test(message);
-  
+
   // Verificar si hay un número de cuenta válido (3-4 dígitos, con confianza alta o media)
   const invoiceRequest = detectInvoiceRequest(message);
-  const hasValidAccountNumber = invoiceRequest.accountNumbers.length > 0 && 
-                                 (invoiceRequest.confidence === "high" || invoiceRequest.confidence === "medium") &&
-                                 !hasOldMatricula;
-  
+  const hasValidAccountNumber =
+    invoiceRequest.accountNumbers.length > 0 &&
+    (invoiceRequest.confidence === "high" ||
+      invoiceRequest.confidence === "medium") &&
+    !hasOldMatricula;
+
   // Si hay solicitud de factura Y (dirección O nombre O depto O matrícula antigua) pero NO hay número de cuenta válido
-  const isAddressOrName = hasInvoiceRequest && 
-                          !hasValidAccountNumber && 
-                          (hasAddressKeyword || hasName || hasDepto || hasOldMatricula);
-  
+  const isAddressOrName =
+    hasInvoiceRequest &&
+    !hasValidAccountNumber &&
+    (hasAddressKeyword || hasName || hasDepto || hasOldMatricula);
+
   console.log(`[INVOICE-DETECTOR] Detección de dirección/nombre:`);
   console.log(`  - Tiene solicitud de factura: ${hasInvoiceRequest}`);
   console.log(`  - Tiene palabra de dirección: ${hasAddressKeyword}`);
@@ -651,10 +890,9 @@ export function detectAddressOrNameInsteadOfAccount(
   console.log(`  - Tiene depto: ${hasDepto}`);
   console.log(`  - Tiene número de cuenta válido: ${hasValidAccountNumber}`);
   console.log(`  - Es dirección/nombre: ${isAddressOrName}`);
-  
+
   return {
     isAddressOrName,
     hasInvoiceRequest,
   };
 }
-

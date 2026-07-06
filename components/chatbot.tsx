@@ -126,10 +126,10 @@ export default function Chatbot() {
 
       const invoiceData = data.invoice
         ? {
-            downloadUrl: data.invoice.downloadUrl as string,
-            fileName: data.invoice.fileName as string,
-            type: data.invoice.type as string,
-          }
+          downloadUrl: data.invoice.downloadUrl as string,
+          fileName: data.invoice.fileName as string,
+          type: data.invoice.type as string,
+        }
         : undefined
 
       const botResponse: Message = {
@@ -140,9 +140,9 @@ export default function Chatbot() {
         image: imagePath,
         invoice: invoiceData,
       }
-      
+
       console.log("Mensaje del bot creado:", botResponse);
-      
+
       setMessages((prev) => [...prev, botResponse])
     } catch (error) {
       console.error('Error al enviar mensaje:', error)
@@ -213,13 +213,13 @@ export default function Chatbot() {
                   <Bot className="h-7 w-7" />
                 </motion.div>
                 {/* Círculo naranja con animación de parpadeo fluida */}
-                <motion.span 
+                <motion.span
                   className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-coop-orange shadow-lg z-10"
-                  animate={{ 
+                  animate={{
                     opacity: [1, 0.4, 1],
                     scale: [1, 1.1, 1]
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 1.2,
                     repeat: Infinity,
                     ease: "easeInOut",
@@ -244,288 +244,288 @@ export default function Chatbot() {
             className="fixed bottom-6 right-6 z-50"
           >
             <Card className="flex h-[600px] w-[calc(100vw-3rem)] sm:w-[400px] flex-col shadow-2xl md:h-[650px] md:w-[450px] border-2 border-coop-green/20 overflow-hidden">
-          {/* Header - Enhanced */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green p-4 text-white relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
-            </div>
-            
-            <div className="flex items-center space-x-3 relative z-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-lg">
-                <Bot className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Asistente Virtual</h3>
-                <div className="flex items-center space-x-1.5 text-xs text-green-50">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400"></span>
-                  </span>
-                  <span className="font-medium">En línea 24/7</span>
+              {/* Header - Enhanced */}
+              <div className="flex items-center justify-between bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green p-4 text-white relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-coop-orange rounded-full blur-2xl"></div>
                 </div>
-              </div>
-            </div>
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="h-9 w-9 text-white hover:bg-white/20 rounded-lg transition-all duration-300 relative z-10"
-                aria-label="Cerrar chat"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </motion.div>
-          </div>
 
-          {/* Área de mensajes - Enhanced with Framer Motion */}
-          <ScrollArea
-            ref={messagesScrollAreaRef}
-            className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white"
-          >
-            <div className="space-y-4">
-              {/* Botones de acción rápida - Solo se muestran cuando hay pocos mensajes */}
-              {messages.length <= 1 && (
+                <div className="flex items-center space-x-3 relative z-10">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-lg">
+                    <Bot className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Asistente Virtual</h3>
+                    <div className="flex items-center space-x-1.5 text-xs text-green-50">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400"></span>
+                      </span>
+                      <span className="font-medium">En línea 24/7</span>
+                    </div>
+                  </div>
+                </div>
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="space-y-2"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <p className="text-xs font-medium text-gray-500 mb-2 px-1">Preguntas frecuentes:</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {quickActions.map((action, index) => (
-                      <motion.button
-                        key={index}
-                        onClick={() => handleQuickAction(action.text)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-coop-green hover:bg-green-50/50 transition-all duration-200 text-left group"
-                      >
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-coop-blue/10 to-coop-purple/10 flex items-center justify-center group-hover:from-coop-blue/20 group-hover:to-coop-purple/20 transition-colors">
-                          <action.icon className="w-4 h-4 text-coop-green" />
-                        </div>
-                        <span className="text-sm text-gray-700 group-hover:text-coop-green font-medium flex-1">
-                          {action.text}
-                        </span>
-                        <Send className="w-3 h-3 text-gray-400 group-hover:text-coop-green opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </motion.button>
-                    ))}
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsOpen(false)}
+                    className="h-9 w-9 text-white hover:bg-white/20 rounded-lg transition-all duration-300 relative z-10"
+                    aria-label="Cerrar chat"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
                 </motion.div>
-              )}
+              </div>
+
+              {/* Área de mensajes - Enhanced with Framer Motion */}
+              <ScrollArea
+                ref={messagesScrollAreaRef}
+                className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white"
+              >
+                <div className="space-y-4">
+                  {/* Botones de acción rápida - Solo se muestran cuando hay pocos mensajes */}
+                  {messages.length <= 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="space-y-2"
+                    >
+                      <p className="text-xs font-medium text-gray-500 mb-2 px-1">Preguntas frecuentes:</p>
+                      <div className="grid grid-cols-1 gap-2">
+                        {quickActions.map((action, index) => (
+                          <motion.button
+                            key={index}
+                            onClick={() => handleQuickAction(action.text)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-coop-green hover:bg-green-50/50 transition-all duration-200 text-left group"
+                          >
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-coop-blue/10 to-coop-purple/10 flex items-center justify-center group-hover:from-coop-blue/20 group-hover:to-coop-purple/20 transition-colors">
+                              <action.icon className="w-4 h-4 text-coop-green" />
+                            </div>
+                            <span className="text-sm text-gray-700 group-hover:text-coop-green font-medium flex-1">
+                              {action.text}
+                            </span>
+                            <Send className="w-3 h-3 text-gray-400 group-hover:text-coop-green opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
 
-              <AnimatePresence mode="popLayout">
-                {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    layout
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                    transition={{ 
-                      duration: 0.3,
-                      layout: { duration: 0.2 }
-                    }}
-                    className={cn(
-                      "flex w-full items-start space-x-3",
-                      message.sender === "user" && "flex-row-reverse space-x-reverse"
-                    )}
-                  >
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-md transition-transform hover:scale-110",
-                      message.sender === "user"
-                        ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
-                        : "bg-gradient-to-br from-coop-orange to-orange-400 text-white"
-                    )}
-                  >
-                    {message.sender === "user" ? (
-                      <User className="h-5 w-5" />
-                    ) : (
-                      <Bot className="h-5 w-5" />
-                    )}
-                  </div>
-                  <div
-                    className={cn(
-                      "max-w-[280px] sm:max-w-[320px] md:max-w-[360px] rounded-2xl px-4 py-3 shadow-sm break-words overflow-hidden",
-                      message.sender === "user"
-                        ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
-                        : "bg-white text-gray-800 border border-gray-200"
-                    )}
-                  >
-                    {message.sender === "bot" ? (
-                      <div className="text-sm leading-relaxed prose prose-sm max-w-none break-words">
-                        <ReactMarkdown
-                          components={{
-                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                            ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-                            li: ({ children }) => <li className="ml-2">{children}</li>,
-                            strong: ({ children }) => <strong className="font-semibold text-coop-green">{children}</strong>,
-                            em: ({ children }) => <em className="italic">{children}</em>,
-                            a: ({ href, children }) => (
-                              <a
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-coop-blue underline break-all"
-                              >
-                                {children}
-                              </a>
-                            ),
-                          }}
-                        >
-                          {message.text}
-                        </ReactMarkdown>
-                        {message.invoice && (
-                          <div className="mt-3 w-full border border-coop-green/30 bg-green-50/60 rounded-lg p-3 flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-sm font-medium text-coop-green">
-                              <FileText className="w-4 h-4" />
-                              <span>Factura de {message.invoice.type}</span>
-                            </div>
-                            <p className="text-xs text-gray-700 break-all">
-                              Archivo: {message.invoice.fileName}
-                            </p>
-                            <div className="flex justify-start">
-                              <a
-                                href={message.invoice.downloadUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-coop-blue to-coop-green text-white shadow hover:shadow-md hover:from-coop-blue/90 hover:to-coop-green/90 transition-all"
-                              >
-                                <FileText className="w-4 h-4" />
-                                Descargar factura
-                              </a>
-                            </div>
-                          </div>
+                  <AnimatePresence mode="popLayout">
+                    {messages.map((message) => (
+                      <motion.div
+                        key={message.id}
+                        layout
+                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                        transition={{
+                          duration: 0.3,
+                          layout: { duration: 0.2 }
+                        }}
+                        className={cn(
+                          "flex w-full items-start space-x-3",
+                          message.sender === "user" && "flex-row-reverse space-x-reverse"
                         )}
-                        {message.image && (
-                          <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                            <img 
-                              src={message.image} 
-                              alt="Ubicación del número de cuenta en la boleta"
-                              className="w-full h-auto max-w-full object-contain"
-                              onError={(e) => {
-                                console.error("Error al cargar la imagen:", message.image);
-                                console.error("Evento de error:", e);
-                              }}
-                              onLoad={() => {
-                                console.log("Imagen cargada correctamente:", message.image);
-                              }}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-md transition-transform hover:scale-110",
+                            message.sender === "user"
+                              ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
+                              : "bg-gradient-to-br from-coop-orange to-orange-400 text-white"
+                          )}
+                        >
+                          {message.sender === "user" ? (
+                            <User className="h-5 w-5" />
+                          ) : (
+                            <Bot className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div
+                          className={cn(
+                            "max-w-[280px] sm:max-w-[320px] md:max-w-[360px] rounded-2xl px-4 py-3 shadow-sm break-words overflow-hidden",
+                            message.sender === "user"
+                              ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
+                              : "bg-white text-gray-800 border border-gray-200"
+                          )}
+                        >
+                          {message.sender === "bot" ? (
+                            <div className="text-sm leading-relaxed prose prose-sm max-w-none break-words">
+                              <ReactMarkdown
+                                components={{
+                                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                  ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                                  li: ({ children }) => <li className="ml-2">{children}</li>,
+                                  strong: ({ children }) => <strong className="font-semibold text-coop-green">{children}</strong>,
+                                  em: ({ children }) => <em className="italic">{children}</em>,
+                                  a: ({ href, children }) => (
+                                    <a
+                                      href={href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-coop-blue underline break-all"
+                                    >
+                                      {children}
+                                    </a>
+                                  ),
+                                }}
+                              >
+                                {message.text}
+                              </ReactMarkdown>
+                              {message.invoice && (
+                                <div className="mt-3 w-full border border-coop-green/30 bg-green-50/60 rounded-lg p-3 flex flex-col gap-2">
+                                  <div className="flex items-center gap-2 text-sm font-medium text-coop-green">
+                                    <FileText className="w-4 h-4" />
+                                    <span>Factura de {message.invoice.type}</span>
+                                  </div>
+                                  <p className="text-xs text-gray-700 break-all">
+                                    Archivo: {message.invoice.fileName}
+                                  </p>
+                                  <div className="flex justify-start">
+                                    <a
+                                      href={message.invoice.downloadUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-coop-blue to-coop-green text-white shadow hover:shadow-md hover:from-coop-blue/90 hover:to-coop-green/90 transition-all"
+                                    >
+                                      <FileText className="w-4 h-4" />
+                                      Descargar factura
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+                              {message.image && (
+                                <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                                  <img
+                                    src={message.image}
+                                    alt="Ubicación del número de cuenta en la boleta"
+                                    className="w-full h-auto max-w-full object-contain"
+                                    onError={(e) => {
+                                      console.error("Error al cargar la imagen:", message.image);
+                                      console.error("Evento de error:", e);
+                                    }}
+                                    onLoad={() => {
+                                      console.log("Imagen cargada correctamente:", message.image);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                          )}
+                          <p className={cn(
+                            "mt-2 text-xs",
+                            message.sender === "user" ? "text-green-100" : "text-gray-500"
+                          )}>
+                            {message.timestamp.toLocaleTimeString("es-AR", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {isTyping && (
+                      <motion.div
+                        key="typing-indicator"
+                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-start space-x-2"
+                      >
+                        <motion.div
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-orange text-white"
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          <Bot className="h-4 w-4" />
+                        </motion.div>
+                        <motion.div
+                          className="rounded-lg bg-gray-100 px-4 py-2"
+                          initial={{ width: 0 }}
+                          animate={{ width: "auto" }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="flex space-x-1">
+                            <motion.span
+                              className="h-2 w-2 rounded-full bg-gray-400"
+                              animate={{ y: [0, -8, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                            />
+                            <motion.span
+                              className="h-2 w-2 rounded-full bg-gray-400"
+                              animate={{ y: [0, -8, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                            />
+                            <motion.span
+                              className="h-2 w-2 rounded-full bg-gray-400"
+                              animate={{ y: [0, -8, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
                             />
                           </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                        </motion.div>
+                      </motion.div>
                     )}
-                    <p className={cn(
-                      "mt-2 text-xs",
-                      message.sender === "user" ? "text-green-100" : "text-gray-500"
-                    )}>
-                      {message.timestamp.toLocaleTimeString("es-AR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </motion.div>
-                ))}
-              </AnimatePresence>
+                  </AnimatePresence>
 
-              <AnimatePresence>
-                {isTyping && (
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+
+              {/* Input area - Enhanced */}
+              <div className="border-t border-gray-200 bg-white p-4">
+                <div className="flex space-x-2">
+                  <Input
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Escribe tu mensaje aquí..."
+                    className="flex-1 border-2 border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20 rounded-xl px-4 py-3 transition-all duration-300"
+                    disabled={isTyping}
+                    autoComplete="off"
+                    autoFocus={false}
+                  />
                   <motion.div
-                    key="typing-indicator"
-                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-start space-x-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <motion.div 
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coop-orange text-white"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!inputValue.trim() || isTyping}
+                      className="bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl px-4"
+                      size="icon"
                     >
-                      <Bot className="h-4 w-4" />
-                    </motion.div>
-                    <motion.div 
-                      className="rounded-lg bg-gray-100 px-4 py-2"
-                      initial={{ width: 0 }}
-                      animate={{ width: "auto" }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="flex space-x-1">
-                        <motion.span 
-                          className="h-2 w-2 rounded-full bg-gray-400"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                        />
-                        <motion.span 
-                          className="h-2 w-2 rounded-full bg-gray-400"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                        />
-                        <motion.span 
-                          className="h-2 w-2 rounded-full bg-gray-400"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-                        />
-                      </div>
-                    </motion.div>
+                      <motion.div
+                        animate={inputValue.trim() && !isTyping ? { rotate: [0, 15, -15, 0] } : {}}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Send className="h-5 w-5" />
+                      </motion.div>
+                    </Button>
                   </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-
-          {/* Input area - Enhanced */}
-          <div className="border-t border-gray-200 bg-white p-4">
-            <div className="flex space-x-2">
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Escribe tu mensaje aquí..."
-                className="flex-1 border-2 border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20 rounded-xl px-4 py-3 transition-all duration-300"
-                disabled={isTyping}
-                autoComplete="off"
-                autoFocus={false}
-              />
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isTyping}
-                  className="bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl px-4"
-                  size="icon"
-                >
-                  <motion.div
-                    animate={inputValue.trim() && !isTyping ? { rotate: [0, 15, -15, 0] } : {}}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Send className="h-5 w-5" />
-                  </motion.div>
-                </Button>
-              </motion.div>
-            </div>
-            <p className="mt-3 text-xs text-gray-500 text-center flex items-center justify-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>Disponible 24/7 para ayudarte</span>
-            </p>
-          </div>
-        </Card>
+                </div>
+                <p className="mt-3 text-xs text-gray-500 text-center flex items-center justify-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>Disponible 24/7 para ayudarte</span>
+                </p>
+              </div>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>
