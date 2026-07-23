@@ -43,7 +43,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
     { href: "/pfc", label: "PFC", icon: Stethoscope },
     { href: "/noticias", label: "Noticias", icon: Newspaper },
     { href: "/revista", label: "Revista", icon: FileText },
-    { href: "/reclamos", label: "Reclamos", icon: Phone },
+    { href: "/contacto", label: "Contacto", icon: Phone },
     { href: "/asociarse", label: "Asociarse", icon: UserPlus },
 
   ]
@@ -70,7 +70,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
           >
             <Link href={isLoggedIn ? "/dashboard" : "/"} className="flex items-center space-x-3 group">
               <div className="relative">
-                <motion.div
+                <motion.div 
                   className="absolute inset-0 bg-coop-green/10 rounded-full blur-lg"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileHover={{ opacity: 1, scale: 1.2 }}
@@ -81,7 +81,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   transition={{ duration: 0.5 }}
                 >
                   <Image
-                    src="/images/logocoopargentina.png"
+                    src="/images/logocoopnuevo.png"
                     alt="Cooperativa La Dormida"
                     width={56}
                     height={56}
@@ -89,14 +89,14 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   />
                 </motion.div>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg lg:text-xl font-bold text-blue-300 transition-colors group-hover:text-coop-blue">
-                  Cooperativa
-                  <br />
-                </h1>
-                <span className="text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900">La Dormida</span>
-              </div>
-            </Link>
+            <div className="hidden sm:block">
+              <h1 className="text-lg lg:text-xl font-bold text-coop-green transition-colors group-hover:text-coop-blue">
+                Cooperativa
+                <br />
+              </h1>
+              <span className="text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900">La Dormida</span>
+            </div>
+          </Link>
           </motion.div>
 
           {/* Desktop Navigation - Enhanced with Framer Motion */}
@@ -120,7 +120,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   </motion.div>
                   <span className="relative">
                     {item.label}
-                    <motion.span
+                    <motion.span 
                       className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green"
                       initial={{ width: 0 }}
                       whileHover={{ width: "100%" }}
@@ -160,20 +160,14 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <a
-                href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login"
-                target="_blank"
+              <a 
+                href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                target="_blank" 
                 rel="noopener noreferrer"
                 className="group"
               >
-                <Button
-                  className="hidden lg:flex relative overflow-hidden bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300 text-white font-bold px-6 py-2 border border-sky-200/50 shadow-xl shadow-sky-500/25 transition-all duration-300 hover:-translate-y-1 hover:from-sky-300 hover:via-sky-200 hover:to-cyan-200 hover:shadow-2xl hover:shadow-sky-500/40"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-1000 group-hover:translate-x-full" />
-
-                  <span className="relative z-10">
-                    Pagar Factura
-                  </span>
+                <Button className="hidden lg:flex bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg">
+                  Pagar Factura
                 </Button>
               </a>
             )}
@@ -246,7 +240,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                         className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 hover:text-coop-green transition-all duration-300 rounded-xl group"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <motion.div
+                        <motion.div 
                           className="w-11 h-11 rounded-xl bg-gradient-to-br from-coop-blue/10 via-coop-purple/10 to-coop-green/10 flex items-center justify-center shadow-sm"
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.95 }}
@@ -265,58 +259,58 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     </motion.div>
                   ))}
 
-                  {/* Mobile User Actions - Enhanced */}
-                  <div className="border-t border-gray-200 pt-4 mt-4 mx-2">
-                    {isLoggedIn ? (
-                      <div className="space-y-2">
-                        <div className="px-4 py-3 text-base text-gray-700 font-semibold bg-gradient-to-r from-coop-green/5 to-green-50 rounded-xl">
-                          Hola, {userName || "Usuario"}{" "}
-                          {isPFC && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold ml-2" title="Usuario PFC">
-                              <ShieldCheck className="w-3 h-3" />
-                              PFC
-                            </span>
-                          )}
-                        </div>
-                        <Link
-                          href="/perfil"
-                          className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100/50 hover:text-blue-700 transition-all duration-300 rounded-xl group"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                            <User className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <span className="font-semibold">Mi Perfil</span>
-                          <ArrowRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                        </Link>
-                        <button
-                          className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/50 hover:text-red-600 transition-all duration-300 rounded-xl w-full group"
-                          onClick={() => { }}
-                        >
-                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                            <LogOut className="w-5 h-5 text-red-600" />
-                          </div>
-                          <span className="font-semibold">Cerrar Sesión</span>
-                          <ArrowRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
-                        </button>
+              {/* Mobile User Actions - Enhanced */}
+              <div className="border-t border-gray-200 pt-4 mt-4 mx-2">
+                {isLoggedIn ? (
+                  <div className="space-y-2">
+                    <div className="px-4 py-3 text-base text-gray-700 font-semibold bg-gradient-to-r from-coop-green/5 to-green-50 rounded-xl">
+                      Hola, {userName || "Usuario"}{" "}
+                      {isPFC && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold ml-2" title="Usuario PFC">
+                          <ShieldCheck className="w-3 h-3" />
+                          PFC
+                        </span>
+                      )}
+                    </div>
+                    <Link
+                      href="/perfil"
+                      className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100/50 hover:text-blue-700 transition-all duration-300 rounded-xl group"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                        <User className="w-5 h-5 text-blue-600" />
                       </div>
-                    ) : (
-                      <a
-                        href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block mx-2"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                          Pagar Factura
-                        </Button>
-                      </a>
-                    )}
+                      <span className="font-semibold">Mi Perfil</span>
+                      <ArrowRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                    </Link>
+                    <button
+                      className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/50 hover:text-red-600 transition-all duration-300 rounded-xl w-full group"
+                      onClick={() => {}}
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                        <LogOut className="w-5 h-5 text-red-600" />
+                      </div>
+                      <span className="font-semibold">Cerrar Sesión</span>
+                      <ArrowRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
+                    </button>
                   </div>
-                </nav>
+                ) : (
+                  <a 
+                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block mx-2" 
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button className="w-full bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                      Pagar Factura
+                    </Button>
+                  </a>
+                )}
               </div>
-            </motion.div>
+            </nav>
+          </div>
+        </motion.div>
           )}
         </AnimatePresence>
       </div>

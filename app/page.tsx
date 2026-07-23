@@ -1,15 +1,15 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Pill } from "lucide-react"
+import { Zap, Wifi, Tv, Heart, Truck, Users, ArrowRight, CheckCircle, Phone, Mail, ShieldCheck, Sparkles, TrendingUp, Award, AlertCircle, PhoneCall, Zap as ZapIcon, Wifi as WifiIcon, FileText, Building2, Clock, ChevronLeft, ChevronRight, Bot, MessageCircle, Smartphone, Globe, HelpCircle, Cloud, Pill } from "lucide-react"
 import { motion } from "framer-motion"
 import WeatherModal from "@/components/clima/weather-modal"
-import WorldCupHero from "@/components/home/world-cup-hero"
 import {
   getPharmacyScheduleMonthLabel,
   isPharmacyDateToday,
@@ -461,20 +461,20 @@ function PharmacySchedule() {
                   >
                     <Card
                       className={`h-full border-2 transition-all duration-300 ${today
-                        ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50"
-                        : isSocial
-                          ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
-                          : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
+                          ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50"
+                          : isSocial
+                            ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
+                            : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
                         }`}
                     >
                       <CardContent className="p-3 sm:p-4 text-center">
                         <div className="mb-2 flex justify-center">
                           <motion.div
                             className={`p-2 rounded-xl ${today
-                              ? "bg-gradient-to-br from-sky-400 to-cyan-500"
-                              : isSocial
-                                ? "bg-gradient-to-br from-amber-400 to-amber-600"
-                                : "bg-gradient-to-br from-sky-100 to-cyan-200"
+                                ? "bg-gradient-to-br from-sky-400 to-cyan-500"
+                                : isSocial
+                                  ? "bg-gradient-to-br from-amber-400 to-amber-600"
+                                  : "bg-gradient-to-br from-sky-100 to-cyan-200"
                               } group-hover:scale-110 transition-transform duration-300`}
                             whileHover={{ rotate: [0, -8, 8, 0] }}
                             transition={{ duration: 0.4 }}
@@ -597,7 +597,261 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/30">
       <Header />
 
-      <WorldCupHero onWeatherClick={() => setIsWeatherModalOpen(true)} />
+      {/* Hero Section - Enhanced with Framer Motion */}
+      <motion.section
+        className="relative text-white overflow-hidden min-h-[calc(100dvh-4rem)] lg:min-h-[calc(100dvh-5rem)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Background Image - Desktop */}
+        <div className="hidden lg:block absolute inset-0">
+          <Image
+            src="/images/hero-desktop.png"
+            alt="Cooperativa Eléctrica La Dormida - Edificio principal"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          {/* Overlay para mejorar legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
+        </div>
+
+        {/* Background Image - Mobile */}
+        <div className="lg:hidden absolute inset-0">
+          <Image
+            src="/images/hero-mobile.png"
+            alt="Cooperativa Eléctrica La Dormida - Edificio principal"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          {/* Overlay para mejorar legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"></div>
+        </div>
+
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <motion.div
+            className="absolute top-0 right-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, -50, 0],
+              y: [0, 30, 0],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+
+        {/* Botón Clima Flotante - Esquina Superior Derecha */}
+        <motion.div
+          className="absolute top-6 right-6 lg:top-8 lg:right-8 z-20"
+          initial={{ opacity: 0, scale: 0.8, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.5 }}
+        >
+          <motion.button
+            onClick={() => setIsWeatherModalOpen(true)}
+            className="group relative flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 hover:bg-white/25 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatDelay: 2
+              }}
+            >
+              <Cloud className="w-5 h-5 text-white" />
+            </motion.div>
+            <span className="text-sm font-medium text-white hidden sm:inline">Clima</span>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-coop-orange rounded-full animate-pulse opacity-80"></div>
+          </motion.button>
+        </motion.div>
+
+        <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div
+              className="space-y-8"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-4 h-4 text-coop-orange" />
+                </motion.div>
+                <span className="text-sm font-medium">Más de 60 años sirviendo a la comunidad</span>
+              </motion.div>
+
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              >
+                <motion.h1
+                  className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
+                  Bienvenido a la
+                  <motion.span
+                    className="text-coop-orange block bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    Cooperativa
+                  </motion.span>
+                  <motion.span
+                    className="block"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                  >
+                    de San Jose De La Dormida
+                  </motion.span>
+                </motion.h1>
+                <motion.p
+                  className="text-lg sm:text-xl lg:text-2xl text-green-50 leading-relaxed max-w-xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1 }}
+                >
+                  Servicios de calidad para nuestra comunidad. Electricidad, Internet, TV y más, con el compromiso de siempre.
+                </motion.p>
+              </motion.div>
+
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4 pt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <a
+                    href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
+                    <Button
+                      size="lg"
+                      className="bg-coop-orange text-white hover:bg-coop-orange/90 w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                    >
+                      Pagar Factura
+                      <motion.span
+                        className="inline-block ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <ArrowRight className="w-5 h-5" />
+                      </motion.span>
+                    </Button>
+                  </a>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <a
+                    href="https://ersep.cba.gov.ar/prestador/cooperativa-electrica-limitada-de-san-jose-de-la-dormida/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-white/30 bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
+                    >
+                      Cuadro Tarifario
+                      <motion.span
+                        className="inline-block ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <ArrowRight className="w-5 h-5" />
+                      </motion.span>
+                    </Button>
+                  </a>
+                </motion.div>
+              </motion.div>
+
+              {/* Stats */}
+              <motion.div
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.4 }}
+              >
+                {[
+                  { value: "2,500+", label: "Familias" },
+                  { value: "50+", label: "Años" },
+                  { value: "24/7", label: "Atención" },
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <motion.div
+                      className="text-3xl lg:text-4xl font-bold text-coop-orange"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                    <div className="text-sm text-green-100 mt-1">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+          </div>
+        </div>
+      </motion.section>
 
       {/* Asistentes Virtuales Section - Enhanced with Framer Motion */}
       <motion.section
@@ -1404,7 +1658,7 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link href="/reclamos" className="group inline-block">
+                <Link href="/contacto" className="group inline-block">
                   <Button
                     size="lg"
                     className="bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold px-8 py-6 text-base w-full sm:w-auto"
