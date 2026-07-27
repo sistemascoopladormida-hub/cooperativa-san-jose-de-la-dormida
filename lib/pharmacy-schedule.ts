@@ -9,7 +9,7 @@ export type PharmacyScheduleEntry = {
 }
 
 /** Mes del turnero publicado (nombre en español, minúsculas). */
-export const PHARMACY_SCHEDULE_MONTH = "junio" as const
+export const PHARMACY_SCHEDULE_MONTH = "julio" as const
 
 export const pharmacySchedule: PharmacyScheduleEntry[] = [
   { date: "3 de Julio", pharmacy: "Farmacia Robledo" },

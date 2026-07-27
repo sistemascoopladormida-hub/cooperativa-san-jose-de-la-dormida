@@ -5,7 +5,7 @@ import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import Chatbot from "@/components/chatbot"
-import WorldCupWelcome from "@/components/home/world-cup-welcome"
+import TorneoClausuraWelcome from "@/components/home/torneo-clausura-welcome"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -54,7 +54,7 @@ export default function RootLayout({
     </head>
       <body className={inter.className}>
         {children}
-        {/* <WorldCupWelcome /> */}
+        <TorneoClausuraWelcome />
         <Chatbot />
         <Analytics />
         <SpeedInsights />
