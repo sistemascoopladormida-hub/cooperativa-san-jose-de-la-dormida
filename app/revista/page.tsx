@@ -16,6 +16,13 @@ type RevistaItem = {
 
 const REVISTAS: RevistaItem[] = [
   {
+    id: "julio-2026",
+    titulo: "REVISTA JULIO 2026",
+    descripcion:
+      "Edición de Julio 2026. Revisá novedades, servicios y contenido institucional de la cooperativa.",
+    url: "https://online.fliphtml5.com/revistacooperativaladormida/REVISTA-JULIO-2026/",
+  },
+  {
     id: "junio-2026",
     titulo: "REVISTA JUNIO 2026",
     descripcion:
