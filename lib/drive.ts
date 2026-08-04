@@ -105,6 +105,11 @@ function normalizeAccountNumber(value: string): string {
   return normalized || "0";
 }
 
+function isStandardNumericInvoiceFilename(filename: string): boolean {
+  const nameWithoutExt = filename.replace(/\.pdf$/i, "");
+  return /^\d+$/.test(nameWithoutExt);
+}
+
 function filenameLikelyContainsAccountNumber(
   filename: string,
   accountNumber: string
@@ -114,22 +119,18 @@ function filenameLikelyContainsAccountNumber(
     return false;
   }
 
-  const nameWithoutExt = filename.replace(/\.pdf$/i, "");
-  const escapedAccount = normalizedAccount.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  // Caso 1: token separado por símbolos/espacios (ej: factura_5160.pdf)
-  const boundedPattern = new RegExp(`(?:^|\\D)0*${escapedAccount}(?:\\D|$)`);
-  if (boundedPattern.test(nameWithoutExt)) {
-    return true;
-  }
-
-  // Caso 2: nombre completamente numérico (ej: 000051600097001400008565.pdf)
-  const digitsOnly = nameWithoutExt.replace(/\D/g, "");
-  if (!digitsOnly) {
+  // Solo aplica a nombres no estándar (ej: factura_5160.pdf).
+  // Los PDF numéricos (0081680002001500023599.pdf) deben resolverse
+  // exclusivamente con extractAccountNumber para evitar falsos positivos
+  // por coincidencias al final del nombre (ej: ...23599 vs cuenta 3599).
+  if (isStandardNumericInvoiceFilename(filename)) {
     return false;
   }
-  const compactPattern = new RegExp(`0*${escapedAccount}`);
-  return compactPattern.test(digitsOnly);
+
+  const nameWithoutExt = filename.replace(/\.pdf$/i, "");
+  const escapedAccount = normalizedAccount.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const boundedPattern = new RegExp(`(?:^|\\D)0*${escapedAccount}(?:\\D|$)`);
+  return boundedPattern.test(nameWithoutExt);
 }
 
 /**
@@ -418,6 +419,7 @@ async function searchPDFInFolder(
         if (
           file.id &&
           file.name &&
+          !isStandardNumericInvoiceFilename(file.name) &&
           filenameLikelyContainsAccountNumber(file.name, normalizedTargetAccount)
         ) {
           fuzzyMatches.push({
