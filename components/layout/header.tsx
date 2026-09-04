@@ -76,6 +76,14 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   whileHover={{ opacity: 1, scale: 1.2 }}
                   transition={{ duration: 0.3 }}
                 />
+                <Image
+                  src="/listonamarillo.webp"
+                  alt=""
+                  aria-hidden
+                  width={28}
+                  height={28}
+                  className="absolute -top-1.5 -left-1.5 z-20 w-6 h-6 lg:w-7 lg:h-7 object-contain drop-shadow-md pointer-events-none"
+                />
                 <motion.div
                   whileHover={{ rotate: [0, -10, 10, -10, 0] }}
                   transition={{ duration: 0.5 }}

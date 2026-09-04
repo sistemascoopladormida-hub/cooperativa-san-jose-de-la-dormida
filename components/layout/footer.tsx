@@ -39,6 +39,14 @@ export default function Footer() {
               <div className="relative">
                 <div className="absolute inset-0 bg-white/20 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <Image
+                  src="/listonamarillo.webp"
+                  alt=""
+                  aria-hidden
+                  width={28}
+                  height={28}
+                  className="absolute -top-1.5 -left-1.5 z-20 w-7 h-7 object-contain drop-shadow-md pointer-events-none"
+                />
+                <Image
                   src="/images/logocoopnuevo.png"
                   alt="Cooperativa La Dormida"
                   width={56}

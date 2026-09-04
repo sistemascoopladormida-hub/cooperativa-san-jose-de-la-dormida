@@ -38,7 +38,7 @@ export default function TorneoClausuraModal({
 
         <div className="mx-auto w-fit max-w-full overflow-hidden rounded-2xl bg-slate-950/20 shadow-2xl shadow-black/40 ring-1 ring-white/20 backdrop-blur-[2px]">
           <Image
-            src="/torneoclausura.webp"
+            src="/septiembre.webp"
             alt="Torneo Clausura - Cooperativa La Dormida"
             width={800}
             height={1000}
