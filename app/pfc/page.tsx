@@ -24,73 +24,73 @@ const professionalsPlaceholders = [
     id: 1,
     name: "Lic. Valentina De Lucca",
     specialty: "Psicologia",
-    imagePath: "/profesionales/valentina de lucca psicologia.jpeg",
+    imagePath: "/profesionales/valentina de lucca psicologia.webp",
   },
-  {
-    id: 2,
-    name: "Natalia Monges",
-    specialty: "Pedicuria",
-    imagePath: "/profesionales/natalia monges pedicura.jpeg",
-  },
+  // {
+  //   id: 2,
+  //   name: "Natalia Monges",
+  //   specialty: "Pedicuria",
+  //   imagePath: "/profesionales/natalia monges pedicura.webp",
+  // },
   {
     id: 3,
     name: "Lic. Emilia Carreras",
     specialty: "Psicopedagogia",
-    imagePath: "/profesionales/emilia carreras psicopedagogia.jpeg",
+    imagePath: "/profesionales/emilia carreras psicopedagogia.webp",
   },
   {
     id: 4,
     name: "Dra. Mercedes Zorilla",
     specialty: "Medico Clinico",
-    imagePath: "/profesionales/mercedes zorilla medico clinico.jpeg",
+    imagePath: "/profesionales/mercedes zorilla medico clinico.webp",
   },
   {
     id: 5,
     name: "Lic. Vanesa Grion",
     specialty: "Fisioterapia",
-    imagePath: "/profesionales/vanesa grion fisioterapia.jpeg",
+    imagePath: "/profesionales/vanesa grion fisioterapia.webp",
   },
   {
     id: 6,
     name: "Dr. Alejandro Monzon",
     specialty: "Ginecologia",
-    imagePath: "/profesionales/alejandro monzon ginecologo.jpeg",
+    imagePath: "/profesionales/alejandro monzon ginecologo.webp",
   },
   {
     id: 7,
     name: "Dra. Andrea Chocobares",
     specialty: "Nutricion",
-    imagePath: "/profesionales/andrea chocobares nutricion.jpeg",
+    imagePath: "/profesionales/andrea chocobares nutricion.webp",
   },
   {
     id: 8,
     name: "Dra. Olga Vazquez",
     specialty: "Alergologia",
-    imagePath: "/profesionales/olga vazquez alergologia.jpeg",
+    imagePath: "/profesionales/olga vazquez alergologia.webp",
   },
   {
     id: 9,
     name: "Dra. Mayra Flores",
     specialty: "Cardiologia",
-    imagePath: "/profesionales/mayra flores cardiologa.jpeg",
+    imagePath: "/profesionales/mayra flores cardiologa.webp",
   },
-  {
-    id: 10,
-    name: "Lic. Sofia de Lorenzi",
-    specialty: "Psicologia",
-    imagePath: "/profesionales/sofia de lorenzi psicologia.jpeg",
-  },
+  // {
+  //   id: 10,
+  //   name: "Lic. Sofia de Lorenzi",
+  //   specialty: "Psicologia",
+  //   imagePath: "/profesionales/sofia de lorenzi psicologia.webp",
+  // },
   {
     id: 11,
     name: "Mabel Montenegro",
     specialty: "Podologia",
-    imagePath: "/profesionales/mabel montenegro podologia.jpeg",
+    imagePath: "/profesionales/mabel montenegro podologia.webp",
   },
   {
     id: 12,
     name: "Dr. Ernesto Vargas",
     specialty: "Diabetologia",
-    imagePath: "/profesionales/ernesto vargas diabetologia.jpeg",
+    imagePath: "/profesionales/ernesto vargas diabetologia.webp",
   },
 ]
 
@@ -102,8 +102,8 @@ const coverageItems = [
 ]
 
 const includedServices = [
-  "Traslado social - PFC: hasta 2 veces al ano",
-  "Traslado social - PFC Plus: hasta 3 veces al ano",
+  "Traslado social - PFC: hasta 2 veces al año",
+  "Traslado social - PFC Plus: hasta 3 veces al año",
   "Servicio de enfermeria",
   "Servicio de sepelio",
   "Servicio de desagote",
@@ -335,7 +335,7 @@ export default function PFCPage() {
                 Profesionales
               </h2>
               <p className="text-gray-600 mt-3">
-                Espacio reservado para 12 imagenes de los profesionales que atienden.
+                Espacio reservado para 10 imagenes de los profesionales que atienden.
               </p>
             </div>
 
@@ -454,7 +454,7 @@ export default function PFCPage() {
                       <ShieldCheck className="w-5 h-5 text-coop-green" />
                       PFC (Plan Basico)
                     </span>
-                    <span className="text-coop-green font-bold text-xl">$13.070,97/mes</span>
+                    <span className="text-coop-green font-bold text-xl">$13.647,74/mes</span>
                   </CardTitle>
                   <CardDescription>Cobertura medica esencial con precio accesible.</CardDescription>
                 </CardHeader>
@@ -579,7 +579,7 @@ export default function PFCPage() {
                   <p className="text-sm font-semibold text-gray-900 mb-2">Servicios incluidos</p>
                   <div className="space-y-2">
                     {[
-                      "Traslado social: hasta 2 veces al ano",
+                      "Traslado social: hasta 2 veces al año",
                       "Servicio de enfermeria",
                       "Servicio de sepelio",
                       "Servicio de desagote",
@@ -621,7 +621,7 @@ export default function PFCPage() {
               <CardContent className="space-y-3">
                 {[
                   "Incluye todo el Plan PFC Basico",
-                  "Traslado social: hasta 3 veces al ano",
+                  "Traslado social: hasta 3 veces al año",
                   "Nuevas especialidades: Cardiologia y Medico Clinico",
                   "Mayor cantidad de consultas durante el ano",
                   "Mejor seguimiento medico anual",
@@ -803,7 +803,7 @@ export default function PFCPage() {
                     </thead>
                     <tbody>
                       {[
-                        ["Precio", "$13.070,97", "$25.000"],
+                        ["Precio", "$13.647,74", "$25.000"],
                         ["Cobertura familiar", "Si", "Si"],
                         ["Especialidades base", "Si", "Si"],
                         ["Cardiologia", "No", "Si"],
