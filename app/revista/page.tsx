@@ -16,6 +16,13 @@ type RevistaItem = {
 
 const REVISTAS: RevistaItem[] = [
   {
+    id: "Agosto-2026",
+    titulo: "REVISTA AGOSTO 2026",
+    descripcion:
+      "Edición de Agosto 2026. Incluye información de la cooperativa, servicios y anuncios para socios.",
+    url: "https://online.fliphtml5.com/rutabi/REVISTA-agosto-2026/",
+  },
+  {
     id: "julio-2026",
     titulo: "REVISTA JULIO 2026",
     descripcion:
@@ -56,13 +63,6 @@ const REVISTAS: RevistaItem[] = [
     descripcion:
       "Edición de febrero 2026. Incluye información de la cooperativa, servicios y anuncios para socios.",
     url: "https://online.fliphtml5.com/revistacooperativaladormida/REVISTA-FEB-2026/",
-  },
-  {
-    id: "Agosto-2026",
-    titulo: "REVISTA AGOSTO 2026",
-    descripcion:
-      "Edición de Agosto 2026. Incluye información de la cooperativa, servicios y anuncios para socios.",
-    url: "https://online.fliphtml5.com/rutabi/REVISTA-agosto-2026/",
   },
 ]
 
