@@ -10,32 +10,30 @@ import TorneoClausuraWelcome from "@/components/home/torneo-clausura-welcome"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Cooperativa Eléctrica Ltda. de San José de la Dormida",
+  title: "Cooperativa Eléctrica Ltda. de San José de la Dormida — Octubre Rosa 🩷",
   description:
-    "Sitio oficial de la Cooperativa Eléctrica Ltda. de San José de la Dormida. Información institucional, servicios de energía eléctrica, internet, televisión y servicios sociales, canales de contacto y noticias para la comunidad.",
+    "Sitio oficial de la Cooperativa Eléctrica Ltda. de San José de la Dormida. En este Octubre Rosa nos unimos a la campaña de concientización y prevención del cáncer de mama. Conocé nuestros servicios de energía eléctrica, internet, televisión y servicios sociales.",
   keywords:
-    "cooperativa eléctrica, San José de la Dormida, Córdoba, energía eléctrica, internet, televisión, servicios sociales, comunidad, socios",
+    "cooperativa eléctrica, San José de la Dormida, Córdoba, Octubre Rosa, concientización cáncer de mama, prevención, energía eléctrica, internet, televisión, servicios sociales, comunidad, socios",
 
-  // 👇 Esto controla el favicon en navegadores (según la doc de Next.js)
-  // Debes tener `app/favicon.ico`
+  // 👇 Controla el favicon en navegadores
   icons: {
     icon: "/favicon.ico",
   },
 
-  // 👇 IMPORTANTE: las previsualizaciones de WhatsApp/redes NO usan el favicon,
-  // usan la imagen Open Graph. Aquí defines qué imagen se muestra al compartir el link.
+  // 👇 Previsualización en WhatsApp y redes sociales adaptada al Mes Rosa
   openGraph: {
-    title: "Cooperativa Eléctrica Ltda. de San José de la Dormida",
+    title: "Cooperativa Eléctrica Ltda. de San José de la Dormida — Octubre Rosa 🩷",
     description:
-      "Servicios que conectan, comunidad que crece. Información sobre energía eléctrica, internet, TV y servicios sociales.",
-    url: "https://cooperativaladormida.com/", // cámbialo por tu dominio real
+      "Nos unimos al Mes Rosa por la concientización y prevención del cáncer de mama. Servicios que conectan, comunidad que crece.",
+    url: "https://cooperativaladormida.com/",
     siteName: "Cooperativa Eléctrica San José de la Dormida",
     images: [
       {
-        url: "/images/logocoopnuevo.png", // una imagen cuadrada o 1200x630 aprox
-        width: 400,
-        height: 400,
-        alt: "Logo de la Cooperativa Eléctrica San José de la Dormida",
+        url: "/octubrelogo.webp", // Logo del Mes Rosa para WhatsApp y redes
+        width: 1200,
+        height: 630,
+        alt: "Logo Octubre Rosa - Cooperativa Eléctrica San José de la Dormida",
       },
     ],
     type: "website",
@@ -49,9 +47,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-    <head>
-    <meta name="facebook-domain-verification" content="0nxwl112pm8f3hnhrf96zrsmnou8lx" />
-    </head>
+      <head>
+        <meta name="facebook-domain-verification" content="0nxwl112pm8f3hnhrf96zrsmnou8lx" />
+      </head>
       <body className={inter.className}>
         {children}
         <TorneoClausuraWelcome />
