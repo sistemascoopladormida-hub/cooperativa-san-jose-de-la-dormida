@@ -18,6 +18,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        /** Octubre Rosa — evita colisión con `bg-primary` (verde) en tailwind-merge */
+        octubreRosa:
+          "bg-gradient-to-r from-pink-300 via-rose-400 to-pink-500 text-white hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -44,7 +47,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
         {...props}
       />

@@ -58,6 +58,8 @@ const config: Config = {
           purple: "#7c3aed",    // Morado del logo (top right)
           green: "#22c55e",     // Verde vibrante del logo (bottom left)
           orange: "#f97316",    // Naranja del logo (bottom right)
+          pink: "#ec4899",      // Octubre Rosa
+          rose: "#f43f5e",
           yellow: "#EDE664",    // Mantener para compatibilidad
           white: "#FFFFFF",
         },

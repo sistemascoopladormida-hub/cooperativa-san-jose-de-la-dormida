@@ -4,9 +4,33 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram, AlertCircle, PhoneCall, Heart, Zap, Wifi, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react"
+import { cn } from "@/lib/utils"
+import {
+  getCooperativeLogoSrc,
+  isOctubreRosaThemeActive,
+  octubreRosaClasses,
+} from "@/lib/octubre-rosa-theme"
 
 export default function Footer() {
   const [showAllEmails, setShowAllEmails] = useState(false)
+  const octubreRosa = isOctubreRosaThemeActive()
+  const logoSrc = getCooperativeLogoSrc()
+  const footerTitleClass = cn(
+    "font-bold text-lg mb-6",
+    octubreRosa ? octubreRosaClasses.footerSectionTitle : "text-coop-orange"
+  )
+  const footerListLinkClass = cn(
+    "text-green-50 transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group",
+    octubreRosa ? octubreRosaClasses.footerLinkHover : "hover:text-coop-orange"
+  )
+  const footerListDotClass = cn(
+    "w-1.5 h-1.5 rounded-full transition-colors",
+    octubreRosa
+      ? "bg-pink-200/60 group-hover:bg-pink-100"
+      : "bg-coop-orange/50 group-hover:bg-coop-orange"
+  )
+  const footerIconAccent = octubreRosa ? "text-pink-200" : "text-coop-orange"
+  const footerTextLinkHover = octubreRosa ? "hover:text-pink-200" : "hover:text-coop-orange"
 
   const emails = [
     { label: "Sistemas", email: "sistemas@cooperativaladormida.com" },
@@ -24,11 +48,24 @@ export default function Footer() {
   const displayedEmails = showAllEmails ? emails : emails.slice(0, 4)
 
   return (
-    <footer className="relative bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange text-white overflow-hidden">
+    <footer
+      className={cn(
+        "relative text-white overflow-hidden bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange",
+        octubreRosa && "via-pink-600/90"
+      )}
+    >
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-coop-orange rounded-full blur-3xl"></div>
+        <div
+          className={cn(
+            "absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl",
+            octubreRosa ? octubreRosaClasses.footerAccentOrb : "bg-coop-orange"
+          )}
+        />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        {octubreRosa && (
+          <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-rose-300/25 rounded-full blur-3xl" />
+        )}
       </div>
       
       <div className="container mx-auto px-4 py-12 lg:py-16 relative z-10">
@@ -37,24 +74,35 @@ export default function Footer() {
           <div className="space-y-6">
             <div className="flex items-center space-x-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-white/20 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100"></div>
-                <Image
-                  src="/listonamarillo.webp"
-                  alt=""
-                  aria-hidden
-                  width={28}
-                  height={28}
-                  className="absolute -top-1.5 -left-1.5 z-20 w-7 h-7 object-contain drop-shadow-md pointer-events-none"
+                <div
+                  className={cn(
+                    "absolute inset-0 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100",
+                    octubreRosa ? "bg-pink-300/25" : "bg-white/20"
+                  )}
                 />
                 <Image
-                  src="/images/logocoopnuevo.png"
-                  alt="Cooperativa La Dormida"
-                  width={56}
-                  height={56}
-                  className="w-14 h-14 relative z-10 drop-shadow-lg transition-transform group-hover:scale-110"
+                  src={logoSrc}
+                  alt={
+                    octubreRosa
+                      ? "Cooperativa La Dormida — Octubre Rosa"
+                      : "Cooperativa La Dormida"
+                  }
+                  width={octubreRosa ? 168 : 56}
+                  height={octubreRosa ? 56 : 56}
+                  className={cn(
+                    "relative z-10 drop-shadow-lg transition-transform group-hover:scale-105 object-contain",
+                    octubreRosa ? "h-14 w-auto max-w-[168px]" : "w-14 h-14"
+                  )}
                 />
               </div>
-              <h3 className="text-xl font-bold">Cooperativa La Dormida</h3>
+              <div>
+                <h3 className="text-xl font-bold">Cooperativa La Dormida</h3>
+                {octubreRosa && (
+                  <p className="text-xs font-semibold uppercase tracking-wider text-pink-100/90 mt-0.5">
+                    Octubre Rosa
+                  </p>
+                )}
+              </div>
             </div>
             <p className="text-base text-green-50 leading-relaxed">
               Brindando servicios de calidad a nuestra comunidad desde hace más de 60 años con compromiso y excelencia.
@@ -80,59 +128,59 @@ export default function Footer() {
 
           {/* Servicios - Enhanced */}
           <div>
-            <h4 className="font-bold text-lg mb-6 text-coop-orange">Nuestros Servicios</h4>
+            <h4 className={footerTitleClass}>Nuestros Servicios</h4>
             <ul className="space-y-3">
               <li>
                 <Link 
                   href="/servicios" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Electricidad
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/servicios" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Internet
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/servicios" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Televisión
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/servicios" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Programa PFC
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/servicios" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Farmacia Social
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/camping" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Camping Pisco Huasi
                 </Link>
               </li>
@@ -141,41 +189,41 @@ export default function Footer() {
 
           {/* Enlaces útiles - Enhanced */}
           <div>
-            <h4 className="font-bold text-lg mb-6 text-coop-orange">Enlaces Útiles</h4>
+            <h4 className={footerTitleClass}>Enlaces Útiles</h4>
             <ul className="space-y-3">
               <li>
                 <Link 
                   href="/noticias" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Noticias
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/asociarse" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Asociarse
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/reclamos" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Reclamos
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/autoridades" 
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Autoridades
                 </Link>
               </li>
@@ -184,9 +232,9 @@ export default function Footer() {
                   href="https://www.cooponlineweb.com.ar/SANJOSEDELADORMIDA/Login" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-green-50 hover:text-coop-orange transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group"
+                  className={footerListLinkClass}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-coop-orange/50 group-hover:bg-coop-orange transition-colors"></span>
+                  <span className={footerListDotClass} />
                   Área Socios (CoopOnline)
                 </a>
               </li>
@@ -195,11 +243,11 @@ export default function Footer() {
 
           {/* Contacto - Enhanced */}
           <div>
-            <h4 className="font-bold text-lg mb-6 text-coop-orange">Contacto</h4>
+            <h4 className={footerTitleClass}>Contacto</h4>
             <div className="space-y-4">
               <div className="flex items-start space-x-3 group">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
-                  <MapPin className="w-5 h-5 text-coop-orange" />
+                  <MapPin className={cn("w-5 h-5", footerIconAccent)} />
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Dirección</p>
@@ -209,16 +257,16 @@ export default function Footer() {
               </div>
               <div className="flex items-start space-x-3 group">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
-                  <Phone className="w-5 h-5 text-coop-orange" />
+                  <Phone className={cn("w-5 h-5", footerIconAccent)} />
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Teléfono</p>
-                  <a href="tel:+543521401330" className="text-green-100 text-sm hover:text-coop-orange transition-colors block">
+                  <a href="tel:+543521401330" className={cn("text-green-100 text-sm transition-colors block", footerTextLinkHover)}>
                     3521-401330
                   </a>
                   <a
                     href="tel:+5493521401387"
-                    className="text-green-100 text-xs hover:text-coop-orange transition-colors block mt-1"
+                    className={cn("text-green-100 text-xs transition-colors block mt-1", footerTextLinkHover)}
                   >
                     Consultorios médicos PFC (turnos): 3521 401387
                   </a>
@@ -226,7 +274,7 @@ export default function Footer() {
               </div>
               <div className="flex items-start space-x-3 group">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
-                  <Mail className="w-5 h-5 text-coop-orange" />
+                  <Mail className={cn("w-5 h-5", footerIconAccent)} />
                 </div>
                 <div className="flex-1">
                   <p className="text-green-50 font-medium mb-3">Correos Electrónicos</p>
@@ -238,7 +286,7 @@ export default function Footer() {
                         </span>
                         <a
                           href={`mailto:${item.email}`}
-                          className="text-green-100 hover:text-coop-orange transition-colors break-all leading-tight"
+                          className={cn("text-green-100 transition-colors break-all leading-tight", footerTextLinkHover)}
                         >
                           {item.email}
                         </a>
@@ -247,7 +295,7 @@ export default function Footer() {
                     {emails.length > 4 && (
                       <button
                         onClick={() => setShowAllEmails(!showAllEmails)}
-                        className="flex items-center gap-1 text-green-200 hover:text-coop-orange transition-colors mt-2 text-[10px] font-medium uppercase tracking-wide"
+                        className={cn("flex items-center gap-1 text-green-200 transition-colors mt-2 text-[10px] font-medium uppercase tracking-wide", footerTextLinkHover)}
                       >
                         {showAllEmails ? (
                           <>
@@ -267,7 +315,7 @@ export default function Footer() {
               </div>
               <div className="flex items-start space-x-3 group">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
-                  <Clock className="w-5 h-5 text-coop-orange" />
+                  <Clock className={cn("w-5 h-5", footerIconAccent)} />
                 </div>
                 <div>
                   <p className="text-green-50 font-medium">Horario</p>
@@ -357,9 +405,9 @@ export default function Footer() {
               &copy; {new Date().getFullYear()} Cooperativa La Dormida. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-6 text-sm text-green-100">
-              <Link href="/politicadeprivacidad" className="hover:text-coop-orange transition-colors">Política de Privacidad</Link>
+              <Link href="/politicadeprivacidad" className={cn("transition-colors", footerTextLinkHover)}>Política de Privacidad</Link>
               <span className="text-white/30">|</span>
-              <Link href="/condicionesdeservicios" className="hover:text-coop-orange transition-colors">Términos y Condiciones</Link>
+              <Link href="/condicionesdeservicios" className={cn("transition-colors", footerTextLinkHover)}>Términos y Condiciones</Link>
             </div>
           </div>
         </div>
