@@ -5,13 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
-import { X, Send, Bot, User, Clock, Zap, Phone, FileText, Heart } from "lucide-react"
+import { X, Send, Bot, User, Clock, Zap, Phone, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  getChatbotWelcomeMessage,
-  isOctubreRosaThemeActive,
-  octubreRosaClasses,
-} from "@/lib/octubre-rosa-theme"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 
@@ -29,12 +24,11 @@ interface Message {
 }
 
 export default function Chatbot() {
-  const octubreRosa = isOctubreRosaThemeActive()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>(() => [
     {
       id: "1",
-      text: getChatbotWelcomeMessage(isOctubreRosaThemeActive()),
+      text: "¡Hola! 👋 Soy el asistente virtual de la Cooperativa La Dormida y estoy aquí para ayudarte 24/7. ¿En qué puedo asistirte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -205,12 +199,8 @@ export default function Chatbot() {
             >
               <Button
                 onClick={() => setIsOpen(true)}
-                variant={octubreRosa ? "octubreRosa" : "default"}
-                className={cn(
-                  "relative h-16 w-16 rounded-full shadow-2xl border-4 border-white/25 backdrop-blur-sm",
-                  !octubreRosa &&
-                    "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
-                )}
+                variant="default"
+                className="relative h-16 w-16 rounded-full shadow-2xl border-4 border-white/25 backdrop-blur-sm bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
                 aria-label="Abrir asistente virtual"
               >
                 <motion.div
@@ -221,10 +211,7 @@ export default function Chatbot() {
                 </motion.div>
                 {/* Círculo naranja con animación de parpadeo fluida */}
                 <motion.span
-                  className={cn(
-                    "absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full shadow-lg z-10",
-                    octubreRosa ? "bg-pink-200" : "bg-coop-orange"
-                  )}
+                  className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full shadow-lg z-10 bg-coop-orange"
                   animate={{
                     opacity: [1, 0.4, 1],
                     scale: [1, 1.1, 1]
@@ -254,59 +241,32 @@ export default function Chatbot() {
             className="fixed bottom-6 right-6 z-50"
           >
             <Card
-              className={cn(
-                "flex h-[600px] w-[calc(100vw-3rem)] sm:w-[400px] flex-col shadow-2xl md:h-[650px] md:w-[450px] border-2 overflow-hidden",
-                octubreRosa ? "border-pink-200/50" : "border-coop-green/20"
-              )}
+              className="flex h-[600px] w-[calc(100vw-3rem)] sm:w-[400px] flex-col shadow-2xl md:h-[650px] md:w-[450px] border-2 overflow-hidden border-coop-green/20"
             >
               {/* Header - Enhanced */}
-              <div
-                className={cn(
-                  "flex items-center justify-between p-4 text-white relative overflow-hidden",
-                  octubreRosa
-                    ? octubreRosaClasses.chatHeader
-                    : "bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green"
-                )}
-              >
+              <div className="flex items-center justify-between p-4 text-white relative overflow-hidden bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green">
                 <div className="absolute inset-0 opacity-15 pointer-events-none">
                   <div
-                    className={cn(
-                      "absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl",
-                      octubreRosa ? "bg-pink-200" : "bg-coop-orange"
-                    )}
+                    className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl bg-coop-orange"
                   />
                 </div>
 
                 <div className="flex items-center space-x-3 relative z-10 min-w-0">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-lg">
-                    {octubreRosa ? (
-                      <Heart className="h-6 w-6 fill-white/90 text-white" />
-                    ) : (
-                      <Bot className="h-6 w-6" />
-                    )}
+                    <Bot className="h-6 w-6" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-bold text-lg leading-tight truncate">
                       Asistente Virtual
                     </h3>
-                    {octubreRosa && (
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-pink-100/95 truncate">
-                        Octubre Rosa · Concientización
-                      </p>
-                    )}
+                    
                     <div className="flex items-center space-x-1.5 text-xs text-white/90 mt-0.5">
                       <span className="relative flex h-2.5 w-2.5 shrink-0">
                         <span
-                          className={cn(
-                            "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
-                            octubreRosa ? "bg-pink-200" : "bg-green-400"
-                          )}
+                          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 bg-green-400"
                         />
                         <span
-                          className={cn(
-                            "relative inline-flex h-2.5 w-2.5 rounded-full",
-                            octubreRosa ? "bg-pink-100" : "bg-green-400"
-                          )}
+                          className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400"
                         />
                       </span>
                       <span className="font-medium">En línea 24/7</span>
@@ -332,29 +292,10 @@ export default function Chatbot() {
               {/* Área de mensajes - Enhanced with Framer Motion */}
               <ScrollArea
                 ref={messagesScrollAreaRef}
-                className={cn(
-                  "flex-1 p-4 bg-gradient-to-b",
-                  octubreRosa
-                    ? octubreRosaClasses.chatMessagesBg
-                    : "from-gray-50 to-white"
-                )}
+                className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-white"
               >
                 <div className="space-y-4">
-                  {octubreRosa && messages.length <= 1 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="flex gap-2.5 rounded-xl border border-pink-200/70 bg-pink-50/90 px-3 py-2.5 shadow-sm"
-                    >
-                      <Heart className="h-4 w-4 shrink-0 text-pink-500 mt-0.5" aria-hidden />
-                      <p className="text-xs leading-relaxed text-pink-950/90">
-                        <span className="font-semibold text-pink-700">Octubre Rosa:</span>{" "}
-                        mes de concientización sobre el cáncer de mama. Ante dudas, consultá
-                        con profesionales de salud. La prevención y el control oportuno son clave.
-                      </p>
-                    </motion.div>
-                  )}
+                  
 
                   {messages.length <= 1 && (
                     <motion.div
@@ -364,10 +305,7 @@ export default function Chatbot() {
                       className="space-y-2"
                     >
                       <p
-                        className={cn(
-                          "text-xs font-medium mb-2 px-1",
-                          octubreRosa ? "text-pink-700/80" : "text-gray-500"
-                        )}
+                        className="text-xs font-medium mb-2 px-1 text-gray-500"
                       >
                         Preguntas frecuentes
                       </p>
@@ -378,52 +316,22 @@ export default function Chatbot() {
                             onClick={() => handleQuickAction(action.text)}
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
-                            className={cn(
-                              "flex items-center gap-3 p-3 bg-white border rounded-xl transition-all duration-200 text-left group",
-                              octubreRosa
-                                ? octubreRosaClasses.chatQuickAction
-                                : "border-gray-200 hover:border-coop-green hover:bg-green-50/50"
-                            )}
+                            className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 text-left group hover:border-coop-green hover:bg-green-50/50"
                           >
-                            <div
-                              className={cn(
-                                "flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center transition-colors",
-                                octubreRosa
-                                  ? octubreRosaClasses.chatQuickActionIcon
-                                  : "from-coop-blue/10 to-coop-purple/10 group-hover:from-coop-blue/20 group-hover:to-coop-purple/20"
-                              )}
-                            >
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center transition-colors from-coop-blue/10 to-coop-purple/10 group-hover:from-coop-blue/20 group-hover:to-coop-purple/20">
                               <action.icon
-                                className={cn(
-                                  "w-4 h-4",
-                                  octubreRosa ? "text-pink-600" : "text-coop-green"
-                                )}
+                                className="w-4 h-4 text-coop-green"
                               />
                             </div>
-                            <span
-                              className={cn(
-                                "text-sm font-medium flex-1 leading-snug",
-                                octubreRosa
-                                  ? "text-gray-700 group-hover:text-pink-700"
-                                  : "text-gray-700 group-hover:text-coop-green"
-                              )}
-                            >
+                            <span className="text-sm font-medium flex-1 leading-snug text-gray-700 group-hover:text-coop-green">
                               {action.text}
                             </span>
-                            <Send
-                              className={cn(
-                                "w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0",
-                                octubreRosa
-                                  ? "text-pink-500"
-                                  : "text-gray-400 group-hover:text-coop-green"
-                              )}
-                            />
+                            <Send className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-gray-400 group-hover:text-coop-green" />
                           </motion.button>
                         ))}
                       </div>
                     </motion.div>
                   )}
-
 
                   <AnimatePresence mode="popLayout">
                     {messages.map((message) => (
@@ -446,12 +354,8 @@ export default function Chatbot() {
                           className={cn(
                             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-md transition-transform hover:scale-105",
                             message.sender === "user"
-                              ? octubreRosa
-                                ? octubreRosaClasses.chatUserBubble
-                                : "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
-                              : octubreRosa
-                                ? "bg-gradient-to-br from-pink-400 to-rose-500 text-white"
-                                : "bg-gradient-to-br from-coop-orange to-orange-400 text-white"
+                              ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white"
+                              : "bg-gradient-to-br from-coop-orange to-orange-400 text-white"
                           )}
                         >
                           {message.sender === "user" ? (
@@ -464,12 +368,8 @@ export default function Chatbot() {
                           className={cn(
                             "max-w-[280px] sm:max-w-[320px] md:max-w-[360px] rounded-2xl px-4 py-3 break-words overflow-hidden",
                             message.sender === "user"
-                              ? octubreRosa
-                                ? `${octubreRosaClasses.chatUserBubble} shadow-md`
-                                : "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white shadow-sm"
-                              : octubreRosa
-                                ? octubreRosaClasses.chatBotBubble
-                                : "bg-white text-gray-800 border border-gray-200 shadow-sm"
+                              ? "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green text-white shadow-sm"
+                              : "bg-white text-gray-800 border border-gray-200 shadow-sm"
                           )}
                         >
                           {message.sender === "bot" ? (
@@ -487,10 +387,7 @@ export default function Chatbot() {
                                   li: ({ children }) => <li className="ml-1 leading-relaxed">{children}</li>,
                                   strong: ({ children }) => (
                                     <strong
-                                      className={cn(
-                                        "font-semibold",
-                                        octubreRosa ? "text-pink-600" : "text-coop-green"
-                                      )}
+                                      className="font-semibold text-coop-green"
                                     >
                                       {children}
                                     </strong>
@@ -501,12 +398,7 @@ export default function Chatbot() {
                                       href={href}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className={cn(
-                                        "underline break-all font-medium",
-                                        octubreRosa
-                                          ? "text-pink-600 hover:text-pink-700"
-                                          : "text-coop-blue"
-                                      )}
+                                      className="underline break-all font-medium text-coop-blue"
                                     >
                                       {children}
                                     </a>
@@ -516,19 +408,9 @@ export default function Chatbot() {
                                 {message.text}
                               </ReactMarkdown>
                               {message.invoice && (
-                                <div
-                                  className={cn(
-                                    "mt-3 w-full rounded-lg p-3 flex flex-col gap-2",
-                                    octubreRosa
-                                      ? "border border-pink-200/80 bg-pink-50/70"
-                                      : "border border-coop-green/30 bg-green-50/60"
-                                  )}
-                                >
+                                <div className="mt-3 w-full rounded-lg p-3 flex flex-col gap-2 border border-coop-green/30 bg-green-50/60">
                                   <div
-                                    className={cn(
-                                      "flex items-center gap-2 text-sm font-medium",
-                                      octubreRosa ? "text-pink-700" : "text-coop-green"
-                                    )}
+                                    className="flex items-center gap-2 text-sm font-medium text-coop-green"
                                   >
                                     <FileText className="w-4 h-4 shrink-0" />
                                     <span>Factura de {message.invoice.type}</span>
@@ -541,12 +423,7 @@ export default function Chatbot() {
                                       href={message.invoice.downloadUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className={cn(
-                                        "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full text-white shadow transition-all",
-                                        octubreRosa
-                                          ? "bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:shadow-md hover:brightness-105"
-                                          : "bg-gradient-to-r from-coop-blue to-coop-green hover:shadow-md hover:from-coop-blue/90 hover:to-coop-green/90"
-                                      )}
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full text-white shadow transition-all bg-gradient-to-r from-coop-blue to-coop-green hover:shadow-md hover:from-coop-blue/90 hover:to-coop-green/90"
                                     >
                                       <FileText className="w-4 h-4" />
                                       Descargar factura
@@ -577,11 +454,7 @@ export default function Chatbot() {
                           <p
                             className={cn(
                               "mt-2 text-[11px] tabular-nums",
-                              message.sender === "user"
-                                ? octubreRosa
-                                  ? "text-pink-100/90"
-                                  : "text-green-100"
-                                : "text-gray-400"
+                              message.sender === "user" ? "text-green-100" : "text-gray-400"
                             )}
                           >
                             {message.timestamp.toLocaleTimeString("es-AR", {
@@ -605,24 +478,14 @@ export default function Chatbot() {
                         className="flex items-start space-x-2"
                       >
                         <motion.div
-                          className={cn(
-                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white",
-                            octubreRosa
-                              ? "bg-gradient-to-br from-pink-400 to-rose-500"
-                              : "bg-coop-orange"
-                          )}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white bg-coop-orange"
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 1, repeat: Infinity }}
                         >
                           <Bot className="h-4 w-4" />
                         </motion.div>
                         <motion.div
-                          className={cn(
-                            "rounded-xl px-4 py-2 border",
-                            octubreRosa
-                              ? "bg-pink-50 border-pink-100"
-                              : "bg-gray-100 border-transparent"
-                          )}
+                          className="rounded-xl px-4 py-2 border bg-gray-100 border-transparent"
                           initial={{ width: 0 }}
                           animate={{ width: "auto" }}
                           transition={{ duration: 0.3 }}
@@ -631,10 +494,7 @@ export default function Chatbot() {
                             {[0, 0.2, 0.4].map((delay) => (
                               <motion.span
                                 key={delay}
-                                className={cn(
-                                  "h-2 w-2 rounded-full",
-                                  octubreRosa ? "bg-pink-400" : "bg-gray-400"
-                                )}
+                                className="h-2 w-2 rounded-full bg-gray-400"
                                 animate={{ y: [0, -6, 0] }}
                                 transition={{ duration: 0.6, repeat: Infinity, delay }}
                               />
@@ -651,10 +511,7 @@ export default function Chatbot() {
 
               {/* Input area - Enhanced */}
               <div
-                className={cn(
-                  "border-t bg-white p-4",
-                  octubreRosa ? "border-pink-100" : "border-gray-200"
-                )}
+                className="border-t bg-white p-4 border-gray-200"
               >
                 <div className="flex space-x-2">
                   <Input
@@ -663,12 +520,7 @@ export default function Chatbot() {
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Escribí tu mensaje..."
-                    className={cn(
-                      "flex-1 border-2 rounded-xl px-4 py-3 transition-all duration-300 text-sm",
-                      octubreRosa
-                        ? "border-pink-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50"
-                        : "border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20"
-                    )}
+                    className="flex-1 border-2 rounded-xl px-4 py-3 transition-all duration-300 text-sm border-gray-200 focus:border-coop-green focus:ring-2 focus:ring-coop-green/20"
                     disabled={isTyping}
                     autoComplete="off"
                     autoFocus={false}
@@ -677,12 +529,8 @@ export default function Chatbot() {
                     <Button
                       onClick={handleSendMessage}
                       disabled={!inputValue.trim() || isTyping}
-                      variant={octubreRosa ? "octubreRosa" : "default"}
-                      className={cn(
-                        "rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed",
-                        !octubreRosa &&
-                          "bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
-                      )}
+                      variant="default"
+                      className="rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-br from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
                       size="icon"
                     >
                       <motion.div
@@ -695,23 +543,14 @@ export default function Chatbot() {
                   </motion.div>
                 </div>
                 <p
-                  className={cn(
-                    "mt-3 text-xs text-center flex flex-col sm:flex-row items-center justify-center gap-1 leading-relaxed",
-                    octubreRosa ? "text-pink-700/70" : "text-gray-500"
-                  )}
+                  className="mt-3 text-xs text-center flex flex-col sm:flex-row items-center justify-center gap-1 leading-relaxed text-gray-500"
                 >
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3 w-3 shrink-0" />
                     Disponible 24/7 para ayudarte
                   </span>
-                  {octubreRosa && (
-                    <span className="hidden sm:inline text-pink-300">·</span>
-                  )}
-                  {octubreRosa && (
-                    <span className="text-pink-600/80 font-medium">
-                      Octubre Rosa — concientización y prevención
-                    </span>
-                  )}
+                  
+                  
                 </p>
               </div>
             </Card>

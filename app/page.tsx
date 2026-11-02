@@ -16,10 +16,6 @@ import {
   pharmacySchedule,
 } from "@/lib/pharmacy-schedule"
 import { cn } from "@/lib/utils"
-import {
-  isOctubreRosaThemeActive,
-  octubreRosaClasses,
-} from "@/lib/octubre-rosa-theme"
 
 type Service = {
   icon: React.ComponentType<{ className?: string }>
@@ -244,7 +240,6 @@ function ServicesCarousel({ services }: { services: Service[] }) {
 
 // Componente para el Turnero de Farmacias con actualización automática
 function PharmacySchedule() {
-  const octubreRosa = isOctubreRosaThemeActive()
   const [currentDate, setCurrentDate] = useState(new Date())
 
   // Actualizar la fecha cada minuto para detectar cambios de día
@@ -328,12 +323,7 @@ function PharmacySchedule() {
 
   return (
     <motion.section
-      className={cn(
-        "py-12 lg:py-16 relative overflow-hidden border-y-2",
-        octubreRosa
-          ? "bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100/60 border-pink-200/40"
-          : "bg-gradient-to-br from-sky-50 via-cyan-50 to-sky-100/50 border-sky-200/30"
-      )}
+      className="py-12 lg:py-16 relative overflow-hidden border-y-2 bg-gradient-to-br from-sky-50 via-cyan-50 to-sky-100/50 border-sky-200/30"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -342,10 +332,7 @@ function PharmacySchedule() {
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-5">
         <motion.div
-          className={cn(
-            "absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl",
-            octubreRosa ? "bg-pink-300" : "bg-sky-400"
-          )}
+          className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl bg-sky-400"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 20, 0],
@@ -357,10 +344,7 @@ function PharmacySchedule() {
           }}
         />
         <motion.div
-          className={cn(
-            "absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl",
-            octubreRosa ? "bg-rose-300" : "bg-cyan-400"
-          )}
+          className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl bg-cyan-400"
           animate={{
             scale: [1, 1.3, 1],
             x: [0, -20, 0],
@@ -382,10 +366,7 @@ function PharmacySchedule() {
           transition={{ duration: 0.6 }}
         >
           <motion.div
-            className={cn(
-              "inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4",
-              octubreRosa ? "bg-pink-100/90" : "bg-sky-100"
-            )}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 bg-sky-100"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
@@ -396,17 +377,11 @@ function PharmacySchedule() {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
               <Pill
-                className={cn(
-                  "w-4 h-4",
-                  octubreRosa ? "text-pink-600" : "text-sky-600"
-                )}
+                className="w-4 h-4 text-sky-600"
               />
             </motion.div>
             <span
-              className={cn(
-                "text-sm font-semibold",
-                octubreRosa ? "text-pink-700" : "text-sky-700"
-              )}
+              className="text-sm font-semibold text-sky-700"
             >
               Turnero de Farmacias
             </span>
@@ -427,7 +402,7 @@ function PharmacySchedule() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Turnero de <span className="text-pink-500 font-bold text-xl">{scheduleMonthLabel.toLowerCase()}</span> — consultá qué farmacia está de turno cada día
+            Turnero de <span className="text-sky-600 font-bold text-xl">{scheduleMonthLabel.toLowerCase()}</span> — consultá qué farmacia está de turno cada día
           </motion.p>
         </motion.div>
 
@@ -447,19 +422,11 @@ function PharmacySchedule() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={() => scroll("left")}
-                className={cn(
-                  "absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border transition-colors",
-                  octubreRosa
-                    ? "border-pink-200 hover:bg-pink-50"
-                    : "border-sky-200 hover:bg-sky-50"
-                )}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border transition-colors border-sky-200 hover:bg-sky-50"
                 aria-label="Anterior"
               >
                 <ChevronLeft
-                  className={cn(
-                    "w-5 h-5",
-                    octubreRosa ? "text-pink-600" : "text-sky-600"
-                  )}
+                  className="w-5 h-5 text-sky-600"
                 />
               </motion.button>
             )}
@@ -468,19 +435,11 @@ function PharmacySchedule() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={() => scroll("right")}
-                className={cn(
-                  "absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border transition-colors",
-                  octubreRosa
-                    ? "border-pink-200 hover:bg-pink-50"
-                    : "border-sky-200 hover:bg-sky-50"
-                )}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 rounded-full bg-white/90 shadow-lg border transition-colors border-sky-200 hover:bg-sky-50"
                 aria-label="Siguiente"
               >
                 <ChevronRight
-                  className={cn(
-                    "w-5 h-5",
-                    octubreRosa ? "text-pink-600" : "text-sky-600"
-                  )}
+                  className="w-5 h-5 text-sky-600"
                 />
               </motion.button>
             )}
@@ -496,7 +455,7 @@ function PharmacySchedule() {
               onTouchMove={onDragMove}
               onTouchEnd={onDragEnd}
             >
-              {pharmacySchedule.map((item, index) => {
+              {pharmacySchedule.map((item: any, index: number) => {
                 const today = isPharmacyDateToday(item.date, currentDate)
                 const isSocial = item.pharmacy === "Farmacia Social"
 
@@ -515,14 +474,10 @@ function PharmacySchedule() {
                       className={cn(
                         "h-full border-2 transition-all duration-300",
                         today
-                          ? octubreRosa
-                            ? "border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 shadow-lg ring-2 ring-pink-300/50"
-                            : "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50"
+                          ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50 shadow-lg ring-2 ring-sky-300/50"
                           : isSocial
                             ? "border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/80 shadow-md hover:border-amber-500 hover:shadow-lg"
-                            : octubreRosa
-                              ? "border-pink-200/90 bg-white hover:border-pink-300 hover:shadow-md"
-                              : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
+                            : "border-sky-200 bg-white hover:border-sky-300 hover:shadow-md"
                       )}
                     >
                       <CardContent className="p-3 sm:p-4 text-center">
@@ -531,14 +486,10 @@ function PharmacySchedule() {
                             className={cn(
                               "p-2 rounded-xl group-hover:scale-110 transition-transform duration-300",
                               today
-                                ? octubreRosa
-                                  ? "bg-gradient-to-br from-pink-400 to-rose-500"
-                                  : "bg-gradient-to-br from-sky-400 to-cyan-500"
+                                ? "bg-gradient-to-br from-sky-400 to-cyan-500"
                                 : isSocial
                                   ? "bg-gradient-to-br from-amber-400 to-amber-600"
-                                  : octubreRosa
-                                    ? "bg-gradient-to-br from-pink-100 to-rose-200"
-                                    : "bg-gradient-to-br from-sky-100 to-cyan-200"
+                                  : "bg-gradient-to-br from-sky-100 to-cyan-200"
                             )}
                             whileHover={{ rotate: [0, -8, 8, 0] }}
                             transition={{ duration: 0.4 }}
@@ -546,11 +497,7 @@ function PharmacySchedule() {
                             <Pill
                               className={cn(
                                 "w-4 h-4 sm:w-5 sm:h-5",
-                                today || isSocial
-                                  ? "text-white"
-                                  : octubreRosa
-                                    ? "text-pink-600"
-                                    : "text-sky-600"
+                                today || isSocial ? "text-white" : "text-sky-600"
                               )}
                             />
                           </motion.div>
@@ -559,13 +506,7 @@ function PharmacySchedule() {
                           <div
                             className={cn(
                               "text-xs font-semibold",
-                              today
-                                ? octubreRosa
-                                  ? "text-pink-700"
-                                  : "text-sky-700"
-                                : isSocial
-                                  ? "text-amber-800"
-                                  : "text-gray-500"
+                              today ? "text-sky-700" : isSocial ? "text-amber-800" : "text-gray-500"
                             )}
                           >
                             {item.date}
@@ -573,13 +514,7 @@ function PharmacySchedule() {
                           <div
                             className={cn(
                               "text-xs sm:text-sm font-bold leading-tight",
-                              today
-                                ? octubreRosa
-                                  ? "text-pink-800"
-                                  : "text-sky-800"
-                                : isSocial
-                                  ? "text-amber-900"
-                                  : "text-gray-800"
+                              today ? "text-sky-800" : isSocial ? "text-amber-900" : "text-gray-800"
                             )}
                           >
                             {item.pharmacy}
@@ -595,10 +530,7 @@ function PharmacySchedule() {
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.3 }}
-                            className={cn(
-                              "mt-2 inline-flex items-center gap-1 px-2 py-0.5 text-white text-xs font-semibold rounded-full",
-                              octubreRosa ? "bg-pink-500" : "bg-sky-500"
-                            )}
+                            className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 text-white text-xs font-semibold rounded-full bg-sky-500"
                           >
                             <Clock className="w-3 h-3" />
                             Hoy
@@ -623,10 +555,7 @@ function PharmacySchedule() {
         >
           <p className="text-xs text-gray-600 flex items-center justify-center gap-1">
             <Heart
-              className={cn(
-                "w-3 h-3",
-                octubreRosa ? "text-pink-500" : "text-sky-500"
-              )}
+              className="w-3 h-3 text-sky-500"
             />
             <span>Información actualizada diariamente</span>
           </p>
@@ -638,7 +567,6 @@ function PharmacySchedule() {
 
 export default function HomePage() {
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false)
-  const octubreRosa = isOctubreRosaThemeActive()
 
   // Mantener la página en el hero al cargar / volver al inicio
   useLayoutEffect(() => {
@@ -695,12 +623,7 @@ export default function HomePage() {
   ]
 
   return (
-    <div
-      className={cn(
-        "min-h-screen bg-gradient-to-b from-white to-gray-50/30",
-        octubreRosa && "from-pink-50/40"
-      )}
-    >
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/30">
       <Header />
 
       {/* Hero Section - Enhanced with Framer Motion */}
@@ -721,14 +644,7 @@ export default function HomePage() {
             sizes="100vw"
           />
           {/* Overlay para mejorar legibilidad del texto */}
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-br",
-              octubreRosa
-                ? octubreRosaClasses.heroOverlay
-                : "from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"
-            )}
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40" />
         </div>
 
         {/* Background Image - Mobile */}
@@ -742,23 +658,13 @@ export default function HomePage() {
             sizes="100vw"
           />
           {/* Overlay para mejorar legibilidad del texto */}
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-br",
-              octubreRosa
-                ? octubreRosaClasses.heroOverlay
-                : "from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40"
-            )}
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-coop-blue/80 via-coop-purple/40 via-coop-green/40 to-coop-orange/40" />
         </div>
 
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <motion.div
-            className={cn(
-              "absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl",
-              octubreRosa ? octubreRosaClasses.heroDecorOrb : "bg-coop-orange"
-            )}
+            className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl bg-coop-orange"
             animate={{
               scale: [1, 1.2, 1],
               x: [0, 50, 0],
@@ -814,10 +720,7 @@ export default function HomePage() {
             </motion.div>
             <span className="text-sm font-medium text-white hidden sm:inline">Clima</span>
             <div
-              className={cn(
-                "absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse opacity-80",
-                octubreRosa ? "bg-pink-300" : "bg-coop-orange"
-              )}
+              className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse opacity-80 bg-coop-orange"
             />
           </motion.button>
         </motion.div>
@@ -831,30 +734,19 @@ export default function HomePage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <motion.div
-                className={cn(
-                  "inline-flex items-center gap-2 px-4 py-2 backdrop-blur-sm rounded-full border border-pink-600",
-                  octubreRosa
-                    ? octubreRosaClasses.heroBadge
-                    : "bg-white/10 border-white/20"
-                )}
+                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-sm rounded-full border border-white/20 bg-white/10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                {octubreRosa ? (
-                  <Heart className={cn("w-4 h-4", octubreRosaClasses.heroBadgeIcon)} />
-                ) : (
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-4 h-4 text-coop-orange" />
-                  </motion.div>
-                )}
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-4 h-4 text-coop-orange" />
+                </motion.div>
                 <span className="text-sm font-medium">
-                  {octubreRosa
-                    ? "Octubre Rosa — conciencia sobre el cáncer de mama"
-                    : "Más de 60 años sirviendo a la comunidad"}
+                  Más de 60 años sirviendo a la comunidad
                 </span>
               </motion.div>
 
@@ -872,12 +764,7 @@ export default function HomePage() {
                 >
                   Bienvenido a la
                   <motion.span
-                    className={cn(
-                      "block font-bold transition-colors duration-300",
-                      octubreRosa
-                        ? "text-pink-200/80" // Usa la opacidad de Tailwind (80% o 70% según prefieras)
-                        : "bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
-                    )}
+                    className="block font-bold transition-colors duration-300 bg-gradient-to-r from-coop-orange to-orange-300 bg-clip-text text-transparent"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
@@ -921,13 +808,8 @@ export default function HomePage() {
                   >
                     <Button
                       size="lg"
-                      variant={octubreRosa ? "octubreRosa" : "default"}
-                      className={cn(
-                        "w-full sm:w-auto text-base px-8 py-6 hover:scale-105",
-                        octubreRosa
-                          ? octubreRosaClasses.ctaButton
-                          : "bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
-                      )}
+                      variant="default"
+                      className="w-full sm:w-auto text-base px-8 py-6 hover:scale-105 bg-coop-orange text-white hover:bg-coop-orange/90 shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
                     >
                       Pagar Factura
                       <motion.span
@@ -953,12 +835,7 @@ export default function HomePage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className={cn(
-                        "border-2 bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6",
-                        octubreRosa
-                          ? octubreRosaClasses.heroSecondaryCta
-                          : "border-white/30"
-                      )}
+                      className="border-2 border-white/30 bg-white/20 backdrop-blur-sm text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base px-8 py-6"
                     >
                       Cuadro Tarifario
                       <motion.span
@@ -993,7 +870,7 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1 }}
                   >
                     <motion.div
-                      className="text-3xl lg:text-4xl font-bold text-pink-300"
+                      className="text-3xl lg:text-4xl font-bold text-coop-orange"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}

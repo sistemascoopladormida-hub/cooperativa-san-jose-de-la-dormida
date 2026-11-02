@@ -28,11 +28,8 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import {
-  getCooperativeLogoSrc,
-  isOctubreRosaThemeActive,
-  octubreRosaClasses,
-} from "@/lib/octubre-rosa-theme"
+
+const LOGO_SRC = "/images/logocoopnuevo.png"
 
 interface HeaderProps {
   isLoggedIn?: boolean
@@ -42,8 +39,6 @@ interface HeaderProps {
 
 export default function Header({ isLoggedIn = false, userName, isPFC = false }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const octubreRosa = isOctubreRosaThemeActive()
-  const logoSrc = getCooperativeLogoSrc()
 
   const publicMenuItems = [
     { href: "/", label: "Inicio", icon: Home },
@@ -68,14 +63,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
   const menuItems = isLoggedIn ? privateMenuItems : publicMenuItems
 
   return (
-    <header
-      className={cn(
-        "bg-white/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300",
-        octubreRosa
-          ? octubreRosaClasses.headerShell
-          : "shadow-md border-b border-gray-200/50"
-      )}
-    >
+    <header className="bg-white/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 shadow-md border-b border-gray-200/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo - Enhanced with Framer Motion */}
@@ -86,53 +74,28 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
             <Link href={isLoggedIn ? "/dashboard" : "/"} className="flex items-center space-x-3 group">
               <div className="relative">
                 <motion.div
-                  className={cn(
-                    "absolute inset-0 rounded-full blur-lg",
-                    octubreRosa ? octubreRosaClasses.logoGlow : "bg-coop-green/10"
-                  )}
+                  className="absolute inset-0 rounded-full blur-lg bg-coop-green/10"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileHover={{ opacity: 1, scale: 1.2 }}
                   transition={{ duration: 0.3 }}
                 />
                 <motion.div
-                  whileHover={{ rotate: octubreRosa ? 0 : [0, -10, 10, -10, 0] }}
+                  whileHover={{ rotate: [0, -10, 10, -10, 0] }}
                   transition={{ duration: 0.5 }}
                 >
                   <Image
-                    src={logoSrc}
-                    alt={
-                      octubreRosa
-                        ? "Cooperativa La Dormida — Octubre Rosa"
-                        : "Cooperativa La Dormida"
-                    }
-                    width={octubreRosa ? 160 : 56}
-                    height={octubreRosa ? 56 : 56}
-                    className={cn(
-                      "transition-all duration-300 relative z-10 drop-shadow-sm object-contain",
-                      octubreRosa
-                        ? "h-11 w-auto max-w-[140px] lg:h-14 lg:max-w-[168px]"
-                        : "w-12 h-12 lg:w-14 lg:h-14"
-                    )}
+                    src={LOGO_SRC}
+                    alt="Cooperativa La Dormida"
+                    width={56}
+                    height={56}
+                    className="transition-all duration-300 relative z-10 drop-shadow-sm object-contain w-12 h-12 lg:w-14 lg:h-14"
                   />
                 </motion.div>
               </div>
               <div className="hidden sm:block">
-                <h1
-                  className={cn(
-                    "text-lg lg:text-xl font-bold whitespace-nowrap transition-colors",
-                    octubreRosa
-                      ? `${octubreRosaClasses.brandTitle} group-hover:text-pink-700`
-                      : "text-coop-green group-hover:text-coop-blue"
-                  )}
-                >
+                <h1 className="text-lg lg:text-xl font-bold whitespace-nowrap transition-colors text-coop-green group-hover:text-coop-blue">
                   Cooperativa La Dormida
                 </h1>
-
-                {octubreRosa && (
-                  <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-wider text-pink-600/90">
-                    Octubre Rosa
-                  </span>
-                )}
               </div>
             </Link>
           </motion.div>
@@ -148,10 +111,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
               >
                 <Link
                   href={item.href}
-                  className={cn(
-                    "group relative flex items-center space-x-2 px-4 py-2 text-gray-700 font-medium rounded-lg transition-all duration-300",
-                    octubreRosa ? octubreRosaClasses.navLinkHover : "hover:text-coop-green"
-                  )}
+                  className="group relative flex items-center space-x-2 px-4 py-2 text-gray-700 font-medium rounded-lg transition-all duration-300 hover:text-coop-green"
                 >
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 5 }}
@@ -162,12 +122,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   <span className="relative">
                     {item.label}
                     <motion.span
-                      className={cn(
-                        "absolute bottom-0 left-0 h-0.5",
-                        octubreRosa
-                          ? octubreRosaClasses.navUnderline
-                          : "bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green"
-                      )}
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green"
                       initial={{ width: 0 }}
                       whileHover={{ width: "100%" }}
                       transition={{ duration: 0.3 }}
@@ -213,13 +168,8 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                 className="group"
               >
                 <Button
-                  variant={octubreRosa ? "octubreRosa" : "default"}
-                  className={cn(
-                    "hidden lg:flex px-6 py-2 hover:scale-105",
-                    octubreRosa
-                      ? octubreRosaClasses.ctaButton
-                      : "bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-md hover:shadow-lg"
-                  )}
+                  variant="default"
+                  className="hidden lg:flex px-6 py-2 hover:scale-105 bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white shadow-md hover:shadow-lg"
                 >
                   Pagar Factura
                 </Button>
@@ -234,12 +184,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(
-                  "relative w-11 h-11 rounded-xl bg-gradient-to-br border-2 transition-all duration-300 shadow-md hover:shadow-lg",
-                  octubreRosa
-                    ? octubreRosaClasses.mobileMenuButton
-                    : "from-coop-blue/10 via-coop-purple/10 to-coop-green/10 hover:from-coop-blue/20 hover:via-coop-purple/20 hover:to-coop-green/20 active:from-coop-blue/30 active:via-coop-purple/30 active:to-coop-green/30 border-coop-green/20 hover:border-coop-green/40"
-                )}
+                className="relative w-11 h-11 rounded-xl bg-gradient-to-br border-2 transition-all duration-300 shadow-md hover:shadow-lg from-coop-blue/10 via-coop-purple/10 to-coop-green/10 hover:from-coop-blue/20 hover:via-coop-purple/20 hover:to-coop-green/20 active:from-coop-blue/30 active:via-coop-purple/30 active:to-coop-green/30 border-coop-green/20 hover:border-coop-green/40"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
               >
@@ -250,7 +195,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="absolute"
                   >
-                    <Menu className={cn("w-5 h-5", octubreRosa ? octubreRosaClasses.mobileMenuIcon : "text-coop-green")} />
+                    <Menu className="w-5 h-5 text-coop-green" />
                   </motion.div>
                   <motion.div
                     initial={false}
@@ -258,7 +203,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="absolute"
                   >
-                    <X className={cn("w-5 h-5", octubreRosa ? octubreRosaClasses.mobileMenuIcon : "text-coop-green")} />
+                    <X className="w-5 h-5 text-coop-green" />
                   </motion.div>
                 </div>
                 {/* Indicador de estado */}
@@ -266,10 +211,7 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className={cn(
-                      "absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white",
-                      octubreRosa ? "bg-pink-500" : "bg-coop-orange"
-                    )}
+                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-coop-orange"
                   />
                 )}
               </Button>
@@ -299,30 +241,15 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                     >
                       <Link
                         href={item.href}
-                        className={cn(
-                          "flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r transition-all duration-300 rounded-xl group",
-                          octubreRosa
-                            ? octubreRosaClasses.mobileNavHover
-                            : "hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 hover:text-coop-green"
-                        )}
+                        className="flex items-center space-x-3 px-4 py-3.5 text-base text-gray-800 hover:bg-gradient-to-r transition-all duration-300 rounded-xl group hover:from-coop-blue/10 hover:via-coop-purple/10 hover:to-coop-green/10 hover:text-coop-green"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <motion.div
-                          className={cn(
-                            "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm",
-                            octubreRosa
-                              ? octubreRosaClasses.mobileNavIconBg
-                              : "from-coop-blue/10 via-coop-purple/10 to-coop-green/10"
-                          )}
+                          className="w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm from-coop-blue/10 via-coop-purple/10 to-coop-green/10"
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          <item.icon
-                            className={cn(
-                              "w-5 h-5",
-                              octubreRosa ? octubreRosaClasses.mobileNavIcon : "text-coop-green"
-                            )}
-                          />
+                          <item.icon className="w-5 h-5 text-coop-green" />
                         </motion.div>
                         <span className="font-semibold">{item.label}</span>
                         <motion.div
@@ -381,13 +308,8 @@ export default function Header({ isLoggedIn = false, userName, isPFC = false }: 
                       >
                         <Button
                           size="lg"
-                          variant={octubreRosa ? "octubreRosa" : "default"}
-                          className={cn(
-                            "w-full font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl",
-                            octubreRosa
-                              ? octubreRosaClasses.ctaButton
-                              : "bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
-                          )}
+                          variant="default"
+                          className="w-full font-semibold py-4 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-gradient-to-r from-coop-blue via-coop-purple to-coop-green hover:from-coop-blue/90 hover:via-coop-purple/90 hover:to-coop-green/90 text-white"
                         >
                           Pagar Factura
                         </Button>

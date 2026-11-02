@@ -5,32 +5,18 @@ import Image from "next/image"
 import { useState } from "react"
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram, AlertCircle, PhoneCall, Heart, Zap, Wifi, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  getCooperativeLogoSrc,
-  isOctubreRosaThemeActive,
-  octubreRosaClasses,
-} from "@/lib/octubre-rosa-theme"
+
+const LOGO_SRC = "/images/logocoopnuevo.png"
 
 export default function Footer() {
   const [showAllEmails, setShowAllEmails] = useState(false)
-  const octubreRosa = isOctubreRosaThemeActive()
-  const logoSrc = getCooperativeLogoSrc()
-  const footerTitleClass = cn(
-    "font-bold text-lg mb-6",
-    octubreRosa ? octubreRosaClasses.footerSectionTitle : "text-coop-orange"
-  )
-  const footerListLinkClass = cn(
-    "text-green-50 transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group",
-    octubreRosa ? octubreRosaClasses.footerLinkHover : "hover:text-coop-orange"
-  )
-  const footerListDotClass = cn(
-    "w-1.5 h-1.5 rounded-full transition-colors",
-    octubreRosa
-      ? "bg-pink-200/60 group-hover:bg-pink-100"
-      : "bg-coop-orange/50 group-hover:bg-coop-orange"
-  )
-  const footerIconAccent = octubreRosa ? "text-pink-200" : "text-coop-orange"
-  const footerTextLinkHover = octubreRosa ? "hover:text-pink-200" : "hover:text-coop-orange"
+  const footerTitleClass = "font-bold text-lg mb-6 text-coop-orange"
+  const footerListLinkClass =
+    "text-green-50 transition-all duration-300 hover:translate-x-1 inline-flex items-center gap-2 group hover:text-coop-orange"
+  const footerListDotClass =
+    "w-1.5 h-1.5 rounded-full transition-colors bg-coop-orange/50 group-hover:bg-coop-orange"
+  const footerIconAccent = "text-coop-orange"
+  const footerTextLinkHover = "hover:text-coop-orange"
 
   const emails = [
     { label: "Sistemas", email: "sistemas@cooperativaladormida.com" },
@@ -48,24 +34,11 @@ export default function Footer() {
   const displayedEmails = showAllEmails ? emails : emails.slice(0, 4)
 
   return (
-    <footer
-      className={cn(
-        "relative text-white overflow-hidden bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange",
-        octubreRosa && "via-pink-600/90"
-      )}
-    >
+    <footer className="relative text-white overflow-hidden bg-gradient-to-br from-coop-blue via-coop-purple via-coop-green to-coop-orange">
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-10">
-        <div
-          className={cn(
-            "absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl",
-            octubreRosa ? octubreRosaClasses.footerAccentOrb : "bg-coop-orange"
-          )}
-        />
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl bg-coop-orange" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        {octubreRosa && (
-          <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-rose-300/25 rounded-full blur-3xl" />
-        )}
       </div>
       
       <div className="container mx-auto px-4 py-12 lg:py-16 relative z-10">
@@ -74,34 +47,17 @@ export default function Footer() {
           <div className="space-y-6">
             <div className="flex items-center space-x-3 group">
               <div className="relative">
-                <div
-                  className={cn(
-                    "absolute inset-0 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100",
-                    octubreRosa ? "bg-pink-300/25" : "bg-white/20"
-                  )}
-                />
+                <div className="absolute inset-0 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100 bg-white/20" />
                 <Image
-                  src={logoSrc}
-                  alt={
-                    octubreRosa
-                      ? "Cooperativa La Dormida — Octubre Rosa"
-                      : "Cooperativa La Dormida"
-                  }
-                  width={octubreRosa ? 168 : 56}
-                  height={octubreRosa ? 56 : 56}
-                  className={cn(
-                    "relative z-10 drop-shadow-lg transition-transform group-hover:scale-105 object-contain",
-                    octubreRosa ? "h-14 w-auto max-w-[168px]" : "w-14 h-14"
-                  )}
+                  src={LOGO_SRC}
+                  alt="Cooperativa La Dormida"
+                  width={56}
+                  height={56}
+                  className="relative z-10 drop-shadow-lg transition-transform group-hover:scale-105 object-contain w-14 h-14"
                 />
               </div>
               <div>
                 <h3 className="text-xl font-bold">Cooperativa La Dormida</h3>
-                {octubreRosa && (
-                  <p className="text-xs font-semibold uppercase tracking-wider text-pink-100/90 mt-0.5">
-                    Octubre Rosa
-                  </p>
-                )}
               </div>
             </div>
             <p className="text-base text-green-50 leading-relaxed">
