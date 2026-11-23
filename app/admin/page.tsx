@@ -10,14 +10,10 @@ import { Button } from "@/components/ui/button";
 import {
   Loader2,
   Lock,
-  BarChart3,
-  Wrench,
   MessageSquare,
   Sparkles,
   ArrowRight,
   X,
-  Building2,
-  QrCode,
   BrainCircuit,
 } from "lucide-react";
 import { CONVERSATION_ANALYSIS_ADMIN_PASSWORD } from "@/lib/conversation-analysis-admin-password";
@@ -33,55 +29,10 @@ interface AdminSection {
   gradient: string;
 }
 
-const ADMIN_NOTICIAS_PASSWORD =
-  process.env.NEXT_PUBLIC_ADMIN_NOTICIAS_PASSWORD ?? "";
-const ADMIN_BOXES_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_BOXES_PASSWORD ?? "";
-const ADMIN_TECNICO_PASSWORD =
-  process.env.NEXT_PUBLIC_ADMIN_TECNICO_PASSWORD ?? "";
 const ADMIN_CONVERSACIONES_PASSWORD =
   process.env.NEXT_PUBLIC_ADMIN_CONVERSACIONES_PASSWORD ?? "";
 
 const ADMIN_SECTIONS: AdminSection[] = [
-  {
-    id: "encuestas",
-    title: "Dashboard de Encuestas",
-    description: "Métricas y estadísticas de las encuestas de visitas técnicas",
-    icon: BarChart3,
-    route: "/encuestas/dashboard",
-    password: ADMIN_NOTICIAS_PASSWORD,
-    color: "blue",
-    gradient: "from-blue-500 to-blue-600",
-  },
-  {
-    id: "encuestas-boxes",
-    title: "Dashboard Encuestas Boxes",
-    description: "Métricas y estadísticas de las encuestas de atención en boxes",
-    icon: Building2,
-    route: "/encuestas-boxes/dashboard",
-    password: ADMIN_BOXES_PASSWORD,
-    color: "indigo",
-    gradient: "from-indigo-500 to-indigo-600",
-  },
-  {
-    id: "gestion-boxes",
-    title: "Gestión Boxes",
-    description: "Administra empleados y genera códigos QR para boxes",
-    icon: QrCode,
-    route: "/encuestas-boxes/admin",
-    password: ADMIN_BOXES_PASSWORD,
-    color: "cyan",
-    gradient: "from-cyan-500 to-cyan-600",
-  },
-  {
-    id: "visitas",
-    title: "Visitas Técnicas",
-    description: "Registro y gestión de visitas técnicas a domicilio",
-    icon: Wrench,
-    route: "/visitas-tecnicas",
-    password: ADMIN_TECNICO_PASSWORD,
-    color: "green",
-    gradient: "from-green-500 to-green-600",
-  },
   {
     id: "conversaciones",
     title: "Conversaciones",
@@ -138,21 +89,7 @@ export default function AdminPage() {
     setLoading(true);
 
     try {
-      // Para visitas técnicas y conversaciones, autenticar mediante API
-      if (selectedSection.id === "visitas") {
-        const response = await fetch("/api/visitas-tecnicas/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: passwordInput }),
-        });
-
-        const data = await response.json();
-        if (!data.success) {
-          setAuthError(data.error || "Error al autenticar");
-          setLoading(false);
-          return;
-        }
-      } else if (selectedSection.id === "conversaciones") {
+      if (selectedSection.id === "conversaciones") {
         const response = await fetch("/api/conversaciones/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

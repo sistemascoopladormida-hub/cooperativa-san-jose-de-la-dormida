@@ -2,99 +2,42 @@
 
 ## 📋 Resumen de Contraseñas Hardcodeadas
 
-Este documento lista todas las contraseñas hardcodeadas en el sistema para acceso administrativo.
+Este documento lista las contraseñas configuradas en el sistema para acceso administrativo.
 
 ---
 
 ## 🎯 Panel Administrativo Principal (`/admin`)
 
-### 1. **Dashboard de Encuestas** (Visitas Técnicas)
-- **Ruta**: `/encuestas/dashboard`
-- **Contraseña**: `Ingresonoticias2026.`
-- **Archivo**: `app/admin/page.tsx` (línea 43)
-- **Uso**: Acceso al dashboard de métricas de encuestas de visitas técnicas
-
-### 2. **Dashboard Encuestas Boxes**
-- **Ruta**: `/encuestas-boxes/dashboard`
-- **Contraseña**: `Boxes2026`
-- **Archivo**: `app/admin/page.tsx` (línea 53)
-- **Uso**: Acceso al dashboard de métricas de encuestas de atención en boxes
-
-### 3. **Gestión Boxes**
-- **Ruta**: `/encuestas-boxes/admin`
-- **Contraseña**: `Boxes2026`
-- **Archivo**: `app/admin/page.tsx` (línea 63)
-- **Uso**: Administración de empleados y generación de códigos QR para boxes
-
-### 4. **Visitas Técnicas**
-- **Ruta**: `/visitas-tecnicas`
-- **Contraseña**: `Tecnico2025`
-- **Archivo**: 
-  - `app/admin/page.tsx` (línea 73)
-  - `app/api/visitas-tecnicas/auth/route.ts` (línea 4)
-- **Uso**: Registro y gestión de visitas técnicas a domicilio
-
-### 5. **Conversaciones**
+### 1. **Conversaciones**
 - **Ruta**: `/conversaciones`
-- **Contraseña**: `Coop2025`
-- **Archivo**: 
-  - `app/admin/page.tsx` (línea 83)
-  - `app/api/conversaciones/auth/route.ts` (línea 4)
-- **Uso**: Gestión y administración de conversaciones
+- **Contraseña**: variable `NEXT_PUBLIC_ADMIN_CONVERSACIONES_PASSWORD` (servidor: `ADMIN_CONVERSACIONES_PASSWORD`)
+- **Archivo**: `app/admin/page.tsx`, `app/api/conversaciones/auth/route.ts`
+
+### 2. **Análisis de conversaciones**
+- **Ruta**: `/admin/analisis-conversaciones`
+- **Contraseña**: definida en `lib/conversation-analysis-admin-password.ts` (y API asociada)
 
 ---
 
 ## 📰 Panel de Noticias
 
-### 6. **Noticias - Listar**
-- **Ruta**: `/api/noticias/list`
-- **Contraseña**: `Ingresonoticias2026.`
-- **Archivo**: `app/api/noticias/list/route.ts` (línea 11)
-- **Uso**: Listar noticias en el panel administrativo
+Las operaciones de noticias usan `ADMIN_NOTICIAS_PASSWORD` en:
 
-### 7. **Noticias - Actualizar**
-- **Ruta**: `/api/noticias/update`
-- **Contraseña**: `Ingresonoticias2026.`
-- **Archivo**: `app/api/noticias/update/route.ts` (línea 20)
-- **Uso**: Actualizar noticias existentes
-
-### 8. **Noticias - Eliminar**
-- **Ruta**: `/api/noticias/delete`
-- **Contraseña**: `Ingresonoticias2026.`
-- **Archivo**: `app/api/noticias/delete/route.ts` (línea 12)
-- **Uso**: Eliminar noticias
-
----
-
-## 📊 Resumen por Contraseña
-
-| Contraseña | Secciones que la usan | Total |
-|------------|----------------------|-------|
-| `Ingresonoticias2026.` | Dashboard Encuestas, Noticias (listar, actualizar, eliminar) | 4 |
-| `Boxes2026` | Dashboard Encuestas Boxes, Gestión Boxes | 2 |
-| `Tecnico2025` | Visitas Técnicas | 1 |
-| `Coop2025` | Conversaciones | 1 |
-
----
-
-## ⚠️ Notas de Seguridad
-
-1. **Todas las contraseñas están hardcodeadas** en el código fuente
-2. Las contraseñas se validan directamente en el código sin hash
-3. Se recomienda migrar a un sistema de autenticación más seguro (variables de entorno, base de datos, etc.)
-4. Las contraseñas de "Visitas Técnicas" y "Conversaciones" también se validan mediante API endpoints que establecen cookies de sesión
+- `app/api/noticias/list/route.ts`
+- `app/api/noticias/update/route.ts`
+- `app/api/noticias/delete/route.ts`
+- `app/api/noticias/create/route.ts`
+- `app/api/noticias/get/route.ts`
+- `app/noticias/admin/page.tsx` (`NEXT_PUBLIC_ADMIN_NOTICIAS_PASSWORD`)
 
 ---
 
 ## 📝 Ubicaciones de Archivos
 
 - `app/admin/page.tsx` - Panel principal de administración
-- `app/api/visitas-tecnicas/auth/route.ts` - Autenticación de visitas técnicas
 - `app/api/conversaciones/auth/route.ts` - Autenticación de conversaciones
-- `app/api/noticias/list/route.ts` - Listar noticias
-- `app/api/noticias/update/route.ts` - Actualizar noticias
-- `app/api/noticias/delete/route.ts` - Eliminar noticias
+- `app/api/admin/conversation-analysis/auth/route.ts` - Análisis de conversaciones
 
 ---
 
-**Última actualización**: Enero 2026
+**Última actualización**: Marzo 2026

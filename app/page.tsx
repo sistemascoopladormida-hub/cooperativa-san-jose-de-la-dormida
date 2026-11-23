@@ -691,38 +691,42 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Botón Clima Flotante - Esquina Superior Derecha */}
+        {/* Botón Autoridades flotante - Esquina superior derecha */}
         <motion.div
           className="absolute top-6 right-6 lg:top-8 lg:right-8 z-20"
           initial={{ opacity: 0, scale: 0.8, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.5 }}
         >
-          <motion.button
-            onClick={() => setIsWeatherModalOpen(true)}
-            className="group relative flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 hover:bg-white/25 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{
-                rotate: [0, 10, -10, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatDelay: 2
-              }}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href="/autoridades"
+              aria-label="Ir a Autoridades"
+              className="group relative flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 hover:bg-white/25 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              <Cloud className="w-5 h-5 text-white" />
-            </motion.div>
-            <span className="text-sm font-medium text-white hidden sm:inline">Clima</span>
-            <div
-              className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse opacity-80 bg-coop-orange"
-            />
-          </motion.button>
+              <motion.div
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatDelay: 2,
+                }}
+              >
+                <Users className="w-5 h-5 text-white" />
+              </motion.div>
+              <span className="text-sm font-medium text-white hidden sm:inline">
+                Autoridades
+              </span>
+              <span
+                className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse opacity-80 bg-coop-orange"
+                aria-hidden
+              />
+            </Link>
+          </motion.div>
         </motion.div>
 
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
