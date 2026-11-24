@@ -181,7 +181,7 @@ export default function Chatbot() {
   }
 
   return (
-    <>
+    <div data-site-chrome="chatbot" className="contents">
       {/* Botón flotante - Enhanced with Framer Motion */}
       <AnimatePresence mode="wait">
         {!isOpen && (
@@ -557,7 +557,7 @@ export default function Chatbot() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }
 

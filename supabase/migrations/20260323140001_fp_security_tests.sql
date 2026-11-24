@@ -1,0 +1,4 @@
+-- Las pruebas automatizadas del módulo fp_* están en:
+--   supabase/tests/fp/README.md
+--   supabase/tests/fp/01_seed.sql
+--   supabase/tests/fp/02_rls_assertions.sql

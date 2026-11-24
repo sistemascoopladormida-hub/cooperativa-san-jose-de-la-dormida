@@ -199,3 +199,7 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+body.facturas-portal [data-site-chrome="chatbot"] {
+  display: none !important;
+}
